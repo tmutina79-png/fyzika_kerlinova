@@ -1,0 +1,118 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  noSidebar?: boolean;
+}
+
+const { title, noSidebar = false } = Astro.props;
+
+/* ── Lesson navigation ── */
+const lessons = [
+  { slug: 'odmocniny', title: '1 – Odmocniny (sekunda)' },
+  { slug: 'umernost', title: '2 – Úměrnost (tercie)' },
+  { slug: 'funkce', title: '3 – Funkce (kvarta)' },
+  { slug: 'spolecna-prace', title: '4 – Společná práce' },
+  { slug: 'smesi', title: '5 – Směsi' },
+  { slug: 'lekce-1', title: '6 – Úvod do derivací' },
+  { slug: 'relativita', title: '7 – Teorie relativity 🔭' },
+  { slug: 'karel-capek', title: '8 – Karel Čapek 🖊️' },
+  { slug: 'lekce-2', title: '9 – Limity funkcí' },
+  { slug: 'lekce-3', title: '10 – Integrály' },
+];
+---
+
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | Gymnázium – Studijní portál</title>
+  </head>
+
+  <body class="min-h-screen flex flex-col">
+    <!-- ====== Top bar ====== -->
+    <header class="bg-primary-700 text-white px-6 py-3 flex items-center justify-between shadow-md">
+      <a href="/" class="text-lg font-bold tracking-wide hover:text-primary-200 transition-colors">
+        🎓 Studijní portál
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="/dashboard" class="text-sm font-semibold text-primary-200 hover:text-white transition-colors">
+          📊 Dashboard
+        </a>
+        <span class="text-sm text-primary-300 hidden sm:inline">Gymnázium · Matematika</span>
+      </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+      <!-- ====== Sidebar ====== -->
+      <aside
+        id="sidebar"
+        class:list={[
+          'w-64 shrink-0 bg-primary-50 border-r border-primary-200 overflow-y-auto',
+          noSidebar ? 'hidden' : 'hidden md:block'
+        ]}
+      >
+        <nav class="p-4 space-y-1">
+          <a
+            href="/dashboard"
+            class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-bold text-primary-700
+                   bg-primary-100 hover:bg-primary-200 transition-colors mb-3"
+          >
+            📊 Dashboard studenta
+          </a>
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-primary-400 mb-3">
+            Lekce
+          </h2>
+          {lessons.map((l) => (
+            <a
+              href={`/docs/${l.slug}`}
+              class="block rounded-md px-3 py-2 text-sm font-medium text-primary-700
+                     hover:bg-primary-200 transition-colors"
+            >
+              {l.title}
+            </a>
+          ))}
+        </nav>
+      </aside>
+
+      <!-- ====== Main content ====== -->
+      <main class:list={[
+        'flex-1 overflow-y-auto p-6 md:p-10 w-full',
+        noSidebar ? 'max-w-7xl mx-auto' : 'max-w-4xl mx-auto'
+      ]}>
+        <article class="prose">
+          <slot />
+        </article>
+      </main>
+    </div>
+
+    <!-- ====== Mobile menu toggle ====== -->
+    <button
+      id="menu-toggle"
+      class:list={[
+        'fixed bottom-4 right-4 md:hidden z-50 bg-primary-700 text-white p-3 rounded-full shadow-lg hover:bg-primary-600 transition-colors',
+        noSidebar && 'hidden'
+      ]}
+      aria-label="Otevřít menu"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+    <script is:inline>
+      const btn = document.getElementById('menu-toggle');
+      const sidebar = document.getElementById('sidebar');
+      btn?.addEventListener('click', () => {
+        sidebar?.classList.toggle('hidden');
+        sidebar?.classList.toggle('fixed');
+        sidebar?.classList.toggle('inset-0');
+        sidebar?.classList.toggle('z-40');
+        sidebar?.classList.toggle('w-full');
+      });
+    </script>
+  </body>
+</html>

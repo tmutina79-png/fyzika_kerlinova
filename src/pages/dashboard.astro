@@ -1,0 +1,179 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import HomeworkTracker from '../components/HomeworkTracker.svelte';
+import TestGenerator from '../components/TestGenerator.svelte';
+import schedule from '../data/schedule.json';
+import curriculum from '../data/curriculum.json';
+
+const { tomorrow, homework, pastTopics, quickTests } = schedule;
+const { practiceProblems } = curriculum;
+
+const colorMap: Record<string, { bg: string; border: string; text: string; badge: string }> = {
+  indigo:  { bg: 'bg-indigo-50',  border: 'border-indigo-200',  text: 'text-indigo-700',  badge: 'bg-indigo-100 text-indigo-700' },
+  violet:  { bg: 'bg-violet-50',  border: 'border-violet-200',  text: 'text-violet-700',  badge: 'bg-violet-100 text-violet-700' },
+  rose:    { bg: 'bg-rose-50',    border: 'border-rose-200',    text: 'text-rose-700',    badge: 'bg-rose-100 text-rose-700' },
+  sky:     { bg: 'bg-sky-50',     border: 'border-sky-200',     text: 'text-sky-700',     badge: 'bg-sky-100 text-sky-700' },
+  amber:   { bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-700',   badge: 'bg-amber-100 text-amber-700' },
+  emerald: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700' },
+};
+---
+
+<MainLayout title="Dashboard studenta" noSidebar>
+  <style is:global>
+    .dash-grid { max-width: 100% !important; }
+  </style>
+
+  <div class="dash-grid">
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- HEADER                                             -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+      <div>
+        <p class="text-sm text-gray-400 font-semibold uppercase tracking-wider mb-1">Dashboard studenta</p>
+        <h1 class="text-2xl font-bold text-gray-900 mb-1">
+          Dobrý den 👋 <span class="text-indigo-600">{tomorrow.className}</span>
+        </h1>
+        <p class="text-gray-500 text-sm">Rozvrh a příprava na <strong>{tomorrow.dayLabel}</strong></p>
+      </div>
+      <div class="flex gap-3 flex-wrap">
+        <a href="/" class="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 font-semibold text-sm px-4 py-2 rounded-2xl hover:bg-gray-50 transition no-underline shadow-sm">
+          🏠 Hlavní portál
+        </a>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- ROZVRH NA ZÍTRA                                    -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section class="mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-xl">📅</div>
+        <div>
+          <h2 class="text-lg font-bold text-gray-900 m-0">Rozvrh na zítra</h2>
+          <p class="text-xs text-gray-400 m-0">{tomorrow.dayLabel} · {tomorrow.schedule.length} hodin</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        {tomorrow.schedule.map((lesson: any) => {
+          const c = colorMap[lesson.color] || colorMap.indigo;
+          const inner = (
+            <div class={`aspect-square flex flex-col items-center justify-center gap-1 p-3 rounded-xl border ${c.border} ${c.bg} transition hover:shadow-md hover:-translate-y-0.5 text-center`}>
+              <span class="text-2xl leading-none">{lesson.icon}</span>
+              <span class={`text-[11px] font-bold uppercase tracking-wide ${c.text} leading-tight`}>{lesson.subject}</span>
+              <span class="text-xs font-semibold text-gray-700 leading-tight line-clamp-2">{lesson.topic}</span>
+              <span class="text-[10px] text-gray-400 mt-auto">{lesson.hour}. hod · {lesson.room}</span>
+            </div>
+          );
+          return lesson.lessonLink ? (
+            <a href={lesson.lessonLink} class="no-underline">{inner}</a>
+          ) : inner;
+        })}
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- QUICK-NAV PANELY                                   -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <!-- Probrané učivo -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition">
+        <div class="text-2xl mb-3">📚</div>
+        <h3 class="text-sm font-bold text-gray-900 mb-1">Probrané učivo</h3>
+        <p class="text-xs text-gray-400 mb-3">Přehled témat z výuky</p>
+        <a href="#past-topics" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 no-underline">Zobrazit ↓</a>
+      </div>
+      <!-- Testy -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition">
+        <div class="text-2xl mb-3">🎯</div>
+        <h3 class="text-sm font-bold text-gray-900 mb-1">Generátor testů</h3>
+        <p class="text-xs text-gray-400 mb-3">Vygeneruj si vlastní test</p>
+        <a href="#test-generator" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 no-underline">Vygenerovat ↓</a>
+      </div>
+      <!-- Domácí úkoly -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition">
+        <div class="text-2xl mb-3">📝</div>
+        <h3 class="text-sm font-bold text-gray-900 mb-1">Domácí úkoly</h3>
+        <p class="text-xs text-gray-400 mb-3">Sleduj termíny odevzdání</p>
+        <a href="#homework" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 no-underline">Zobrazit ↓</a>
+      </div>
+      <!-- Rychlé kvízy -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition">
+        <div class="text-2xl mb-3">⚡</div>
+        <h3 class="text-sm font-bold text-gray-900 mb-1">Rychlé kvízy</h3>
+        <p class="text-xs text-gray-400 mb-3">Ověř si znalosti za minutu</p>
+        <a href="#quick-quiz" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 no-underline">Spustit ↓</a>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- DOMÁCÍ ÚKOLY + GENERÁTOR TESTŮ                     -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="grid lg:grid-cols-2 gap-6 mb-8">
+      <div id="homework">
+        <HomeworkTracker client:load homework={homework} />
+      </div>
+      <div id="test-generator">
+        <TestGenerator client:load problems={practiceProblems} />
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- PROBRANÉ UČIVO                                     -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section id="past-topics" class="mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-xl">📚</div>
+        <h2 class="text-lg font-bold text-gray-900 m-0">Probrané učivo</h2>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {pastTopics.map((subj: any) => (
+          <div class="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xl">{subj.icon}</span>
+              <h3 class="text-sm font-bold text-gray-900 m-0">{subj.subject}</h3>
+            </div>
+            <ul class="space-y-2 m-0 p-0 list-none">
+              {subj.topics.map((t: any) => (
+                <li class="flex items-center gap-2 text-sm">
+                  <span class="text-xs text-gray-300 font-mono w-12 shrink-0">{t.date}</span>
+                  {t.link ? (
+                    <a href={t.link} class="text-indigo-600 hover:text-indigo-800 font-medium no-underline hover:underline">
+                      {t.title}
+                    </a>
+                  ) : (
+                    <span class="text-gray-600">{t.title}</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- RYCHLÉ KVÍZY                                       -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <section id="quick-quiz" class="mb-8">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-xl">⚡</div>
+        <h2 class="text-lg font-bold text-gray-900 m-0">Rychlé kvízy</h2>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {quickTests.map((qt: any) => (
+          <a href={qt.link}
+             class="group flex flex-col items-center justify-center text-center bg-white rounded-2xl p-5 border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition no-underline">
+            <span class="text-3xl mb-2">{qt.icon}</span>
+            <span class="text-sm font-bold text-gray-800 group-hover:text-indigo-600 transition">{qt.title}</span>
+            <span class="text-xs text-gray-400 mt-1">{qt.questionCount} otázek</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+  </div>
+</MainLayout>

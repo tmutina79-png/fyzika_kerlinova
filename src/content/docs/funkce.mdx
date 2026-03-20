@@ -1,0 +1,248 @@
+---
+title: "Funkce – úvod pro kvartu"
+description: "Co je funkce, jak ji zapisujeme, definiční obor, obor hodnot, graf a praktické příklady."
+order: 2
+---
+
+import SelfCheck from '../../components/SelfCheck.svelte';
+import Quiz from '../../components/Quiz.svelte';
+import VideoModal from '../../components/VideoModal.svelte';
+
+# Funkce – úvod
+
+> **Klíčová otázka:** Když do automatu na kávu hodíš 20 Kč, dostaneš právě jeden nápoj. Nikdy dva, nikdy nula. Přesně tak funguje matematická funkce.
+
+<div class="flex justify-end my-4">
+  <VideoModal client:load src="/video-funkce.html" title="📈 Vizualizace průběhu funkcí" />
+</div>
+
+---
+
+## 1. Co je funkce?
+
+**Funkce** je předpis, který **každému** prvku z jedné množiny (vstup) přiřadí **právě jeden** prvek z druhé množiny (výstup).
+
+Formálně zapíšeme:
+
+$$
+f \colon A \to B
+$$
+
+kde:
+- $A$ je **definiční obor** (množina vstupů),
+- $B$ je množina, ve které leží výstupy,
+- pro každé $x \in A$ existuje **právě jedno** $y \in B$ takové, že $y = f(x)$.
+
+### Šipkový diagram
+
+Podívej se na dva příklady. Vlevo **je** funkce – každý prvek z A má právě jednu šipku. Vpravo funkce **není** – prvek 2 má dvě šipky a prvek 4 nemá žádnou.
+
+<figure class="my-6">
+  <img src="/img/funkce-sipky.svg" alt="Šipkový diagram – funkce vs. nefunkce" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+> 💡 **Zapamatuj si:** Funkce = každý vstup → přesně jeden výstup.
+
+---
+
+## 2. Zápis funkce
+
+Funkci můžeme zapsat několika způsoby:
+
+### a) Předpisem (vzorcem)
+
+$$
+f(x) = 2x + 3
+$$
+
+Čteme: „funkce $f$ přiřadí číslu $x$ hodnotu $2x + 3$".
+
+**Příklad:** Dosaďme $x = 4$:
+$$
+f(4) = 2 \cdot 4 + 3 = 11
+$$
+
+### b) Tabulkou
+
+| $x$    | $-2$ | $-1$ | $0$ | $1$ | $2$ | $3$ |
+|:-------|:----:|:----:|:---:|:---:|:---:|:---:|
+| $f(x)$ | $-1$ | $1$  | $3$ | $5$ | $7$ | $9$ |
+
+### c) Grafem
+
+Graf funkce je množina všech bodů $[x, f(x)]$ v rovině.
+
+<figure class="my-6">
+  <img src="/img/funkce-graf-linearni.svg" alt="Graf lineární funkce f(x) = ½x + 1" class="w-full max-w-lg mx-auto" />
+  <figcaption class="text-center text-sm text-primary-400 mt-2">Graf funkce $f(x) = \frac{1}{2}x + 1$. Bod $[4, 3]$ leží na grafu, protože $f(4) = 3$.</figcaption>
+</figure>
+
+### d) Šipkovým diagramem
+
+Viz obrázek výše – šipky spojují vstupy s výstupy.
+
+<SelfCheck client:load id="funkce-zapis" label="Rozumím čtyřem způsobům zápisu funkce (předpis, tabulka, graf, diagram)." />
+
+---
+
+## 3. Test svislou přímkou
+
+Jak poznat z obrázku, jestli křivka je graf funkce?
+
+> **Pravidlo:** Jestliže **každá svislá přímka** protne křivku **nejvýše v jednom bodě**, pak je to graf funkce.
+
+<figure class="my-6">
+  <img src="/img/funkce-vertikalni-test.svg" alt="Test svislou přímkou" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+Kružnice testem neprojde – existuje svislá přímka, která ji protne ve **dvou** bodech. Proto kružnice **není** graf žádné funkce.
+
+<SelfCheck client:load id="funkce-svisly-test" label="Umím použít test svislou přímkou." />
+
+---
+
+## 4. Definiční obor a obor hodnot
+
+Pro funkci $f$ definujeme:
+
+| Pojem | Značení | Význam |
+|:------|:-------:|:-------|
+| **Definiční obor** | $D(f)$ | Množina všech **přípustných vstupů** $x$ |
+| **Obor hodnot** | $H(f)$ | Množina všech **výstupů** $f(x)$ |
+
+### Příklad
+
+$$
+f(x) = \sqrt{x - 1}
+$$
+
+- **Definiční obor:** Pod odmocninou nesmí být záporné číslo → $x - 1 \geq 0$ → $D(f) = \langle 1, +\infty)$.
+- **Obor hodnot:** Odmocnina vrací nezáporná čísla → $H(f) = \langle 0, +\infty)$.
+
+<figure class="my-6">
+  <img src="/img/funkce-dmo-ho.svg" alt="Definiční obor a obor hodnot" class="w-full max-w-lg mx-auto" />
+  <figcaption class="text-center text-sm text-primary-400 mt-2">Zelená na ose $x$ = definiční obor, červená na ose $y$ = obor hodnot.</figcaption>
+</figure>
+
+### Časté omezení definičního oboru
+
+| Situace | Podmínka |
+|:--------|:---------|
+| Zlomek $\frac{1}{g(x)}$ | $g(x) \neq 0$ |
+| Odmocnina $\sqrt{g(x)}$ | $g(x) \geq 0$ |
+| Logaritmus $\log g(x)$ | $g(x) > 0$ |
+
+<SelfCheck client:load id="funkce-dmo-ho" label="Vím, jak najít definiční obor a obor hodnot." />
+
+---
+
+## 5. Funkce v reálném životě
+
+Funkce nejsou jen abstraktní matematika. Potkáváš je každý den:
+
+<figure class="my-6">
+  <img src="/img/funkce-priklady-zivot.svg" alt="Funkce v reálném životě" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+### 🌡️ Teplota během dne
+Každé hodině přiřadíme právě jednu teplotu.
+$$
+T \colon \text{hodina} \to \text{°C}, \quad T(14) = 23\text{ °C}
+$$
+
+### 🚌 Cena jízdného
+Každé vzdálenosti přiřadíme cenu lístku.
+$$
+c \colon \text{km} \to \text{Kč}, \quad c(15) = 24\text{ Kč}
+$$
+
+### 📊 Body z testu → Známka
+Každému bodovému rozsahu přiřadíme známku.
+$$
+z \colon \text{body} \to \{1, 2, 3, 4, 5\}, \quad z(75) = 2
+$$
+
+> **Co NENÍ funkce?** Pokud bys jednomu studentovi přiřadil dvě různé známky za stejný test — to by funkce nebyla (a taky by to nebylo fér 😄).
+
+<SelfCheck client:load id="funkce-realny-zivot" label="Dokážu uvést příklad funkce z reálného života." />
+
+---
+
+## 6. Důležité typy funkcí (náhled)
+
+Brzy se s těmito funkcemi potkáte podrobněji:
+
+| Typ funkce | Předpis | Jak vypadá graf |
+|:-----------|:--------|:----------------|
+| **Konstantní** | $f(x) = c$ | Vodorovná přímka |
+| **Lineární** | $f(x) = ax + b$ | Přímka se sklonem |
+| **Kvadratická** | $f(x) = ax^2 + bx + c$ | Parabola |
+| **Nepřímá úměrnost** | $f(x) = \frac{k}{x}$ | Hyperbola |
+| **Mocninná** | $f(x) = x^n$ | Závisí na $n$ |
+| **Exponenciální** | $f(x) = a^x$ | Rychlý růst/pokles |
+
+---
+
+## 📖 Slovník důležitých pojmů
+
+<div class="overflow-x-auto my-6">
+
+| Pojem | Anglicky | Definice |
+|:------|:---------|:---------|
+| **Funkce** | *function* | Předpis přiřazující každému vstupu právě jeden výstup |
+| **Definiční obor** | *domain* | Množina všech přípustných vstupů — $D(f)$ |
+| **Obor hodnot** | *range* | Množina všech výstupů — $H(f)$ |
+| **Argument** | *argument* | Vstupní hodnota $x$ |
+| **Funkční hodnota** | *function value* | Výstupní hodnota $f(x)$ |
+| **Předpis funkce** | *formula / rule* | Vzorec, např. $f(x) = 2x + 3$ |
+| **Graf funkce** | *graph* | Množina bodů $[x, f(x)]$ v rovině |
+| **Prostá funkce** | *injective / one-to-one* | Různé vstupy → různé výstupy |
+| **Rostoucí funkce** | *increasing* | Větší $x$ → větší $f(x)$ |
+| **Klesající funkce** | *decreasing* | Větší $x$ → menší $f(x)$ |
+| **Sudá funkce** | *even function* | $f(-x) = f(x)$ — souměrná podle osy $y$ |
+| **Lichá funkce** | *odd function* | $f(-x) = -f(x)$ — souměrná podle počátku |
+
+</div>
+
+<SelfCheck client:load id="funkce-slovnik" label="Prošel/prošla jsem slovník pojmů a rozumím jim." />
+
+---
+
+## ✅ Celkový self-check
+
+<SelfCheck client:load id="funkce-celkovy" label="Lekci o funkcích mám za sebou – cítím se připraven/a na kvíz!" />
+
+---
+
+## 📝 Kvízy
+
+<Quiz
+  client:load
+  questions={[
+    {
+      question: "Která z následujících přiřazení JE funkce?",
+      options: ["Každému studentovi přiřadíme všechny jeho známky", "Každému číslu přiřadíme jeho druhou mocninu", "Každému městu přiřadíme všechny lidi, kteří v něm bydlí", "Každému číslu přiřadíme čísla, která jsou menší než ono"],
+      correct: 1
+    },
+    {
+      question: "Jaký je definiční obor funkce f(x) = 1/(x − 3)?",
+      options: ["Všechna reálná čísla", "Všechna reálná čísla kromě 0", "Všechna reálná čísla kromě 3", "Pouze kladná čísla"],
+      correct: 2
+    },
+    {
+      question: "Funkce f(x) = 2x + 1. Kolik je f(5)?",
+      options: ["10", "11", "12", "7"],
+      correct: 1
+    },
+    {
+      question: "Kružnice v rovině je graf funkce. Je toto tvrzení pravdivé?",
+      options: ["Ano, kružnice je funkce", "Ne – existuje svislá přímka protínající kružnici ve dvou bodech", "Ano, pokud je kružnice dost malá", "Záleží na středu kružnice"],
+      correct: 1
+    },
+    {
+      question: "Co je obor hodnot (H) funkce f(x) = x²?",
+      options: ["Všechna reálná čísla", "Všechna záporná čísla", "⟨0, +∞) — nezáporná reálná čísla", "Pouze celá čísla"],
+      correct: 2
+    }
+  ]}
+/>

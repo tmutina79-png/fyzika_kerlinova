@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 340" font-family="'Segoe UI',system-ui,sans-serif">
+  <rect width="520" height="340" rx="16" fill="#f8fafc"/>
+
+  <text x="260" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#1e3a5f">E = mc²  —  Ekvivalence hmotnosti a energie</text>
+
+  <!-- Scale / balance visualization -->
+  <!-- fulcrum -->
+  <polygon points="260,170 245,200 275,200" fill="#64748b"/>
+  <line x1="260" y1="150" x2="260" y2="170" stroke="#64748b" stroke-width="3"/>
+
+  <!-- beam -->
+  <line x1="100" y1="150" x2="420" y2="150" stroke="#1e3a5f" stroke-width="3"/>
+
+  <!-- left pan: mass -->
+  <line x1="130" y1="150" x2="130" y2="180" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="100" y1="150" x2="100" y2="180" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="160" y1="150" x2="160" y2="180" stroke="#94a3b8" stroke-width="1.5"/>
+  <ellipse cx="130" cy="182" rx="40" ry="8" fill="#bfdbfe" stroke="#3b82f6" stroke-width="1.5"/>
+
+  <!-- mass cube -->
+  <rect x="110" y="132" width="40" height="18" rx="3" fill="#3b82f6"/>
+  <text x="130" y="146" text-anchor="middle" font-size="12" font-weight="700" fill="white">m</text>
+
+  <!-- right pan: energy -->
+  <line x1="390" y1="150" x2="390" y2="180" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="360" y1="150" x2="360" y2="180" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="420" y1="150" x2="420" y2="180" stroke="#94a3b8" stroke-width="1.5"/>
+  <ellipse cx="390" cy="182" rx="40" ry="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+
+  <!-- energy symbol (lightning) -->
+  <polygon points="395,118 382,142 394,142 385,162 408,134 396,134 405,118" fill="#f59e0b" stroke="#d97706" stroke-width="1"/>
+  <text x="390" y="110" text-anchor="middle" font-size="12" font-weight="700" fill="#f59e0b">E</text>
+
+  <!-- equals sign in middle -->
+  <circle cx="260" cy="130" r="16" fill="#10b981"/>
+  <text x="260" y="136" text-anchor="middle" font-size="18" font-weight="700" fill="white">=</text>
+
+  <!-- Formula large -->
+  <text x="260" y="240" text-anchor="middle" font-size="28" font-weight="700" fill="#1e3a5f">E = mc²</text>
+
+  <!-- Annotations -->
+  <g font-size="13" fill="#1e3a5f">
+    <text x="90" y="68" font-weight="700" fill="#3b82f6">E</text>
+    <text x="106" y="68">= energie (J)</text>
+
+    <text x="90" y="88" font-weight="700" fill="#3b82f6">m</text>
+    <text x="106" y="88">= hmotnost (kg)</text>
+
+    <text x="90" y="108" font-weight="700" fill="#3b82f6">c</text>
+    <text x="106" y="108">= rychlost světla</text>
+    <text x="120" y="124" font-size="12" fill="#64748b">≈ 3 × 10⁸ m/s</text>
+  </g>
+
+  <!-- Example box -->
+  <rect x="50" y="266" width="420" height="56" rx="8" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text x="260" y="288" text-anchor="middle" font-size="13" font-weight="600" fill="#065f46">Příklad: 1 kg hmoty = ?</text>
+  <text x="260" y="308" text-anchor="middle" font-size="13" fill="#065f46">E = 1 × (3×10⁸)² = 9 × 10¹⁶ J ≈ energie 25 milionů MWh ⚡</text>
+</svg>

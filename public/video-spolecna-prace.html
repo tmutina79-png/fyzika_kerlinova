@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Společná práce – Řešený příklad na tabuli</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+canvas{border-radius:16px;box-shadow:0 0 60px rgba(59,130,246,.2)}
+#phase{color:#60a5fa;font-size:15px;margin-top:10px;font-weight:600;min-height:22px}
+#timer{color:#475569;font-size:12px;margin-top:4px}
+#title{color:#e2e8f0;font-size:22px;font-weight:700;margin-bottom:14px;letter-spacing:1px}
+#controls{display:flex;align-items:center;gap:10px;margin-top:12px}
+#controls button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:8px 16px;font-size:15px;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;display:flex;align-items:center;gap:6px}
+#controls button:hover{background:#334155;border-color:#60a5fa}
+#controls button:active{background:#475569}
+#controls button .icon{font-size:18px}
+#scrubber{-webkit-appearance:none;appearance:none;width:300px;height:6px;border-radius:3px;background:#1e293b;outline:none;cursor:pointer}
+#scrubber::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#scrubber::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#info{color:#94a3b8;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="title">📐 Společná práce – řešený příklad na tabuli</div>
+<canvas id="c" width="760" height="500"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="controls">
+  <button id="btnRew" title="Zpět 0,3s"><span class="icon">⏪</span> −0,3s</button>
+  <button id="btnPlay" title="Přehrát / Zastavit"><span class="icon" id="playIcon">⏸</span> <span id="playLabel">Pauza</span></button>
+  <button id="btnFwd" title="Vpřed 0,3s"><span class="icon">⏩</span> +0,3s</button>
+  <input type="range" id="scrubber" min="0" max="42000" value="0" step="100"/>
+</div>
+<div id="info">Fixka píše řešení na tabuli • vpravo vidíš, jak se bazén plní • ovládej šipkami nebo posuvníkem</div>
+
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=C.width,H=C.height;
+const DUR=42000;
+let currentTime=0,playing=true,lastTs=null;
+const STEP=300;
+
+/* ── Controls ── */
+const btnPlay=document.getElementById('btnPlay');
+const btnRew=document.getElementById('btnRew');
+const btnFwd=document.getElementById('btnFwd');
+const scrubber=document.getElementById('scrubber');
+const playIcon=document.getElementById('playIcon');
+const playLabel=document.getElementById('playLabel');
+let scrubbing=false;
+
+btnPlay.addEventListener('click',()=>{playing=!playing;playIcon.textContent=playing?'⏸':'▶';playLabel.textContent=playing?'Pauza':'Přehrát';if(playing)lastTs=null});
+btnRew.addEventListener('click',()=>{currentTime=Math.max(0,currentTime-STEP);scrubber.value=currentTime});
+btnFwd.addEventListener('click',()=>{currentTime=Math.min(DUR,currentTime+STEP);scrubber.value=currentTime});
+scrubber.addEventListener('input',()=>{scrubbing=true;currentTime=Number(scrubber.value)});
+scrubber.addEventListener('change',()=>{scrubbing=false});
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();btnPlay.click()}if(e.code==='ArrowLeft')btnRew.click();if(e.code==='ArrowRight')btnFwd.click()});
+
+/* ── Phases ── */
+const phases=[
+  {t:0,     label:'① Čteme zadání'},
+  {t:10800, label:'② Krok 1 – Výkony trubek'},
+  {t:17500, label:'③ Krok 2 – Sčítáme výkony'},
+  {t:25200, label:'④ Krok 3 – Počítáme čas'},
+  {t:32800, label:'⑤ Krok 4 – Ověřujeme výsledek'},
+];
+function getPhase(t){let p=phases[0].label;for(const ph of phases)if(t>=ph.t)p=ph.label;return p}
+
+/* ── Helpers ── */
+function clamp(t){return Math.max(0,Math.min(1,t))}
+function ease(t){return 1-Math.pow(1-clamp(t),3)}
+function easeInOut(t){t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+function lerp(a,b,t){return a+(b-a)*clamp(t)}
+function getFontSize(f){const m=f.match(/(\d+)px/);return m?+m[1]:16}
+
+function roundRect(x,y,w,h,r){
+  X.beginPath();X.moveTo(x+r,y);X.lineTo(x+w-r,y);X.quadraticCurveTo(x+w,y,x+w,y+r);
+  X.lineTo(x+w,y+h-r);X.quadraticCurveTo(x+w,y+h,x+w-r,y+h);X.lineTo(x+r,y+h);
+  X.quadraticCurveTo(x,y+h,x,y+h-r);X.lineTo(x,y+r);X.quadraticCurveTo(x,y,x+r,y);X.closePath();
+}
+
+/* ═══════════════════════════════════════════════
+   LEFT SIDE: WHITEBOARD WITH MARKER
+   ═══════════════════════════════════════════════ */
+const BOARD_W=390;
+
+const writes=[
+  {text:'Plnění bazénu',            x:85,  y:35,  t0:400,   spd:50,  font:'bold 24px', color:'#1e3a5f'},
+  {text:'společná práce',           x:105, y:57,  t0:1500,  spd:45,  font:'15px',      color:'#64748b'},
+
+  {text:'Zadání:',                  x:18,  y:92,  t0:3800,  spd:55,  font:'bold 16px', color:'#dc2626'},
+  {text:'Trubka A → bazén za 4 h', x:18,  y:114, t0:5000,  spd:38,  font:'15px',      color:'#1e3a5f'},
+  {text:'Trubka B → bazén za 6 h', x:18,  y:136, t0:7000,  spd:38,  font:'15px',      color:'#1e3a5f'},
+  {text:'Společně → ?',            x:18,  y:164, t0:9000,  spd:50,  font:'bold 17px', color:'#dc2626'},
+
+  {text:'Krok 1: Výkony',          x:18,  y:200, t0:11000, spd:45,  font:'bold 15px', color:'#059669', underline:true},
+  {text:'v₁ = 1/4  (za hod)',      x:32,  y:224, t0:13000, spd:50,  font:'bold 15px', color:'#1e3a5f'},
+  {text:'v₂ = 1/6  (za hod)',      x:32,  y:248, t0:15500, spd:50,  font:'bold 15px', color:'#1e3a5f'},
+
+  {text:'Krok 2: Sečteme',         x:18,  y:282, t0:17700, spd:42,  font:'bold 15px', color:'#059669', underline:true},
+  {text:'v = 1/4 + 1/6',           x:32,  y:306, t0:19500, spd:44,  font:'15px',      color:'#1e3a5f'},
+  {text:'  = 3/12 + 2/12',         x:32,  y:330, t0:21300, spd:40,  font:'15px',      color:'#1e3a5f'},
+  {text:'  = 5/12',                 x:32,  y:358, t0:23300, spd:50,  font:'bold 18px', color:'#0369a1', box:true},
+
+  {text:'Krok 3: Čas',             x:18,  y:396, t0:25500, spd:45,  font:'bold 15px', color:'#059669', underline:true},
+  {text:'t = 12/5 = 2,4 h',        x:32,  y:420, t0:27200, spd:42,  font:'15px',      color:'#1e3a5f'},
+  {text:'= 2 h 24 min',            x:32,  y:448, t0:30000, spd:42,  font:'bold 20px', color:'#dc2626', box:true},
+
+  {text:'Ověření:',                 x:200, y:396, t0:33000, spd:48,  font:'bold 15px', color:'#059669', underline:true},
+  {text:'2,4 < 4  ✓',              x:210, y:420, t0:35000, spd:50,  font:'bold 17px', color:'#059669'},
+  {text:'Kratší než',               x:210, y:442, t0:37000, spd:35,  font:'13px',      color:'#059669'},
+  {text:'rychlejší trubka!',        x:210, y:458, t0:37800, spd:35,  font:'13px',      color:'#059669'},
+
+  {text:'✅ Hotovo!',              x:130, y:490, t0:39500, spd:55,  font:'bold 22px', color:'#059669'},
+];
+
+/* ── Draw marker ── */
+function drawMarker(tipX,tipY,writing){
+  const wobble=writing?Math.sin(currentTime*0.012)*1.2:0;
+  const tx=tipX+wobble*0.3, ty=tipY+wobble-4;
+  X.save();X.translate(tx,ty);X.rotate(-1.05);
+  X.globalAlpha=0.10;X.fillStyle='#000';
+  X.beginPath();X.ellipse(6,0,8,4,0.2,0,Math.PI*2);X.fill();X.globalAlpha=1;
+  X.fillStyle='#1a1a2e';
+  X.beginPath();X.moveTo(1,0);X.lineTo(11,0);X.lineTo(6,7);X.closePath();X.fill();
+  const grd=X.createLinearGradient(0,0,12,0);
+  grd.addColorStop(0,'#60a5fa');grd.addColorStop(0.4,'#2563eb');grd.addColorStop(1,'#3b82f6');
+  X.fillStyle=grd;X.fillRect(0,-50,12,52);
+  X.fillStyle='rgba(255,255,255,0.35)';X.fillRect(1,-36,10,14);
+  X.fillStyle='#2563eb';X.beginPath();X.arc(6,-50,6,Math.PI,0);X.fill();
+  X.fillStyle='#1d4ed8';X.fillRect(-1,-70,14,22);
+  X.beginPath();X.arc(6,-70,7,Math.PI,0);X.fill();
+  X.restore();
+}
+
+/* ── Draw whiteboard ── */
+function drawBoard(){
+  X.save();X.beginPath();X.rect(0,0,BOARD_W,H);X.clip();
+  const g=X.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#fefefe');g.addColorStop(0.5,'#fbfaf6');g.addColorStop(1,'#f3f1eb');
+  X.fillStyle=g;X.fillRect(0,0,BOARD_W,H);
+  X.fillStyle='rgba(0,0,0,0.02)';
+  for(let gx=20;gx<BOARD_W;gx+=25)for(let gy=20;gy<H;gy+=25){
+    X.beginPath();X.arc(gx,gy,0.7,0,Math.PI*2);X.fill();
+  }
+  X.strokeStyle='#c8c4bb';X.lineWidth=2.5;
+  roundRect(1,1,BOARD_W-2,H-2,10);X.stroke();
+  const sh=X.createLinearGradient(0,0,0,7);
+  sh.addColorStop(0,'rgba(0,0,0,0.04)');sh.addColorStop(1,'rgba(0,0,0,0)');
+  X.fillStyle=sh;X.fillRect(3,3,BOARD_W-6,7);
+  if(currentTime>2500){
+    const p=ease((currentTime-2500)/600);
+    X.strokeStyle='rgba(180,170,155,'+0.35*p+')';X.lineWidth=1.5;
+    X.beginPath();X.moveTo(30,66);X.lineTo(30+p*330,66);X.stroke();
+  }
+  if(currentTime>10000){
+    const p=ease((currentTime-10000)/500);
+    X.strokeStyle='rgba(180,170,155,'+0.3*p+')';X.lineWidth=1;
+    X.beginPath();X.moveTo(16,180);X.lineTo(16+p*350,180);X.stroke();
+  }
+  X.restore();
+}
+
+/* ═══════════════════════════════════════════════
+   RIGHT SIDE: POOL VISUALIZATION
+   ═══════════════════════════════════════════════ */
+const VIZ_X=BOARD_W+5;
+const VIZ_W=W-BOARD_W-5;
+
+/* Water bubbles */
+const bubbles=[];
+for(let i=0;i<50;i++){
+  bubbles.push({x:Math.random(),y:Math.random(),r:1.2+Math.random()*2.2,
+    vx:(Math.random()-0.5)*0.15,vy:-(0.08+Math.random()*0.18),
+    color:i<25?'rgba(96,165,250,0.45)':'rgba(52,211,153,0.38)'});
+}
+
+function drawViz(t){
+  X.save();X.beginPath();X.rect(VIZ_X,0,VIZ_W,H);X.clip();
+
+  const bg=X.createLinearGradient(VIZ_X,0,VIZ_X,H);
+  bg.addColorStop(0,'#0c1222');bg.addColorStop(1,'#0a0e1a');
+  X.fillStyle=bg;X.fillRect(VIZ_X,0,VIZ_W,H);
+
+  const vizA=ease(t/1500);
+  X.globalAlpha=vizA;
+  X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillStyle='#64748b';X.fillText('🏊  Vizualizace',VIZ_X+VIZ_W/2,20);
+  X.globalAlpha=1;
+
+  /* ── Pool constants ── */
+  const poolX=VIZ_X+55,poolY=165,poolW=250,poolH=185;
+  const poolR=10;
+
+  /* ── Compute fill levels ── */
+  let fillA=0,fillB=0,fillTotal=0;
+  let showPipeA=false,showPipeB=false,showCombined=false;
+  let flowA=false,flowB=false;
+
+  if(t>=5000) showPipeA=true;
+  if(t>=7000) showPipeB=true;
+
+  /* Step 1: pipes demo */
+  if(t>=13000&&t<17500){
+    fillA=clamp((t-13000)/4000)*0.30;
+    flowA=true;
+  }
+  if(t>=15500&&t<17500){
+    fillB=clamp((t-15500)/2000)*0.12;
+    flowB=true;
+  }
+
+  /* Step 2-3: combined filling */
+  if(t>=17500&&t<32800){
+    const p=easeInOut(clamp((t-17500)/13000));
+    fillA=0.30+p*0.30;
+    fillB=0.12+p*0.28;
+    flowA=t<30000;flowB=t<30000;
+    showCombined=t>=23300;
+  }
+
+  /* Step 4+: full */
+  if(t>=32800){
+    fillA=0.60;fillB=0.40;
+    showCombined=true;
+  }
+  fillTotal=Math.min(1,fillA+fillB);
+
+  /* ── Pipes ── */
+  const pipeAx=poolX+55,pipeBx=poolX+poolW-55;
+  const pipeTop=40,pipeBot=poolY-2;
+
+  function drawPipe(cx,appear,isFlow,colorMain,colorLight,label,sublabel){
+    const pa=ease((t-appear)/1200);
+    if(pa<=0)return;
+    X.globalAlpha=pa;
+    /* body */
+    X.fillStyle='#334155';
+    roundRect(cx-13,pipeTop,26,pipeBot-pipeTop+5,5);X.fill();
+    X.strokeStyle='#475569';X.lineWidth=1.5;
+    roundRect(cx-13,pipeTop,26,pipeBot-pipeTop+5,5);X.stroke();
+    /* nozzle */
+    X.fillStyle='#475569';
+    roundRect(cx-17,pipeBot-6,34,10,3);X.fill();
+    /* label */
+    X.font='bold 12px "Segoe UI",sans-serif';X.textAlign='center';
+    X.fillStyle=colorMain;X.fillText(label,cx,pipeTop-8);
+    X.font='10px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';X.fillText(sublabel,cx,pipeTop-22);
+
+    /* flow */
+    if(isFlow&&pa>=1){
+      const streamH=pipeBot-pipeTop-12;
+      for(let d=0;d<4;d++){
+        const dp=((t*0.0009+d*0.25)%1);
+        const dy=pipeTop+12+dp*streamH;
+        const dr=4-dp*2;
+        X.fillStyle=colorLight;
+        X.globalAlpha=pa*(0.7-dp*0.5);
+        X.beginPath();X.arc(cx+Math.sin(dp*12+d)*3,dy,dr,0,Math.PI*2);X.fill();
+      }
+      /* glow stream */
+      X.globalAlpha=pa*0.25;
+      const sg=X.createLinearGradient(0,pipeTop+10,0,pipeBot);
+      sg.addColorStop(0,colorLight);sg.addColorStop(1,'transparent');
+      X.fillStyle=sg;X.fillRect(cx-5,pipeTop+10,10,streamH);
+    }
+    X.globalAlpha=1;
+  }
+
+  if(showPipeA) drawPipe(pipeAx,5000,flowA,'#60a5fa','rgba(96,165,250,0.6)','Trubka A','4 h');
+  if(showPipeB) drawPipe(pipeBx,7000,flowB,'#34d399','rgba(52,211,153,0.55)','Trubka B','6 h');
+
+  /* ── Draw pool ── */
+  const poolApp=ease(t/2000);
+  X.globalAlpha=poolApp;
+
+  /* pool body */
+  roundRect(poolX,poolY,poolW,poolH,poolR);
+  X.fillStyle='#0f172a';X.fill();
+  X.strokeStyle='#475569';X.lineWidth=2;
+  roundRect(poolX,poolY,poolW,poolH,poolR);X.stroke();
+
+  /* pool label */
+  if(fillTotal<0.03){
+    X.font='13px "Segoe UI",sans-serif';X.textAlign='center';
+    X.fillStyle='#334155';X.fillText('🏊 Bazén',poolX+poolW/2,poolY+poolH/2+4);
+  }
+
+  /* ── Water fill ── */
+  if(fillTotal>0){
+    X.save();
+    roundRect(poolX+2,poolY+2,poolW-4,poolH-4,poolR-1);X.clip();
+
+    const waterH=fillTotal*(poolH-4);
+    const waterTop=poolY+poolH-2-waterH;
+
+    /* A layer (blue – bottom) */
+    const aH=(fillA/Math.max(0.001,fillTotal))*waterH;
+    X.fillStyle='rgba(59,130,246,0.32)';
+    X.fillRect(poolX+2,poolY+poolH-2-aH,poolW-4,aH);
+
+    /* B layer (green – on top of A) */
+    const bH=waterH-aH;
+    X.fillStyle='rgba(16,185,129,0.28)';
+    X.fillRect(poolX+2,waterTop,poolW-4,bH);
+
+    /* mixed glow */
+    const mg=X.createLinearGradient(poolX,waterTop,poolX,poolY+poolH);
+    mg.addColorStop(0,'rgba(52,211,153,0.08)');mg.addColorStop(0.5,'rgba(100,160,240,0.12)');mg.addColorStop(1,'rgba(59,130,246,0.08)');
+    X.fillStyle=mg;X.fillRect(poolX+2,waterTop,poolW-4,waterH);
+
+    /* surface wave */
+    X.strokeStyle='rgba(255,255,255,0.22)';X.lineWidth=2;
+    X.beginPath();
+    for(let wx=poolX+3;wx<poolX+poolW-3;wx+=2){
+      const wy=waterTop+Math.sin((wx+t*0.035)*0.07)*2.5;
+      wx<=poolX+4?X.moveTo(wx,wy):X.lineTo(wx,wy);
+    }
+    X.stroke();
+
+    /* bubbles */
+    for(const b of bubbles){
+      if(playing){b.y+=b.vy*0.003;b.x+=b.vx*0.002;if(b.y<0){b.y=1;b.x=Math.random()}if(b.x<0||b.x>1){b.vx*=-1;b.x=clamp(b.x)}}
+      const bx=poolX+6+b.x*(poolW-12);
+      const by=waterTop+b.y*waterH;
+      if(by>poolY+poolH-4||by<waterTop)continue;
+      X.globalAlpha=0.3;X.fillStyle=b.color;
+      X.beginPath();X.arc(bx,by,b.r,0,Math.PI*2);X.fill();
+    }
+    X.globalAlpha=1;
+    X.restore();
+  }
+
+  /* re-draw pool border on top */
+  X.strokeStyle='#475569';X.lineWidth=2;
+  roundRect(poolX,poolY,poolW,poolH,poolR);X.stroke();
+
+  /* tiles on pool bottom */
+  X.globalAlpha=poolApp*0.1;
+  for(let tx=poolX+8;tx<poolX+poolW-8;tx+=18){
+    X.strokeStyle='#60a5fa';X.lineWidth=0.5;
+    X.beginPath();X.moveTo(tx,poolY+poolH-3);X.lineTo(tx,poolY+poolH-12);X.stroke();
+  }
+  X.globalAlpha=1;
+
+  /* ── Percentage display ── */
+  if(fillTotal>0.02){
+    const pct=Math.round(fillTotal*100);
+    X.font='bold 22px "Segoe UI",sans-serif';X.textAlign='center';
+    X.fillStyle='#e2e8f0';
+    X.fillText(pct+' %',poolX+poolW/2,poolY+poolH/2+(fillTotal>0.45?-14:18));
+
+    /* contribution bar */
+    if(t>17500){
+      const barY=poolY+poolH+14,barW=poolW-20,barH=10,bx=poolX+10;
+      X.fillStyle='#1e293b';roundRect(bx,barY,barW,barH,4);X.fill();
+      const aw=barW*(fillA/Math.max(0.001,fillTotal))*fillTotal;
+      if(aw>1){X.fillStyle='#3b82f6';roundRect(bx,barY,aw,barH,4);X.fill()}
+      const bw=barW-aw*fillTotal;
+      const realBw=barW*(fillB/Math.max(0.001,fillTotal))*fillTotal;
+      if(realBw>1){X.fillStyle='#10b981';roundRect(bx+aw,barY,realBw,barH,4);X.fill()}
+
+      X.font='10px "Segoe UI",sans-serif';
+      X.textAlign='left';X.fillStyle='#60a5fa';X.fillText('A: '+Math.round(fillA*100)+'%',bx,barY+barH+14);
+      X.textAlign='right';X.fillStyle='#34d399';X.fillText('B: '+Math.round(fillB*100)+'%',bx+barW,barY+barH+14);
+    }
+  }
+
+  /* ── Combined rate box ── */
+  if(showCombined){
+    const cp=ease((t-23300)/1200);
+    X.globalAlpha=cp;
+    roundRect(poolX+18,poolY+poolH+50,poolW-36,46,8);
+    X.fillStyle='#1e293b';X.fill();X.strokeStyle='#fbbf2455';X.lineWidth=1;
+    roundRect(poolX+18,poolY+poolH+50,poolW-36,46,8);X.stroke();
+    X.font='bold 12px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#fbbf24';
+    X.fillText('Společný výkon: 5/12 za hod',poolX+poolW/2,poolY+poolH+70);
+    if(t>=30000){
+      X.font='bold 14px "Segoe UI",sans-serif';X.fillStyle='#f59e0b';
+      X.fillText('⏱  2 h 24 min',poolX+poolW/2,poolY+poolH+90);
+    }
+    X.globalAlpha=1;
+  }
+
+  /* ── Checkmark ── */
+  if(t>=35000){
+    const fp=ease((t-35000)/1500);
+    X.globalAlpha=fp;
+    X.font='bold 30px "Segoe UI",sans-serif';X.textAlign='center';
+    X.fillStyle='#34d399';X.fillText('✓',poolX+poolW/2,poolY-16);
+    X.globalAlpha=1;
+  }
+
+  /* ── Time comparison line ── */
+  if(t>=33000){
+    const tp=ease((t-33000)/2000);
+    X.globalAlpha=tp;
+    const tlX=poolX+12,tlY=poolY+poolH+110,tlW=poolW-24;
+
+    X.strokeStyle='#475569';X.lineWidth=1.5;
+    X.beginPath();X.moveTo(tlX,tlY);X.lineTo(tlX+tlW,tlY);X.stroke();
+    X.beginPath();X.moveTo(tlX+tlW-6,tlY-3);X.lineTo(tlX+tlW,tlY);X.lineTo(tlX+tlW-6,tlY+3);X.stroke();
+
+    const ticks=[{h:0,l:'0h',c:'#94a3b8'},{h:2.4,l:'2,4h',c:'#f59e0b'},{h:4,l:'4h',c:'#60a5fa'},{h:6,l:'6h',c:'#34d399'}];
+    for(const tk of ticks){
+      const tx=tlX+(tk.h/6.5)*tlW;
+      X.strokeStyle=tk.c;X.lineWidth=1.5;
+      X.beginPath();X.moveTo(tx,tlY-5);X.lineTo(tx,tlY+5);X.stroke();
+      X.font=tk.h===2.4?'bold 10px "Segoe UI",sans-serif':'10px "Segoe UI",sans-serif';
+      X.textAlign='center';X.fillStyle=tk.c;X.fillText(tk.l,tx,tlY+17);
+      if(tk.h===2.4){
+        X.fillStyle='#f59e0b';X.beginPath();X.arc(tx,tlY,5,0,Math.PI*2);X.fill();
+      }
+    }
+    const lp=ease((t-34500)/1500);
+    X.globalAlpha=tp*lp;
+    X.font='9px "Segoe UI",sans-serif';X.textAlign='center';
+    X.fillStyle='#60a5fa';X.fillText('A samotná',tlX+(4/6.5)*tlW,tlY+28);
+    X.fillStyle='#34d399';X.fillText('B samotná',tlX+(6/6.5)*tlW,tlY+28);
+    X.fillStyle='#fbbf24';X.fillText('společně ↑',tlX+(2.4/6.5)*tlW,tlY-13);
+    X.globalAlpha=1;
+  }
+
+  X.restore();
+}
+
+/* ═══════════════════════════════════════════════
+   MAIN LOOP
+   ═══════════════════════════════════════════════ */
+let activeMarkerPos=null;
+
+function frame(ts){
+  if(lastTs===null)lastTs=ts;
+  const dt=ts-lastTs;lastTs=ts;
+  if(playing&&!scrubbing){currentTime=Math.min(DUR,currentTime+dt);if(currentTime>=DUR)currentTime=0}
+  const t=currentTime;
+  if(!scrubbing)scrubber.value=t;
+
+  X.fillStyle='#0a0e1a';X.fillRect(0,0,W,H);
+
+  drawBoard();
+  drawViz(t);
+
+  /* ── Write text ── */
+  activeMarkerPos=null;
+  for(let i=0;i<writes.length;i++){
+    const w=writes[i];
+    if(t<w.t0)continue;
+    const elapsed=t-w.t0;
+    const chars=Math.min(w.text.length,Math.floor(elapsed/w.spd));
+    const done=chars>=w.text.length;
+    if(chars===0&&!done)continue;
+    const fs=getFontSize(w.font);
+    X.font=w.font+' "Segoe UI",system-ui,sans-serif';
+    X.textBaseline='alphabetic';X.textAlign='left';
+    const vis=w.text.substring(0,chars);
+    X.fillStyle=w.color;X.fillText(vis,w.x,w.y);
+    if(w.underline&&done){
+      const tw=X.measureText(w.text).width;
+      X.strokeStyle=w.color;X.lineWidth=2;
+      X.beginPath();X.moveTo(w.x,w.y+4);X.lineTo(w.x+tw,w.y+4);X.stroke();
+    }
+    if(w.box&&done){
+      const tw=X.measureText(w.text).width;const pad=5;
+      X.strokeStyle=w.color;X.lineWidth=2.5;
+      roundRect(w.x-pad,w.y-fs-pad+2,tw+pad*2,fs+pad*2,5);X.stroke();
+    }
+    if(!done){
+      const tw=X.measureText(vis).width;
+      activeMarkerPos={x:w.x+tw,y:w.y};
+    }
+  }
+
+  if(activeMarkerPos) drawMarker(activeMarkerPos.x,activeMarkerPos.y,true);
+  else if(t<500) drawMarker(60,100,false);
+
+  /* divider */
+  X.strokeStyle='#1e293b';X.lineWidth=2;
+  X.beginPath();X.moveTo(BOARD_W+2,5);X.lineTo(BOARD_W+2,H-5);X.stroke();
+
+  document.getElementById('phase').textContent=getPhase(t);
+  document.getElementById('timer').textContent=(t/1000).toFixed(1)+'s / '+(DUR/1000).toFixed(0)+'.0s';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

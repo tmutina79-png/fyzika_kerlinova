@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Funkce – Vizuální animace</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+canvas{border-radius:16px;box-shadow:0 0 60px rgba(59,130,246,.2)}
+#phase{color:#60a5fa;font-size:15px;margin-top:10px;font-weight:600;min-height:22px}
+#timer{color:#475569;font-size:12px;margin-top:4px}
+#title{color:#e2e8f0;font-size:22px;font-weight:700;margin-bottom:14px;letter-spacing:1px}
+#info{color:#94a3b8;font-size:13px;margin-top:8px}
+#controls{display:flex;align-items:center;gap:10px;margin-top:12px}
+#controls button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:8px 16px;font-size:15px;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;display:flex;align-items:center;gap:6px}
+#controls button:hover{background:#334155;border-color:#60a5fa}
+#controls button:active{background:#475569}
+#controls button .icon{font-size:18px}
+#scrubber{-webkit-appearance:none;appearance:none;width:300px;height:6px;border-radius:3px;background:#1e293b;outline:none;cursor:pointer}
+#scrubber::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#scrubber::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+</style>
+</head>
+<body>
+<div id="title">📈 Funkce – průběh a vlastnosti</div>
+<canvas id="c" width="760" height="500"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="controls">
+  <button id="btnRew" title="Zpět 0,3s"><span class="icon">⏪</span> −0,3s</button>
+  <button id="btnPlay" title="Přehrát / Zastavit"><span class="icon" id="playIcon">⏸</span> <span id="playLabel">Pauza</span></button>
+  <button id="btnFwd" title="Vpřed 0,3s"><span class="icon">⏩</span> +0,3s</button>
+  <input type="range" id="scrubber" min="0" max="33000" value="0" step="100"/>
+</div>
+<div id="info">Ovládej tlačítky nebo táhni posuvník • lineární → kvadratická → sinus → přehled vlastností</div>
+
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=C.width, H=C.height;
+const DUR=33000;
+let currentTime=0;
+let playing=true;
+let lastTs=null;
+const STEP=300; // 0.3s skip
+
+/* ── Controls ── */
+const btnPlay=document.getElementById('btnPlay');
+const btnRew=document.getElementById('btnRew');
+const btnFwd=document.getElementById('btnFwd');
+const scrubber=document.getElementById('scrubber');
+const playIcon=document.getElementById('playIcon');
+const playLabel=document.getElementById('playLabel');
+let scrubbing=false;
+
+btnPlay.addEventListener('click',()=>{
+  playing=!playing;
+  playIcon.textContent=playing?'⏸':'▶';
+  playLabel.textContent=playing?'Pauza':'Přehrát';
+  if(playing) lastTs=null;
+});
+btnRew.addEventListener('click',()=>{
+  currentTime=Math.max(0,currentTime-STEP);
+  scrubber.value=currentTime;
+});
+btnFwd.addEventListener('click',()=>{
+  currentTime=Math.min(DUR,currentTime+STEP);
+  scrubber.value=currentTime;
+});
+scrubber.addEventListener('input',()=>{
+  scrubbing=true;
+  currentTime=Number(scrubber.value);
+});
+scrubber.addEventListener('change',()=>{ scrubbing=false; });
+
+/* keyboard shortcuts */
+document.addEventListener('keydown',(e)=>{
+  if(e.code==='Space'){e.preventDefault();btnPlay.click();}
+  if(e.code==='ArrowLeft'){btnRew.click();}
+  if(e.code==='ArrowRight'){btnFwd.click();}
+});
+
+/* ── Fáze ── */
+const phases=[
+  {t:0,    label:"① Vstup → výstup: co je funkce?"},
+  {t:7300, label:"② Graf lineární funkce  f(x) = 2x + 1"},
+  {t:13900,label:"③ Graf kvadratické funkce  f(x) = x²"},
+  {t:20500,label:"④ Graf sinu  f(x) = sin(x)"},
+  {t:27100,label:"⑤ Test svislou přímkou"},
+];
+function getPhase(t){let p=phases[0].label;for(const ph of phases)if(t>=ph.t)p=ph.label;return p}
+
+/* ── Helpers ── */
+function lerp(a,b,t){return a+(b-a)*Math.max(0,Math.min(1,t))}
+function easeOut(t){return 1-Math.pow(1-Math.max(0,Math.min(1,t)),3)}
+
+/* ── Coord system ── */
+const OX=380, OY=260; // origin pixel
+const SX=40, SY=40;   // pixels per unit
+function toP(x,y){return[OX+x*SX, OY-y*SY]}
+
+function drawAxes(alpha){
+  X.globalAlpha=alpha;
+  X.strokeStyle='#334155';X.lineWidth=1;
+  // grid
+  for(let i=-8;i<=8;i++){
+    const [px]=toP(i,0),[,py]=toP(0,i);
+    X.beginPath();X.moveTo(px,40);X.lineTo(px,H-40);X.stroke();
+    X.beginPath();X.moveTo(40,py);X.lineTo(W-40,py);X.stroke();
+  }
+  // axes
+  X.strokeStyle='#94a3b8';X.lineWidth=2;
+  X.beginPath();X.moveTo(40,OY);X.lineTo(W-20,OY);X.stroke();
+  X.beginPath();X.moveTo(OX,H-20);X.lineTo(OX,20);X.stroke();
+  // arrows
+  X.fillStyle='#94a3b8';
+  X.beginPath();X.moveTo(W-20,OY);X.lineTo(W-30,OY-5);X.lineTo(W-30,OY+5);X.fill();
+  X.beginPath();X.moveTo(OX,20);X.lineTo(OX-5,30);X.lineTo(OX+5,30);X.fill();
+  // labels
+  X.font='bold 14px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+  X.textAlign='left';X.fillText('x',W-18,OY-8);
+  X.textAlign='center';X.fillText('y',OX+14,28);
+  // tick numbers
+  X.font='11px "Segoe UI",sans-serif';X.fillStyle='#64748b';
+  for(let i=-8;i<=8;i++){
+    if(i===0)continue;
+    const [px]=toP(i,0);
+    X.textAlign='center';X.fillText(i,px,OY+16);
+  }
+  for(let i=-5;i<=5;i++){
+    if(i===0)continue;
+    const [,py]=toP(0,i);
+    X.textAlign='right';X.fillText(i,OX-8,py+4);
+  }
+  X.textAlign='right';X.fillText('0',OX-8,OY+16);
+  X.globalAlpha=1;
+}
+
+/* ── Phase 1: Mapping arrows ── */
+function drawMapping(prog){
+  const inputs=[1,2,3,4];
+  const outputs=[3,5,7,9]; // f(x)=2x+1
+  const lx=100, rx=280, cy=140;
+
+  // boxes
+  X.globalAlpha=easeOut(prog*3);
+  X.fillStyle='#1e3a5f';X.strokeStyle='#3b82f6';X.lineWidth=2;
+  roundRect(lx-40,cy-80,80,180,12,true);
+  X.fillStyle='#1e3a2f';X.strokeStyle='#10b981';
+  roundRect(rx-40,cy-80,80,180,12,true);
+
+  // labels
+  X.font='bold 16px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillStyle='#60a5fa';X.fillText('Vstup',lx,cy-90);
+  X.fillStyle='#34d399';X.fillText('Výstup',rx,cy-90);
+
+  // values
+  X.font='bold 18px "Segoe UI",sans-serif';
+  for(let i=0;i<inputs.length;i++){
+    const y=cy-50+i*40;
+    X.fillStyle='#bfdbfe';X.fillText(inputs[i],lx,y+6);
+    X.fillStyle='#a7f3d0';X.fillText(outputs[i],rx,y+6);
+
+    // arrows animate one by one
+    const aProg=easeOut((prog-0.2-i*0.15)*5);
+    if(aProg>0){
+      X.globalAlpha=aProg;
+      X.strokeStyle='#f59e0b';X.lineWidth=2.5;
+      const startX=lx+30, endX=rx-30;
+      const curX=lerp(startX,endX,aProg);
+      X.beginPath();X.moveTo(startX,y);X.lineTo(curX,y);X.stroke();
+      // arrowhead
+      if(aProg>0.8){
+        X.fillStyle='#f59e0b';
+        X.beginPath();X.moveTo(curX,y);X.lineTo(curX-8,y-4);X.lineTo(curX-8,y+4);X.fill();
+      }
+    }
+  }
+
+  // formula
+  const fProg=easeOut((prog-0.7)*4);
+  X.globalAlpha=fProg;
+  X.fillStyle='#fbbf24';X.font='bold 20px "Segoe UI",sans-serif';
+  X.textAlign='center';X.fillText('f(x) = 2x + 1',190,cy+130);
+
+  X.globalAlpha=1;
+}
+
+function roundRect(x,y,w,h,r,fill){
+  X.beginPath();X.moveTo(x+r,y);X.lineTo(x+w-r,y);X.quadraticCurveTo(x+w,y,x+w,y+r);
+  X.lineTo(x+w,y+h-r);X.quadraticCurveTo(x+w,y+h,x+w-r,y+h);X.lineTo(x+r,y+h);
+  X.quadraticCurveTo(x,y+h,x,y+h-r);X.lineTo(x,y+r);X.quadraticCurveTo(x,y,x+r,y);
+  X.closePath();if(fill){X.fill();X.stroke();}else X.stroke();
+}
+
+/* ── Draw function curve progressively ── */
+function drawCurve(fn, xMin, xMax, prog, color, width){
+  const steps=200;
+  const drawSteps=Math.floor(steps*prog);
+  if(drawSteps<2)return;
+  X.strokeStyle=color;X.lineWidth=width;
+  X.beginPath();
+  let first=true;
+  for(let i=0;i<=drawSteps;i++){
+    const xv=xMin+(xMax-xMin)*i/steps;
+    const yv=fn(xv);
+    const [px,py]=toP(xv,yv);
+    if(py<20||py>H-20){first=true;continue}
+    if(first){X.moveTo(px,py);first=false}
+    else X.lineTo(px,py);
+  }
+  X.stroke();
+
+  // moving dot at tip
+  if(prog<1){
+    const xv=xMin+(xMax-xMin)*drawSteps/steps;
+    const yv=fn(xv);
+    const [px,py]=toP(xv,yv);
+    if(py>20&&py<H-20){
+      X.fillStyle=color;
+      X.beginPath();X.arc(px,py,5,0,Math.PI*2);X.fill();
+      // coordinate label
+      X.font='12px "Segoe UI",sans-serif';X.fillStyle=color;
+      X.textAlign='left';
+      X.fillText(`(${xv.toFixed(1)}, ${yv.toFixed(1)})`,px+10,py-8);
+    }
+  }
+}
+
+/* ── Phase 5: Vertical line test ── */
+function drawVLT(prog){
+  // draw parabola (passes) and circle (fails)
+  const leftCX=220, rightCX=540;
+
+  // Parabola
+  X.globalAlpha=easeOut(prog*3);
+  drawAxesMini(leftCX,OY,150,180);
+  X.strokeStyle='#3b82f6';X.lineWidth=2.5;
+  X.beginPath();
+  for(let i=-40;i<=40;i++){
+    const xv=i/10;
+    const yv=xv*xv;
+    const px=leftCX+xv*30, py=OY-yv*15;
+    if(i===-40)X.moveTo(px,py);else X.lineTo(px,py);
+  }
+  X.stroke();
+
+  // vertical test line sweeping
+  const sweep=(prog*2)%1;
+  const vlX=leftCX-110+sweep*220;
+  X.strokeStyle='rgba(251,191,36,0.7)';X.lineWidth=2;X.setLineDash([6,4]);
+  X.beginPath();X.moveTo(vlX,OY-180);X.lineTo(vlX,OY+40);X.stroke();
+  X.setLineDash([]);
+
+  // label
+  X.fillStyle='#34d399';X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillText('✓ JE funkce',leftCX,OY+65);
+  X.fillStyle='#94a3b8';X.font='13px "Segoe UI",sans-serif';
+  X.fillText('f(x) = x²',leftCX,OY+85);
+
+  // Circle (fails)
+  X.strokeStyle='#ef4444';X.lineWidth=2.5;
+  X.beginPath();X.arc(rightCX,OY-50,60,0,Math.PI*2);X.stroke();
+  drawAxesMini(rightCX,OY-50,100,100);
+
+  // vertical test line
+  const vlX2=rightCX-90+sweep*180;
+  X.strokeStyle='rgba(251,191,36,0.7)';X.lineWidth=2;X.setLineDash([6,4]);
+  X.beginPath();X.moveTo(vlX2,OY-170);X.lineTo(vlX2,OY+60);X.stroke();
+  X.setLineDash([]);
+
+  // intersection dots on circle
+  const dx=vlX2-rightCX;
+  if(Math.abs(dx)<60){
+    const dy=Math.sqrt(3600-dx*dx);
+    X.fillStyle='#ef4444';
+    X.beginPath();X.arc(vlX2,OY-50-dy,5,0,Math.PI*2);X.fill();
+    X.beginPath();X.arc(vlX2,OY-50+dy,5,0,Math.PI*2);X.fill();
+  }
+
+  X.fillStyle='#ef4444';X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillText('✗ NENÍ funkce',rightCX,OY+65);
+  X.fillStyle='#94a3b8';X.font='13px "Segoe UI",sans-serif';
+  X.fillText('kružnice',rightCX,OY+85);
+
+  // sweeping line label
+  X.fillStyle='#fbbf24';X.font='bold 12px "Segoe UI",sans-serif';
+  X.textAlign='center';X.fillText('test svislou přímkou',380,OY-195);
+
+  X.globalAlpha=1;
+}
+
+function drawAxesMini(cx,cy,hw,hh){
+  X.strokeStyle='#475569';X.lineWidth=1;
+  X.beginPath();X.moveTo(cx-hw,cy);X.lineTo(cx+hw,cy);X.stroke();
+  X.beginPath();X.moveTo(cx,cy+hh*0.3);X.lineTo(cx,cy-hh);X.stroke();
+}
+
+/* ── Hlavní smyčka ── */
+function frame(ts){
+  if(lastTs===null) lastTs=ts;
+  const dt=ts-lastTs;
+  lastTs=ts;
+  if(playing&&!scrubbing) currentTime=(currentTime+dt)%DUR;
+  const t=currentTime;
+  if(!scrubbing) scrubber.value=t;
+
+  X.fillStyle='#0f172a';X.fillRect(0,0,W,H);
+
+  // ── Fáze 1: mapping (0–2200) ──
+  if(t<7300){
+    const p=t/7300;
+    drawMapping(p);
+  }
+  // ── Fáze 2: lineární (2200–4200) ──
+  else if(t<13900){
+    const p=(t-7300)/6600;
+    drawAxes(easeOut(p*4));
+    drawCurve(x=>2*x+1, -8, 8, easeOut(p), '#3b82f6', 3);
+    // formula
+    const fA=easeOut((p-0.1)*3);
+    X.globalAlpha=fA;X.fillStyle='#60a5fa';X.font='bold 18px "Segoe UI",sans-serif';
+    X.textAlign='left';X.fillText('f(x) = 2x + 1',50,H-30);
+    // show some points
+    if(p>0.4){
+      const pts=[[0,1],[1,3],[2,5],[-1,-1]];
+      for(const[px,py]of pts){
+        const da=easeOut((p-0.4)*3);
+        X.globalAlpha=da;
+        const[sx,sy]=toP(px,py);
+        X.fillStyle='#f59e0b';X.beginPath();X.arc(sx,sy,5,0,Math.PI*2);X.fill();
+        X.font='11px "Segoe UI",sans-serif';X.fillStyle='#fbbf24';
+        X.textAlign='left';X.fillText(`(${px},${py})`,sx+8,sy-6);
+      }
+    }
+    X.globalAlpha=1;
+  }
+  // ── Fáze 3: kvadratická (4200–6200) ──
+  else if(t<20500){
+    const p=(t-13900)/6600;
+    drawAxes(1);
+    // fade out linear
+    X.globalAlpha=Math.max(0,1-p*4);
+    drawCurve(x=>2*x+1, -8, 8, 1, '#3b82f6', 2);
+    X.globalAlpha=1;
+    // draw quadratic
+    drawCurve(x=>x*x, -5, 5, easeOut(p), '#10b981', 3);
+    // domain/range
+    const fA=easeOut((p-0.3)*3);
+    X.globalAlpha=fA;
+    X.fillStyle='#34d399';X.font='bold 18px "Segoe UI",sans-serif';
+    X.textAlign='left';X.fillText('f(x) = x²',50,H-30);
+    // D(f) and H(f) labels
+    if(p>0.5){
+      X.font='14px "Segoe UI",sans-serif';
+      X.fillStyle='#60a5fa';X.fillText('D(f) = ℝ  (celá osa x)',50,H-55);
+      X.fillStyle='#f59e0b';X.fillText('H(f) = ⟨0, +∞)  (nezáporná čísla)',50,H-75);
+      // highlight range on y-axis
+      X.strokeStyle='rgba(245,158,11,0.4)';X.lineWidth=6;
+      X.beginPath();X.moveTo(OX,OY);X.lineTo(OX,30);X.stroke();
+    }
+    X.globalAlpha=1;
+  }
+  // ── Fáze 4: sinus (6200–8200) ──
+  else if(t<27100){
+    const p=(t-20500)/6600;
+    drawAxes(1);
+    X.globalAlpha=Math.max(0,1-p*4);
+    drawCurve(x=>x*x, -5, 5, 1, '#10b981', 2);
+    X.globalAlpha=1;
+    drawCurve(x=>Math.sin(x)*2, -8, 8, easeOut(p), '#a855f7', 3);
+    const fA=easeOut((p-0.2)*3);
+    X.globalAlpha=fA;
+    X.fillStyle='#a855f7';X.font='bold 18px "Segoe UI",sans-serif';
+    X.textAlign='left';X.fillText('f(x) = sin(x)',50,H-30);
+    // period annotation
+    if(p>0.5){
+      X.font='14px "Segoe UI",sans-serif';X.fillStyle='#c084fc';
+      X.fillText('Perioda T = 2π ≈ 6,28',50,H-55);
+      X.fillText('H(f) = ⟨-1, 1⟩',50,H-75);
+    }
+    X.globalAlpha=1;
+  }
+  // ── Fáze 5: VLT test (8200–10000) ──
+  else{
+    const p=(t-27100)/5900;
+    drawVLT(p);
+  }
+
+  document.getElementById('phase').textContent=getPhase(t);
+  document.getElementById('timer').textContent=`${(t/1000).toFixed(1)}s / 33.0s`;
+
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

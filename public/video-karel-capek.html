@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karel Čapek – Slavné citáty a úryvky</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Special+Elite&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    body { 
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      display: flex; 
+      flex-direction: column;
+      justify-content: center; 
+      align-items: center; 
+      height: 100%;
+      font-family: 'Playfair Display', Georgia, serif;
+      padding: 20px;
+      gap: 12px;
+    }
+    .video-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    canvas { 
+      border-radius: 12px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      border: 2px solid #86efac;
+      max-width: 100%;
+      max-height: calc(100vh - 100px);
+      width: auto;
+      height: auto;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .controls button {
+      background: linear-gradient(135deg, #166534 0%, #15803d 100%);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(22, 101, 52, 0.3);
+    }
+    .controls button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(22, 101, 52, 0.4);
+    }
+    .controls button:active {
+      transform: translateY(0);
+    }
+    .controls button.stop {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3);
+    }
+    .controls button.stop:hover {
+      box-shadow: 0 3px 10px rgba(220, 38, 38, 0.4);
+    }
+    .time-display {
+      font-family: 'Special Elite', monospace;
+      color: #166534;
+      font-size: 13px;
+      min-width: 75px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="video-container">
+    <canvas id="canvas" width="900" height="600"></canvas>
+    <div class="controls">
+      <button id="backBtn">⏪ -0.3s</button>
+      <button id="stopBtn" class="stop">⏹ Stop</button>
+      <button id="forwardBtn">+0.3s ⏩</button>
+      <span class="time-display" id="timeDisplay">0:00 / 1:00</span>
+    </div>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+
+    // Ovládací prvky
+    const backBtn = document.getElementById('backBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const forwardBtn = document.getElementById('forwardBtn');
+    const timeDisplay = document.getElementById('timeDisplay');
+
+    // Konfigurace
+    const TOTAL_DURATION = 60;
+    const FPS = 60;
+    let frame = 0;
+    let isPlaying = true;
+
+    // Barvy - zelená paleta inspirovaná SVG obrázky
+    const colors = {
+      bgLight: '#f0fdf4',
+      bgMid: '#ecfdf5',
+      bgAccent: '#dcfce7',
+      primary: '#166534',
+      primaryLight: '#15803d',
+      accent: '#4ade80',
+      accentMuted: '#86efac',
+      ink: '#1a1a1a',
+      inkFaded: '#374151',
+      blue: '#3b82f6',
+      blueLight: '#93c5fd',
+      blueDark: '#1e40af',
+      red: '#ef4444',
+      purple: '#8b5cf6',
+      orange: '#f59e0b',
+      teal: '#10b981'
+    };
+
+    // Scény s citáty
+    const scenes = [
+      {
+        title: "Karel Čapek",
+        subtitle: "Slavné citáty a úryvky",
+        years: "1890 – 1938",
+        duration: 4,
+        type: "intro"
+      },
+      {
+        source: "R.U.R.",
+        year: "1920",
+        quote: "Roboti nejsou lidé.\nRoboti jsou mechanicky dokonalejší než my,\nmají úžasnou rozumovou inteligenci,\nale nemají duši.",
+        note: "První použití slova 'robot' ve světové literatuře",
+        accent: colors.blue,
+        emoji: "🤖",
+        duration: 8
+      },
+      {
+        source: "Válka s mloky",
+        year: "1936",
+        quote: "Člověk je ochoten udělat ze sebe otroka,\njen aby mohl mít otroky.",
+        note: "Satira na fašismus a kolonialismus",
+        accent: colors.teal,
+        emoji: "🦎",
+        duration: 7
+      },
+      {
+        source: "Bílá nemoc",
+        year: "1937",
+        quote: "Vy chcete mír.\nAle mír není jen absence války.\nMír je spravedlnost.",
+        note: "Antiválečné drama – varování před Hitlerem",
+        accent: colors.red,
+        emoji: "🏥",
+        duration: 7
+      },
+      {
+        source: "Matka",
+        year: "1938",
+        quote: "Jdi, synu.\nJdi a braň svou zem.",
+        note: "Poslední Čapkovo drama – výzva k boji za svobodu",
+        accent: colors.orange,
+        emoji: "🕊️",
+        duration: 6
+      },
+      {
+        source: "Hovory s T. G. Masarykem",
+        year: "1928–1935",
+        quote: "Demokracie není jen forma státu,\ndemokracie je názor na život.\nSpočívá v důvěře v lidi.",
+        note: "Rozhovory s prvním prezidentem ČSR",
+        accent: colors.purple,
+        emoji: "🎙️",
+        duration: 7
+      },
+      {
+        source: "Lidové noviny",
+        year: "fejeton",
+        quote: "Kdo chce pohnout světem,\nať pohne nejdřív sám sebou.",
+        note: "Jeden z nejslavnějších Čapkových aforismů",
+        accent: colors.blue,
+        emoji: "✨",
+        duration: 6
+      },
+      {
+        source: "O věcech obecných",
+        year: "1932",
+        quote: "Pravda je to,\nco nás činí svobodnými.",
+        note: "Filozofický esej o hledání pravdy",
+        accent: colors.teal,
+        emoji: "💡",
+        duration: 6
+      },
+      {
+        title: "Zapamatuj si",
+        points: [
+          "Robot = z českého 'robota' (nucená práce)",
+          "R.U.R. – varování před technikou",
+          "Válka s mloky – satira na fašismus", 
+          "Bílá nemoc – mír a spravedlnost",
+          "7× nominován na Nobelovu cenu"
+        ],
+        duration: 9,
+        type: "summary"
+      }
+    ];
+
+    // Vypočítat časování scén
+    let sceneTimings = [];
+    let currentTime = 0;
+    for (const scene of scenes) {
+      sceneTimings.push({ start: currentTime, end: currentTime + scene.duration, scene });
+      currentTime += scene.duration;
+    }
+
+    // Pomocné funkce
+    function easeInOut(t) {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    }
+
+    function easeOut(t) {
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    // Pozadí - světle zelené jako v SVG
+    function drawBackground() {
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, colors.bgLight);
+      grad.addColorStop(0.5, colors.bgMid);
+      grad.addColorStop(1, colors.bgAccent);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Jemná textura
+      ctx.globalAlpha = 0.015;
+      for (let i = 0; i < 1500; i++) {
+        const x = Math.random() * W;
+        const y = Math.random() * H;
+        const size = Math.random() * 2;
+        ctx.fillStyle = colors.primary;
+        ctx.fillRect(x, y, size, size);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Dekorativní rámečky
+    function drawFrame(color = colors.accentMuted) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.roundRect(15, 15, W - 30, H - 30, 16);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    function drawDecorativeLine(y, color) {
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = 0.4;
+      
+      ctx.beginPath();
+      ctx.moveTo(80, y);
+      ctx.lineTo(W - 80, y);
+      ctx.stroke();
+      
+      // Diamanty
+      const diamondSize = 5;
+      [90, W - 90].forEach(dx => {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(dx, y - diamondSize);
+        ctx.lineTo(dx + diamondSize, y);
+        ctx.lineTo(dx, y + diamondSize);
+        ctx.lineTo(dx - diamondSize, y);
+        ctx.closePath();
+        ctx.fill();
+      });
+      
+      // Střední ornament
+      ctx.beginPath();
+      ctx.arc(W/2, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.globalAlpha = 1;
+    }
+
+    function drawQuoteMark(x, y, size, opening = true) {
+      ctx.font = `${size}px "Playfair Display", Georgia, serif`;
+      ctx.fillStyle = colors.accent;
+      ctx.globalAlpha = 0.35;
+      ctx.textAlign = 'center';
+      ctx.fillText(opening ? '„' : '"', x, y);
+      ctx.globalAlpha = 1;
+    }
+
+    function drawPenIcon(x, y, size, alpha = 1) {
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = colors.primary;
+      ctx.fillStyle = colors.accent;
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y + size);
+      ctx.lineTo(x + size * 0.3, y);
+      ctx.lineTo(x + size * 0.5, y - size * 0.2);
+      ctx.lineTo(x + size * 0.7, y);
+      ctx.lineTo(x + size, y + size);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.moveTo(x + size * 0.5, y + size);
+      ctx.lineTo(x + size * 0.5, y + size * 1.4);
+      ctx.strokeStyle = colors.ink;
+      ctx.stroke();
+      
+      ctx.globalAlpha = 1;
+    }
+
+    function drawBookIcon(x, y, size, alpha = 1) {
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = colors.primary;
+      ctx.fillStyle = colors.bgLight;
+      ctx.lineWidth = 2;
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.quadraticCurveTo(x + size/2, y + size * 0.1, x + size, y);
+      ctx.lineTo(x + size, y + size);
+      ctx.quadraticCurveTo(x + size/2, y + size * 0.9, x, y + size);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(x + size/2, y + size * 0.05);
+      ctx.lineTo(x + size/2, y + size * 0.95);
+      ctx.stroke();
+      
+      ctx.globalAlpha = 1;
+    }
+
+    function drawTypewriterIcon(x, y, size, alpha = 1) {
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = colors.inkFaded;
+      ctx.strokeStyle = colors.inkFaded;
+      ctx.lineWidth = 1.5;
+      
+      // Tělo psacího stroje
+      ctx.beginPath();
+      ctx.roundRect(x, y + size * 0.4, size, size * 0.4, 4);
+      ctx.fill();
+      
+      // Papír
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x + size * 0.25, y, size * 0.5, size * 0.45);
+      ctx.strokeStyle = colors.accentMuted;
+      ctx.strokeRect(x + size * 0.25, y, size * 0.5, size * 0.45);
+      
+      // Řádky na papíru
+      ctx.strokeStyle = colors.inkFaded;
+      ctx.globalAlpha = alpha * 0.3;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x + size * 0.3, y + size * 0.1 + i * size * 0.1);
+        ctx.lineTo(x + size * 0.7, y + size * 0.1 + i * size * 0.1);
+        ctx.stroke();
+      }
+      
+      ctx.globalAlpha = 1;
+    }
+
+    function drawIntroScene(progress) {
+      drawBackground();
+      drawFrame(colors.accentMuted);
+
+      // Horní dekorace
+      if (progress > 0.05) {
+        const ornProgress = easeOut(Math.min(1, (progress - 0.05) * 2));
+        ctx.globalAlpha = ornProgress;
+        drawDecorativeLine(70, colors.accent);
+        ctx.globalAlpha = 1;
+      }
+
+      // Emoji pero
+      if (progress > 0.1) {
+        const penProgress = easeOut(Math.min(1, (progress - 0.1) * 2));
+        ctx.font = `${60 * penProgress}px serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('🖊️', W/2, 140);
+      }
+
+      // Psací stroj
+      if (progress > 0.15) {
+        const twProgress = easeOut(Math.min(1, (progress - 0.15) * 2));
+        drawTypewriterIcon(W/2 - 30, 160, 60, twProgress * 0.6);
+      }
+
+      // Jméno
+      if (progress > 0.25) {
+        const nameProgress = Math.min(1, (progress - 0.25) * 2.5);
+        ctx.font = 'bold 56px "Playfair Display", Georgia, serif';
+        ctx.fillStyle = colors.primary;
+        ctx.textAlign = 'center';
+        
+        const name = "Karel Čapek";
+        const visibleChars = Math.floor(name.length * nameProgress);
+        ctx.fillText(name.slice(0, visibleChars), W/2, H/2 + 10);
+      }
+
+      // Podtitul
+      if (progress > 0.5) {
+        const subProgress = easeOut(Math.min(1, (progress - 0.5) * 2));
+        ctx.globalAlpha = subProgress;
+        ctx.font = 'italic 24px "Playfair Display", Georgia, serif';
+        ctx.fillStyle = colors.primaryLight;
+        ctx.fillText('Slavné citáty a úryvky', W/2, H/2 + 55);
+        ctx.globalAlpha = 1;
+      }
+
+      // Datum života
+      if (progress > 0.65) {
+        const dateProgress = easeOut(Math.min(1, (progress - 0.65) * 2));
+        ctx.globalAlpha = dateProgress * 0.7;
+        ctx.font = '18px "Playfair Display", Georgia, serif';
+        ctx.fillStyle = colors.accent;
+        ctx.fillText('✦  1890 – 1938  ✦', W/2, H/2 + 95);
+        ctx.globalAlpha = 1;
+      }
+
+      // Dolní dekorace
+      if (progress > 0.4) {
+        const ornProgress = easeOut(Math.min(1, (progress - 0.4) * 2));
+        ctx.globalAlpha = ornProgress;
+        drawDecorativeLine(H - 70, colors.accent);
+        ctx.globalAlpha = 1;
+      }
+
+      // Knihy
+      if (progress > 0.7) {
+        const bookProgress = easeOut(Math.min(1, (progress - 0.7) * 2));
+        drawBookIcon(W/2 - 140, H - 140, 35, bookProgress * 0.5);
+        drawBookIcon(W/2 + 105, H - 140, 35, bookProgress * 0.5);
+      }
+    }
+
+    function drawQuoteScene(sceneIndex, progress) {
+      const scene = scenes[sceneIndex];
+      
+      drawBackground();
+      
+      // Barevný proužek vlevo
+      ctx.fillStyle = scene.accent;
+      ctx.globalAlpha = 0.25;
+      ctx.fillRect(0, 0, 6, H);
+      ctx.globalAlpha = 1;
+
+      drawFrame(scene.accent);
+
+      // Horní dekorace + název
+      const headerProgress = easeOut(Math.min(1, progress * 3));
+      ctx.globalAlpha = headerProgress;
+      
+      drawDecorativeLine(55, scene.accent);
+      
+      // Emoji
+      ctx.font = '36px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(scene.emoji, W/2, 100);
+      
+      // Název díla
+      ctx.font = 'bold 28px "Playfair Display", Georgia, serif';
+      ctx.fillStyle = scene.accent;
+      ctx.fillText(scene.source, W/2, 140);
+      
+      // Rok
+      ctx.font = '15px "Playfair Display", Georgia, serif';
+      ctx.fillStyle = colors.inkFaded;
+      ctx.fillText('(' + scene.year + ')', W/2, 162);
+      
+      ctx.globalAlpha = 1;
+
+      // Citát
+      if (progress > 0.15) {
+        const quoteProgress = easeOut(Math.min(1, (progress - 0.15) * 1.5));
+        const lines = scene.quote.split('\n');
+        
+        const lineHeight = 48;
+        const startY = H/2 - (lines.length * lineHeight) / 2 + 50;
+        
+        // Velké uvozovky
+        drawQuoteMark(90, startY + 20, 90, true);
+        drawQuoteMark(W - 90, startY + lines.length * lineHeight - 20, 90, false);
+        
+        // Text citátu
+        ctx.font = 'italic 26px "Playfair Display", Georgia, serif';
+        ctx.fillStyle = colors.ink;
+        ctx.textAlign = 'center';
+        
+        lines.forEach((line, i) => {
+          const lineProgress = Math.min(1, (quoteProgress - i * 0.12) * 2);
+          if (lineProgress > 0) {
+            ctx.globalAlpha = lineProgress;
+            ctx.fillText(line, W/2, startY + i * lineHeight);
+          }
+        });
+        ctx.globalAlpha = 1;
+      }
+
+      // Poznámka dole
+      if (progress > 0.6) {
+        const noteProgress = easeOut(Math.min(1, (progress - 0.6) * 2));
+        
+        drawDecorativeLine(H - 75, scene.accent);
+        
+        ctx.globalAlpha = noteProgress * 0.8;
+        ctx.font = '14px "Playfair Display", Georgia, serif';
+        ctx.fillStyle = colors.inkFaded;
+        ctx.textAlign = 'center';
+        ctx.fillText('💡 ' + scene.note, W/2, H - 42);
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function drawSummaryScene(progress) {
+      const scene = scenes[scenes.length - 1];
+      
+      drawBackground();
+      
+      // Jemný zelený overlay
+      ctx.fillStyle = colors.accent;
+      ctx.globalAlpha = 0.08;
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = 1;
+
+      drawFrame(colors.primary);
+
+      // Titul
+      const titleProgress = easeOut(Math.min(1, progress * 2));
+      ctx.globalAlpha = titleProgress;
+      
+      drawDecorativeLine(50, colors.primary);
+      
+      ctx.font = '32px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('📚', W/2, 95);
+      
+      ctx.font = 'bold 34px "Playfair Display", Georgia, serif';
+      ctx.fillStyle = colors.primary;
+      ctx.fillText('Zapamatuj si', W/2, 135);
+      
+      ctx.globalAlpha = 1;
+
+      // Body
+      const startY = 175;
+      const lineHeight = 65;
+      const icons = ['🤖', '📖', '🦎', '🏥', '🏆'];
+      
+      scene.points.forEach((point, i) => {
+        const pointProgress = Math.max(0, Math.min(1, (progress - 0.15 - i * 0.1) * 2.5));
+        if (pointProgress > 0) {
+          ctx.globalAlpha = pointProgress;
+          
+          // Pozadí bodu
+          ctx.fillStyle = 'rgba(74, 222, 128, 0.12)';
+          const boxWidth = 680;
+          const boxX = W/2 - boxWidth/2;
+          ctx.beginPath();
+          ctx.roundRect(boxX, startY + i * lineHeight - 20, boxWidth, 50, 8);
+          ctx.fill();
+          
+          // Linie pod bodem
+          ctx.strokeStyle = colors.accentMuted;
+          ctx.lineWidth = 1;
+          ctx.globalAlpha = pointProgress * 0.4;
+          ctx.beginPath();
+          ctx.moveTo(boxX + 10, startY + i * lineHeight + 30);
+          ctx.lineTo(boxX + boxWidth - 10, startY + i * lineHeight + 30);
+          ctx.stroke();
+          
+          // Ikona
+          ctx.globalAlpha = pointProgress;
+          ctx.font = '20px serif';
+          ctx.textAlign = 'left';
+          ctx.fillText(icons[i], boxX + 18, startY + i * lineHeight + 8);
+          
+          // Text
+          ctx.font = '18px "Playfair Display", Georgia, serif';
+          ctx.fillStyle = colors.ink;
+          ctx.fillText(point, boxX + 50, startY + i * lineHeight + 8);
+        }
+      });
+      ctx.globalAlpha = 1;
+
+      // Podpis
+      if (progress > 0.75) {
+        const sigProgress = easeOut(Math.min(1, (progress - 0.75) * 3));
+        
+        drawDecorativeLine(H - 55, colors.primary);
+        
+        ctx.globalAlpha = sigProgress * 0.7;
+        ctx.font = 'italic 17px "Playfair Display", Georgia, serif';
+        ctx.fillStyle = colors.primaryLight;
+        ctx.textAlign = 'center';
+        ctx.fillText('— Karel Čapek (1890–1938) —', W/2, H - 25);
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function getCurrentSceneIndex(time) {
+      for (let i = 0; i < sceneTimings.length; i++) {
+        if (time >= sceneTimings[i].start && time < sceneTimings[i].end) {
+          return i;
+        }
+      }
+      return sceneTimings.length - 1;
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimeDisplay() {
+      const currentSec = frame / FPS;
+      timeDisplay.textContent = `${formatTime(currentSec)} / ${formatTime(TOTAL_DURATION)}`;
+    }
+
+    function draw() {
+      const time = frame / FPS;
+      const sceneIndex = getCurrentSceneIndex(time);
+      const timing = sceneTimings[sceneIndex];
+      const sceneProgress = (time - timing.start) / (timing.end - timing.start);
+      const scene = timing.scene;
+
+      // Fade in/out
+      let fadeAlpha = 1;
+      if (sceneProgress < 0.08) {
+        fadeAlpha = sceneProgress / 0.08;
+      } else if (sceneProgress > 0.92) {
+        fadeAlpha = (1 - sceneProgress) / 0.08;
+      }
+
+      ctx.save();
+      ctx.globalAlpha = fadeAlpha;
+
+      if (scene.type === 'intro') {
+        drawIntroScene(sceneProgress);
+      } else if (scene.type === 'summary') {
+        drawSummaryScene(sceneProgress);
+      } else {
+        drawQuoteScene(sceneIndex, sceneProgress);
+      }
+
+      ctx.restore();
+
+      // Progress bar - zelený styl
+      ctx.fillStyle = 'rgba(134, 239, 172, 0.3)';
+      ctx.beginPath();
+      ctx.roundRect(40, H - 14, W - 80, 6, 3);
+      ctx.fill();
+      
+      ctx.fillStyle = colors.primary;
+      ctx.beginPath();
+      ctx.roundRect(40, H - 14, (W - 80) * (time / TOTAL_DURATION), 6, 3);
+      ctx.fill();
+      
+      // Koncové tečky
+      ctx.fillStyle = colors.accent;
+      ctx.beginPath();
+      ctx.arc(40, H - 11, 5, 0, Math.PI * 2);
+      ctx.arc(W - 40, H - 11, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Aktuální pozice
+      const currentX = 40 + (W - 80) * (time / TOTAL_DURATION);
+      ctx.fillStyle = colors.primary;
+      ctx.beginPath();
+      ctx.arc(currentX, H - 11, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      updateTimeDisplay();
+
+      // Loop nebo stop
+      if (frame < TOTAL_DURATION * FPS && isPlaying) {
+        frame++;
+        requestAnimationFrame(draw);
+      } else if (frame >= TOTAL_DURATION * FPS) {
+        frame = 0;
+        requestAnimationFrame(draw);
+      }
+    }
+
+    // Start
+    draw();
+
+    // Ovládání - klik na canvas
+    canvas.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      stopBtn.innerHTML = isPlaying ? '⏹ Stop' : '▶ Play';
+      if (isPlaying) draw();
+    });
+
+    // Tlačítko Stop/Play
+    stopBtn.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      stopBtn.innerHTML = isPlaying ? '⏹ Stop' : '▶ Play';
+      if (isPlaying) draw();
+    });
+
+    // Tlačítko zpět -0.3s
+    backBtn.addEventListener('click', () => {
+      frame = Math.max(0, frame - Math.floor(0.3 * FPS));
+      if (!isPlaying) {
+        draw();
+      }
+    });
+
+    // Tlačítko vpřed +0.3s
+    forwardBtn.addEventListener('click', () => {
+      frame = Math.min(TOTAL_DURATION * FPS - 1, frame + Math.floor(0.3 * FPS));
+      if (!isPlaying) {
+        draw();
+      }
+    });
+
+    // Klávesové zkratky
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        isPlaying = !isPlaying;
+        stopBtn.innerHTML = isPlaying ? '⏹ Stop' : '▶ Play';
+        if (isPlaying) draw();
+      } else if (e.code === 'ArrowLeft') {
+        frame = Math.max(0, frame - Math.floor(0.3 * FPS));
+        if (!isPlaying) draw();
+      } else if (e.code === 'ArrowRight') {
+        frame = Math.min(TOTAL_DURATION * FPS - 1, frame + Math.floor(0.3 * FPS));
+        if (!isPlaying) draw();
+      }
+    });
+  </script>
+</body>
+</html>

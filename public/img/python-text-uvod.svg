@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Pozadí -->
+  <rect width="800" height="300" fill="url(#bgGrad)"/>
+  
+  <!-- Příklad 1: Hra se skóre -->
+  <g transform="translate(50, 30)">
+    <rect x="0" y="0" width="200" height="130" rx="8" fill="#0f3460" stroke="#e94560" stroke-width="2"/>
+    <text x="100" y="25" fill="#e94560" font-family="Arial" font-size="12" text-anchor="middle" font-weight="bold">🎮 HRA</text>
+    <text x="20" y="55" fill="#fff" font-family="Arial" font-size="14" font-weight="bold">SKÓRE: 1250</text>
+    <text x="20" y="80" fill="#00ff88" font-family="Arial" font-size="11">LEVEL: 5</text>
+    <circle cx="100" cy="105" r="15" fill="#e94560"/>
+    <text x="140" y="110" fill="#aaa" font-family="Arial" font-size="10">← hráč</text>
+  </g>
+  
+  <!-- Příklad 2: Graf s popisky -->
+  <g transform="translate(300, 30)">
+    <rect x="0" y="0" width="200" height="130" rx="8" fill="#0f3460" stroke="#3498db" stroke-width="2"/>
+    <text x="100" y="25" fill="#3498db" font-family="Arial" font-size="12" text-anchor="middle" font-weight="bold">📊 GRAF</text>
+    <!-- Osy -->
+    <line x1="30" y1="110" x2="180" y2="110" stroke="#666" stroke-width="1"/>
+    <line x1="30" y1="40" x2="30" y2="110" stroke="#666" stroke-width="1"/>
+    <!-- Sloupce -->
+    <rect x="50" y="70" width="25" height="40" fill="#e74c3c"/>
+    <rect x="90" y="50" width="25" height="60" fill="#2ecc71"/>
+    <rect x="130" y="80" width="25" height="30" fill="#f39c12"/>
+    <!-- Popisky -->
+    <text x="62" y="125" fill="#fff" font-family="Arial" font-size="9" text-anchor="middle">Led</text>
+    <text x="102" y="125" fill="#fff" font-family="Arial" font-size="9" text-anchor="middle">Úno</text>
+    <text x="142" y="125" fill="#fff" font-family="Arial" font-size="9" text-anchor="middle">Bře</text>
+  </g>
+  
+  <!-- Příklad 3: Vizitka -->
+  <g transform="translate(550, 30)">
+    <rect x="0" y="0" width="200" height="130" rx="8" fill="#0f3460" stroke="#2ecc71" stroke-width="2"/>
+    <text x="100" y="25" fill="#2ecc71" font-family="Arial" font-size="12" text-anchor="middle" font-weight="bold">📇 VIZITKA</text>
+    <text x="100" y="55" fill="#fff" font-family="Georgia" font-size="16" text-anchor="middle" font-weight="bold">Jan Novák</text>
+    <text x="100" y="75" fill="#aaa" font-family="Arial" font-size="10" text-anchor="middle" font-style="italic">Programátor</text>
+    <text x="100" y="95" fill="#3498db" font-family="Arial" font-size="9" text-anchor="middle">📧 jan@email.cz</text>
+    <text x="100" y="115" fill="#3498db" font-family="Arial" font-size="9" text-anchor="middle">📱 +420 123 456</text>
+  </g>
+  
+  <!-- Příklad 4: Animace -->
+  <g transform="translate(50, 180)">
+    <rect x="0" y="0" width="200" height="90" rx="8" fill="#0f3460" stroke="#f39c12" stroke-width="2"/>
+    <text x="100" y="25" fill="#f39c12" font-family="Arial" font-size="12" text-anchor="middle" font-weight="bold">✨ ANIMACE</text>
+    <text x="20" y="55" fill="#00ff00" font-family="Courier" font-size="14">Hello_</text>
+    <rect x="68" y="42" width="10" height="18" fill="#00ff00" opacity="0.7"/>
+    <text x="100" y="80" fill="#666" font-family="Arial" font-size="9" text-anchor="middle">psací stroj efekt</text>
+  </g>
+  
+  <!-- Příklad 5: Hodiny -->
+  <g transform="translate(300, 180)">
+    <rect x="0" y="0" width="200" height="90" rx="8" fill="#0f3460" stroke="#9b59b6" stroke-width="2"/>
+    <text x="100" y="25" fill="#9b59b6" font-family="Arial" font-size="12" text-anchor="middle" font-weight="bold">🕐 HODINY</text>
+    <text x="100" y="60" fill="#00ff00" font-family="Courier" font-size="24" text-anchor="middle" font-weight="bold">14:35:22</text>
+    <text x="100" y="80" fill="#666" font-family="Arial" font-size="10" text-anchor="middle">20. března 2026</text>
+  </g>
+  
+  <!-- Příklad 6: ASCII art -->
+  <g transform="translate(550, 180)">
+    <rect x="0" y="0" width="200" height="90" rx="8" fill="#0f3460" stroke="#e91e63" stroke-width="2"/>
+    <text x="100" y="25" fill="#e91e63" font-family="Arial" font-size="12" text-anchor="middle" font-weight="bold">🎨 BAREVNÝ TEXT</text>
+    <text x="30" y="60" fill="#e74c3c" font-family="Arial" font-size="20" font-weight="bold">P</text>
+    <text x="50" y="60" fill="#f39c12" font-family="Arial" font-size="20" font-weight="bold">Y</text>
+    <text x="70" y="60" fill="#2ecc71" font-family="Arial" font-size="20" font-weight="bold">T</text>
+    <text x="90" y="60" fill="#3498db" font-family="Arial" font-size="20" font-weight="bold">H</text>
+    <text x="110" y="60" fill="#9b59b6" font-family="Arial" font-size="20" font-weight="bold">O</text>
+    <text x="130" y="60" fill="#e91e63" font-family="Arial" font-size="20" font-weight="bold">N</text>
+    <text x="100" y="80" fill="#666" font-family="Arial" font-size="9" text-anchor="middle">každé písmeno jinou barvou</text>
+  </g>
+  
+  <!-- Nadpis -->
+  <text x="400" y="295" fill="#ecf0f1" font-family="Arial" font-size="11" text-anchor="middle" opacity="0.7">Příklady využití textu v grafických programech</text>
+</svg>

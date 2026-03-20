@@ -1,0 +1,343 @@
+---
+title: "Python – kreslení textu"
+description: "Naučíme se vykreslovat text pomocí knihovny Turtle – barvy, velikosti, fonty a praktické využití."
+order: 10
+---
+
+import SelfCheck from '../../components/SelfCheck.svelte';
+import VideoModal from '../../components/VideoModal.svelte';
+
+# Python – kreslení textu 🐢✍️
+
+> **Cíl lekce:** Naučit se vykreslovat text na plátno pomocí knihovny Turtle – měnit barvu, velikost, font a pozici textu.
+
+<div class="flex justify-end my-4">
+  <VideoModal 
+    client:load 
+    src="/video-python-text.html" 
+    title="🎬 Animace kreslení textu v Pythonu"
+    thumbnailImg="/img/python-text-thumb.svg"
+  />
+</div>
+
+---
+
+## 1. Proč kreslit text?
+
+V grafických programech často potřebujeme zobrazit:
+- **Popisky** k obrázkům
+- **Titulky** a nadpisy
+- **Výsledky výpočtů** přímo na plátně
+- **Interaktivní hry** se skóre a texty
+
+<figure class="my-6">
+  <img src="/img/python-text-uvod.svg" alt="Příklady použití textu v grafice" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+---
+
+## 2. Základní příkaz `write()`
+
+Pro vykreslení textu v Turtle používáme metodu **`write()`**:
+
+```python
+import turtle
+
+t = turtle.Turtle()
+t.write("Ahoj světe!")
+```
+
+Text se vykreslí na **aktuální pozici** želvy.
+
+### Parametry příkazu write()
+
+```python
+t.write("Text", move=False, align="left", font=("Arial", 16, "normal"))
+```
+
+| Parametr | Popis | Možné hodnoty |
+|----------|-------|---------------|
+| `move` | Posunout želvu za text? | `True` / `False` |
+| `align` | Zarovnání textu | `"left"`, `"center"`, `"right"` |
+| `font` | Trojice (název, velikost, styl) | např. `("Arial", 20, "bold")` |
+
+<figure class="my-6">
+  <img src="/img/python-text-write.svg" alt="Parametry příkazu write()" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+---
+
+## 3. Barva textu
+
+Barvu textu nastavíme pomocí **`pencolor()`** před voláním `write()`:
+
+```python
+import turtle
+
+t = turtle.Turtle()
+t.hideturtle()      # skryjeme želvu
+
+t.pencolor("red")   # červená
+t.write("Červený text", font=("Arial", 24, "bold"))
+
+t.penup()
+t.goto(0, -50)      # posun dolů
+
+t.pencolor("#3498db")  # modrá (hex kód)
+t.write("Modrý text", font=("Arial", 24, "bold"))
+```
+
+<SelfCheck client:load
+  question="Jakým příkazem nastavíme barvu textu na zelenou?"
+  answer="t.pencolor('green') nebo t.pencolor('#00ff00')"
+/>
+
+---
+
+## 4. Velikost a styl písma
+
+Font zadáváme jako **trojici** (tuple):
+
+```python
+font = ("název_fontu", velikost, "styl")
+```
+
+### Dostupné styly:
+- `"normal"` – normální
+- `"bold"` – tučné
+- `"italic"` – kurzíva
+- `"bold italic"` – tučná kurzíva
+
+### Příklady:
+
+```python
+t.write("Malý text", font=("Arial", 12, "normal"))
+t.write("Velký tučný", font=("Arial", 36, "bold"))
+t.write("Kurzíva", font=("Courier", 20, "italic"))
+t.write("Comic Sans", font=("Comic Sans MS", 24, "bold"))
+```
+
+<figure class="my-6">
+  <img src="/img/python-text-fonty.svg" alt="Ukázka různých fontů a stylů" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+---
+
+## 5. Zarovnání textu
+
+Parametr `align` určuje, **kde se text vykreslí** vzhledem k pozici želvy:
+
+```python
+# Želva je na pozici (0, 0)
+t.write("Left", align="left")     # text jde doprava od želvy
+t.write("Center", align="center") # želva je uprostřed textu
+t.write("Right", align="right")   # text jde doleva od želvy
+```
+
+<figure class="my-6">
+  <img src="/img/python-text-zarovnani.svg" alt="Tři typy zarovnání textu" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+> 💡 **Tip:** Pro nadpisy používej `align="center"` a umísti želvu doprostřed obrazovky.
+
+---
+
+## 6. Pozicování textu
+
+Než vypíšeme text, musíme želvu **přemístit** na správnou pozici:
+
+```python
+import turtle
+
+t = turtle.Turtle()
+t.hideturtle()
+t.penup()           # nezanechávat stopu
+
+# Nadpis nahoře
+t.goto(0, 200)
+t.write("NADPIS", align="center", font=("Arial", 32, "bold"))
+
+# Text vlevo
+t.goto(-300, 0)
+t.write("Levý text", font=("Arial", 16, "normal"))
+
+# Text vpravo
+t.goto(300, 0)
+t.write("Pravý text", align="right", font=("Arial", 16, "normal"))
+```
+
+---
+
+## 7. Praktický příklad: Vizitka
+
+Vytvoříme jednoduchou digitální vizitku:
+
+```python
+import turtle
+
+# Nastavení plátna
+screen = turtle.Screen()
+screen.bgcolor("#2c3e50")
+screen.title("Moje vizitka")
+
+t = turtle.Turtle()
+t.hideturtle()
+t.penup()
+t.speed(0)
+
+# Rámeček
+t.goto(-200, 150)
+t.pendown()
+t.pencolor("#ecf0f1")
+t.pensize(3)
+for _ in range(2):
+    t.forward(400)
+    t.right(90)
+    t.forward(250)
+    t.right(90)
+
+t.penup()
+
+# Jméno
+t.goto(0, 80)
+t.pencolor("#e74c3c")
+t.write("Jan Novák", align="center", font=("Arial", 36, "bold"))
+
+# Titul
+t.goto(0, 30)
+t.pencolor("#ecf0f1")
+t.write("Student Gymnázia", align="center", font=("Arial", 18, "italic"))
+
+# Kontakt
+t.goto(0, -30)
+t.pencolor("#3498db")
+t.write("📧 jan.novak@skola.cz", align="center", font=("Arial", 14, "normal"))
+
+t.goto(0, -60)
+t.write("📱 +420 123 456 789", align="center", font=("Arial", 14, "normal"))
+
+# Třída
+t.goto(0, -100)
+t.pencolor("#2ecc71")
+t.write("Sexta A", align="center", font=("Arial", 20, "bold"))
+
+turtle.done()
+```
+
+<figure class="my-6">
+  <img src="/img/python-text-vizitka.svg" alt="Výsledek programu – digitální vizitka" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+---
+
+## 8. Praktický příklad: Hodiny s časem
+
+Kombinace textu a grafiky – analogové hodiny s digitálním časem:
+
+```python
+import turtle
+import time
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.tracer(0)  # vypnout animaci
+
+t = turtle.Turtle()
+t.hideturtle()
+t.penup()
+
+while True:
+    t.clear()
+    
+    # Digitální čas
+    current_time = time.strftime("%H:%M:%S")
+    t.goto(0, 0)
+    t.pencolor("#00ff00")
+    t.write(current_time, align="center", font=("Courier", 60, "bold"))
+    
+    # Datum
+    current_date = time.strftime("%d. %m. %Y")
+    t.goto(0, -60)
+    t.pencolor("#888888")
+    t.write(current_date, align="center", font=("Arial", 20, "normal"))
+    
+    screen.update()
+    time.sleep(1)
+```
+
+---
+
+## 9. Shrnutí
+
+<div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg my-6">
+
+### 📝 Klíčové příkazy:
+
+| Příkaz | Co dělá |
+|--------|---------|
+| `t.write("text")` | Vypíše text na pozici želvy |
+| `t.pencolor("red")` | Nastaví barvu textu |
+| `font=("Arial", 24, "bold")` | Nastaví font, velikost a styl |
+| `align="center"` | Zarovná text na střed |
+| `t.hideturtle()` | Skryje ikonu želvy |
+| `t.penup()` + `t.goto(x, y)` | Přesune želvu bez kreslení |
+
+</div>
+
+---
+
+## 10. Úkoly k procvičení
+
+<div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg my-6">
+
+### 🎯 Úkol 1: Vlajka s nápisem
+Nakresli českou vlajku a přidej pod ni text "ČESKÁ REPUBLIKA".
+
+### 🎯 Úkol 2: Certifikát
+Vytvoř certifikát se jménem, datem a podpisem učitele.
+
+### 🎯 Úkol 3: Hra se skóre
+Nakresli jednoduchý terč a zobraz aktuální skóre v rohu obrazovky.
+
+### 🎯 Úkol 4: ASCII art jméno
+Vypiš své jméno různými fonty a barvami – každé písmeno jinou barvou.
+
+</div>
+
+<SelfCheck client:load
+  question="Co musíme udělat, abychom text vypsali na konkrétní pozici (např. 100, 50)?"
+  answer="Nejprve t.penup() (abychom nekresili čáru), pak t.goto(100, 50) a nakonec t.write('text')"
+/>
+
+---
+
+## 11. Bonus: Animovaný text
+
+Text můžeme i animovat – například efekt psacího stroje:
+
+```python
+import turtle
+import time
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.hideturtle()
+t.penup()
+t.goto(-200, 0)
+t.pencolor("#00ff00")
+
+text = "Ahoj, jsem Python a umím psát!"
+
+for i in range(len(text) + 1):
+    t.clear()
+    t.write(text[:i], font=("Courier", 24, "bold"))
+    screen.update()
+    time.sleep(0.1)
+
+turtle.done()
+```
+
+> 🚀 **Výzva:** Zkus přidat blikající kurzor na konec textu jako v terminálu!

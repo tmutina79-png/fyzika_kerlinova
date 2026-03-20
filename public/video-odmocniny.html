@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Odmocniny – Jak vzniká odmocnina</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
+body{background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-family:'Segoe UI',system-ui,sans-serif;padding:16px;gap:8px}
+canvas{border-radius:12px;box-shadow:0 0 40px rgba(59,130,246,.15);max-width:100%;max-height:calc(100vh - 140px);width:auto;height:auto}
+#phase{color:#60a5fa;font-size:14px;font-weight:600;min-height:20px;text-align:center}
+#timer{color:#475569;font-size:11px}
+#title{color:#e2e8f0;font-size:18px;font-weight:700;letter-spacing:0.5px;text-align:center}
+#controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+#controls button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;display:flex;align-items:center;gap:5px}
+#controls button:hover{background:#334155;border-color:#60a5fa}
+#controls button:active{background:#475569}
+#controls button .icon{font-size:15px}
+#scrubber{-webkit-appearance:none;appearance:none;width:200px;height:5px;border-radius:3px;background:#1e293b;outline:none;cursor:pointer}
+#scrubber::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#scrubber::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#info{color:#94a3b8;font-size:11px;text-align:center}
+</style>
+</head>
+<body>
+<div id="title">📐 Odmocniny – jak vzniká odmocnina</div>
+<canvas id="c" width="760" height="500"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="controls">
+  <button id="btnRew" title="Zpět 0,3s"><span class="icon">⏪</span> −0,3s</button>
+  <button id="btnPlay" title="Přehrát / Zastavit"><span class="icon" id="playIcon">⏸</span> <span id="playLabel">Pauza</span></button>
+  <button id="btnFwd" title="Vpřed 0,3s"><span class="icon">⏩</span> +0,3s</button>
+  <input type="range" id="scrubber" min="0" max="36000" value="0" step="100"/>
+</div>
+<div id="info">Ovládej tlačítky nebo táhni posuvník</div>
+
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=C.width,H=C.height;
+const DUR=36000;
+let currentTime=0,playing=true,lastTs=null;
+const STEP=300;
+
+/* Controls */
+const btnPlay=document.getElementById('btnPlay');
+const btnRew=document.getElementById('btnRew');
+const btnFwd=document.getElementById('btnFwd');
+const scrubber=document.getElementById('scrubber');
+const playIcon=document.getElementById('playIcon');
+const playLabel=document.getElementById('playLabel');
+let scrubbing=false;
+
+btnPlay.addEventListener('click',()=>{playing=!playing;playIcon.textContent=playing?'⏸':'▶';playLabel.textContent=playing?'Pauza':'Přehrát';if(playing)lastTs=null});
+btnRew.addEventListener('click',()=>{currentTime=Math.max(0,currentTime-STEP);scrubber.value=currentTime});
+btnFwd.addEventListener('click',()=>{currentTime=Math.min(DUR,currentTime+STEP);scrubber.value=currentTime});
+scrubber.addEventListener('input',()=>{scrubbing=true;currentTime=Number(scrubber.value)});
+scrubber.addEventListener('change',()=>{scrubbing=false});
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();btnPlay.click()}if(e.code==='ArrowLeft')btnRew.click();if(e.code==='ArrowRight')btnFwd.click()});
+
+/* Phases */
+const phases=[
+  {t:0,    label:"① Čtverec a jeho strana – co je odmocnina?"},
+  {t:7200, label:"② Hledáme stranu – √9 a záhadné √2"},
+  {t:14400,label:"③ Geometrická konstrukce √2 (úhlopříčka)"},
+  {t:21600,label:"④ Odmocniny na číselné ose"},
+  {t:28800,label:"⑤ Shrnutí a klíčové poznatky"},
+];
+function getPhase(t){let p=phases[0].label;for(const ph of phases)if(t>=ph.t)p=ph.label;return p}
+
+/* Helpers */
+function lerp(a,b,t){return a+(b-a)*clamp(t)}
+function clamp(t){return Math.max(0,Math.min(1,t))}
+function ease(t){return 1-Math.pow(1-clamp(t),3)}
+function easeInOut(t){t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+
+function roundRect(x,y,w,h,r){
+  X.beginPath();X.moveTo(x+r,y);X.lineTo(x+w-r,y);X.quadraticCurveTo(x+w,y,x+w,y+r);
+  X.lineTo(x+w,y+h-r);X.quadraticCurveTo(x+w,y+h,x+w-r,y+h);X.lineTo(x+r,y+h);
+  X.quadraticCurveTo(x,y+h,x,y+h-r);X.lineTo(x,y+r);X.quadraticCurveTo(x,y,x+r,y);X.closePath();
+}
+
+/* ── Draw grid square ── */
+function drawSquare(cx,cy,side,unit,color,alpha,showGrid,showLabels,areaLabel){
+  const px=side*unit;
+  X.globalAlpha=alpha;
+  
+  /* fill */
+  X.fillStyle=color+'22';
+  X.fillRect(cx-px/2,cy-px/2,px,px);
+  
+  /* grid */
+  if(showGrid&&side>1){
+    X.strokeStyle=color+'44';X.lineWidth=1;
+    for(let i=1;i<side;i++){
+      X.beginPath();X.moveTo(cx-px/2+i*unit,cy-px/2);X.lineTo(cx-px/2+i*unit,cy+px/2);X.stroke();
+      X.beginPath();X.moveTo(cx-px/2,cy-px/2+i*unit);X.lineTo(cx+px/2,cy-px/2+i*unit);X.stroke();
+    }
+  }
+  
+  /* border */
+  X.strokeStyle=color;X.lineWidth=2.5;
+  X.strokeRect(cx-px/2,cy-px/2,px,px);
+  
+  if(showLabels){
+    /* side label (bottom) */
+    X.font='bold 16px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=color;
+    X.fillText('strana = '+side,cx,cy+px/2+24);
+    
+    /* side label (right) */
+    X.save();X.translate(cx+px/2+24,cy);X.rotate(Math.PI/2);
+    X.fillText('strana = '+side,0,0);X.restore();
+  }
+  
+  /* area label center */
+  if(areaLabel){
+    X.font='bold 22px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=color;
+    X.fillText(areaLabel,cx,cy+7);
+  }
+  
+  X.globalAlpha=1;
+}
+
+/* ── Draw a number line ── */
+function drawNumberLine(x,y,len,maxVal,color,alpha){
+  X.globalAlpha=alpha;
+  X.strokeStyle=color;X.lineWidth=2;
+  X.beginPath();X.moveTo(x,y);X.lineTo(x+len,y);X.stroke();
+  /* arrow */
+  X.beginPath();X.moveTo(x+len-8,y-5);X.lineTo(x+len,y);X.lineTo(x+len-8,y+5);X.stroke();
+  
+  const step=len/maxVal;
+  for(let i=0;i<=maxVal;i++){
+    const tx=x+i*step;
+    X.strokeStyle=color;X.lineWidth=1.5;
+    X.beginPath();X.moveTo(tx,y-6);X.lineTo(tx,y+6);X.stroke();
+    X.fillStyle=color;X.font='13px "Segoe UI",sans-serif';X.textAlign='center';
+    X.fillText(i,tx,y+22);
+  }
+  X.globalAlpha=1;
+  return step;
+}
+
+/* ── Draw dot on number line ── */
+function drawDot(x,y,step,val,color,label,alpha,below){
+  X.globalAlpha=alpha;
+  const dx=x+val*step;
+  X.fillStyle=color;
+  X.beginPath();X.arc(dx,y,7,0,Math.PI*2);X.fill();
+  
+  /* glow */
+  X.globalAlpha=alpha*0.3;
+  X.beginPath();X.arc(dx,y,14,0,Math.PI*2);X.fill();
+  
+  X.globalAlpha=alpha;
+  X.font='bold 13px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=color;
+  X.fillText(label,dx,below?y+35:y-16);
+  X.globalAlpha=1;
+}
+
+/* ═══════════════════════════════════════════════
+   MAIN ANIMATION LOOP
+   ═══════════════════════════════════════════════ */
+function frame(ts){
+  if(lastTs===null)lastTs=ts;
+  const dt=ts-lastTs;lastTs=ts;
+  if(playing&&!scrubbing)currentTime=(currentTime+dt)%DUR;
+  const t=currentTime;
+  if(!scrubbing)scrubber.value=t;
+
+  X.fillStyle='#0a0e1a';X.fillRect(0,0,W,H);
+
+  /* ═══ Phase 1: Square & side concept (0–7200) ═══ */
+  if(t<7200){
+    const p=t/7200;
+    const UNIT=60;
+
+    /* Title */
+    const titleA=ease(p*4);
+    X.globalAlpha=titleA;
+    X.font='bold 20px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#e2e8f0';
+    X.fillText('Odmocnina = strana čtverce, když znáš jeho obsah',W/2,40);
+    X.globalAlpha=1;
+
+    /* Animate growing square from 1×1 to 3×3 */
+    let animSide;
+    if(p<0.35){
+      /* show 1×1 */
+      animSide=1;
+      drawSquare(200,250,1,UNIT,'#60a5fa',ease(p*5),false,true,'S = 1');
+    } else if(p<0.55){
+      /* grow 1→2 */
+      const gp=(p-0.35)/0.2;
+      animSide=lerp(1,2,easeInOut(gp));
+      const pxSide=animSide*UNIT;
+      X.fillStyle='rgba(96,165,250,0.12)';X.fillRect(200-pxSide/2,250-pxSide/2,pxSide,pxSide);
+      X.strokeStyle='#60a5fa';X.lineWidth=2.5;X.strokeRect(200-pxSide/2,250-pxSide/2,pxSide,pxSide);
+      X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#60a5fa';
+      X.fillText('S = '+(animSide*animSide).toFixed(1),200,257);
+      X.fillText('strana = '+animSide.toFixed(1),200,250+pxSide/2+24);
+    } else if(p<0.7){
+      /* show 2×2 */
+      drawSquare(200,250,2,UNIT,'#60a5fa',1,true,true,'S = 4');
+    } else if(p<0.85){
+      /* grow 2→3 */
+      const gp=(p-0.7)/0.15;
+      animSide=lerp(2,3,easeInOut(gp));
+      const pxSide=animSide*UNIT;
+      X.fillStyle='rgba(96,165,250,0.12)';X.fillRect(200-pxSide/2,250-pxSide/2,pxSide,pxSide);
+      X.strokeStyle='#60a5fa';X.lineWidth=2.5;X.strokeRect(200-pxSide/2,250-pxSide/2,pxSide,pxSide);
+      X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#60a5fa';
+      X.fillText('S = '+(animSide*animSide).toFixed(1),200,257);
+      X.fillText('strana = '+animSide.toFixed(1),200,250+pxSide/2+24);
+    } else {
+      /* show 3×3 */
+      drawSquare(200,250,3,UNIT,'#60a5fa',1,true,true,'S = 9');
+    }
+
+    /* Right side: formula explanation */
+    const fP=ease((p-0.3)*2);
+    X.globalAlpha=fP;
+    X.font='bold 17px "Segoe UI",sans-serif';X.textAlign='left';X.fillStyle='#f59e0b';
+    X.fillText('Umocnění (→)',500,130);
+    X.font='16px "Segoe UI",sans-serif';X.fillStyle='#e2e8f0';
+    X.fillText('strana → obsah',500,158);
+    X.fillStyle='#94a3b8';
+    X.fillText('3² = 3 × 3 = 9',500,185);
+
+    const fP2=ease((p-0.55)*2.5);
+    X.globalAlpha=fP2;
+    X.font='bold 17px "Segoe UI",sans-serif';X.fillStyle='#34d399';
+    X.fillText('Odmocnění (←)',500,240);
+    X.font='16px "Segoe UI",sans-serif';X.fillStyle='#e2e8f0';
+    X.fillText('obsah → strana',500,268);
+    X.fillStyle='#94a3b8';
+    X.fillText('√9  = 3',500,295);
+
+    /* Bottom key insight */
+    const bP=ease((p-0.75)*4);
+    X.globalAlpha=bP;
+    roundRect(140,405,480,55,12);
+    X.fillStyle='#0f1720';X.fill();X.strokeStyle='#334155';X.lineWidth=1;X.stroke();
+    X.font='bold 15px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#fbbf24';
+    X.fillText('💡  √S = strana čtverce o obsahu S',W/2,438);
+    X.globalAlpha=1;
+  }
+
+  /* ═══ Phase 2: Finding side – √9 vs √2 (7200–14400) ═══ */
+  else if(t<14400){
+    const p=(t-7200)/7200;
+    const UNIT=55;
+
+    /* Left: known square √9 = 3 */
+    const aP=ease(p*3);
+    drawSquare(180,200,3,UNIT,'#60a5fa',aP,true,false,'S = 9');
+    X.globalAlpha=aP;
+    X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#60a5fa';
+    X.fillText('√9 = 3  ✓',180,200+3*UNIT/2+30);
+    X.font='14px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+    X.fillText('Celé číslo – dokonalý čtverec',180,200+3*UNIT/2+52);
+    X.globalAlpha=1;
+
+    /* Right: mystery square √2 = ? */
+    const bP=ease((p-0.2)*2.5);
+    if(bP>0){
+      /* Draw √2-sized square (≈ 1.414 side units) */
+      const s2=Math.SQRT2;
+      const px2=s2*UNIT;
+      
+      X.globalAlpha=bP;
+      X.fillStyle='rgba(245,158,11,0.12)';
+      X.fillRect(530-px2/2,200-px2/2,px2,px2);
+      X.strokeStyle='#f59e0b';X.lineWidth=2.5;
+      X.strokeRect(530-px2/2,200-px2/2,px2,px2);
+      
+      /* "S = 2" inside */
+      X.font='bold 22px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#f59e0b';
+      X.fillText('S = 2',530,207);
+      
+      /* side label with question */
+      const qP=ease((p-0.35)*3);
+      X.globalAlpha=bP*qP;
+      X.font='bold 18px "Segoe UI",sans-serif';X.fillStyle='#f59e0b';
+      X.fillText('strana = √2 = ?',530,200+px2/2+30);
+
+      /* Decimal digits revealing */
+      const digP=ease((p-0.5)*2.5);
+      X.globalAlpha=bP*digP;
+      X.font='bold 24px "Segoe UI",sans-serif';X.fillStyle='#fbbf24';
+      const digits='1,41421356...';
+      const shown=Math.floor(digP*digits.length);
+      X.fillText('≈ '+digits.substring(0,shown),530,200+px2/2+62);
+
+      X.font='14px "Segoe UI",sans-serif';X.fillStyle='#ef4444';
+      const irP=ease((p-0.7)*3);
+      X.globalAlpha=bP*irP;
+      X.fillText('⚠ Iracionální číslo!',530,200+px2/2+88);
+      X.fillText('Desetinný rozvoj nekončí',530,200+px2/2+108);
+      X.fillText('a neopakuje se.',530,200+px2/2+126);
+    }
+
+    /* Compare: 1×1 reference square */
+    const refP=ease((p-0.15)*3);
+    if(refP>0){
+      X.globalAlpha=refP*0.4;
+      X.strokeStyle='#475569';X.lineWidth=1;X.setLineDash([4,4]);
+      X.strokeRect(530-UNIT/2,200-UNIT/2,UNIT,UNIT);
+      X.setLineDash([]);
+      X.font='11px "Segoe UI",sans-serif';X.fillStyle='#475569';X.textAlign='center';
+      X.fillText('1×1',530,200+UNIT/2+14);
+    }
+
+    /* Bottom comparison box */
+    const boxP=ease((p-0.65)*2.5);
+    X.globalAlpha=boxP;
+    roundRect(80,385,600,80,14);
+    X.fillStyle='#0f1720';X.fill();X.strokeStyle='#334155';X.lineWidth=1;X.stroke();
+
+    X.font='bold 15px "Segoe UI",sans-serif';X.textAlign='center';
+    X.fillStyle='#60a5fa';X.fillText('√1=1   √4=2   √9=3   √16=4',260,415);
+    X.fillStyle='#94a3b8';X.font='13px "Segoe UI",sans-serif';
+    X.fillText('dokonalé čtverce',260,438);
+
+    X.font='bold 15px "Segoe UI",sans-serif';
+    X.fillStyle='#f59e0b';X.fillText('√2≈1,41   √3≈1,73   √5≈2,24',530,415);
+    X.fillStyle='#94a3b8';X.font='13px "Segoe UI",sans-serif';
+    X.fillText('iracionální čísla',530,438);
+
+    X.globalAlpha=1;
+  }
+
+  /* ═══ Phase 3: Geometric construction of √2 (14400–21600) ═══ */
+  else if(t<21600){
+    const p=(t-14400)/7200;
+    const cx=300,cy=260;
+    const U=120; /* unit length in pixels */
+
+    /* Title */
+    const tP=ease(p*4);
+    X.globalAlpha=tP;
+    X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#e2e8f0';
+    X.fillText('Geometrická konstrukce √2 pomocí úhlopříčky',W/2,35);
+    X.globalAlpha=1;
+
+    /* Step 1: Draw unit square */
+    const sq=ease(p*3);
+    X.globalAlpha=sq;
+    X.fillStyle='rgba(96,165,250,0.1)';
+    X.fillRect(cx,cy,U,U);
+    X.strokeStyle='#60a5fa';X.lineWidth=2;
+    X.strokeRect(cx,cy,U,U);
+
+    /* Labels on sides */
+    X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#60a5fa';
+    X.fillText('1',cx+U/2,cy+U+20);
+    X.save();X.translate(cx-16,cy+U/2);X.rotate(-Math.PI/2);
+    X.fillText('1',0,0);X.restore();
+    X.globalAlpha=1;
+
+    /* Step 2: Draw diagonal */
+    const diagP=ease((p-0.2)*3);
+    if(diagP>0){
+      X.globalAlpha=diagP;
+      X.strokeStyle='#f59e0b';X.lineWidth=3;
+      const dLen=diagP*Math.hypot(U,U);
+      const angle=Math.atan2(U,U);
+      X.beginPath();
+      X.moveTo(cx,cy+U);
+      X.lineTo(cx+dLen*Math.cos(-angle),cy+U+dLen*Math.sin(-angle));
+      X.stroke();
+
+      /* Diagonal label */
+      const dlP=ease((p-0.35)*3);
+      X.globalAlpha=dlP;
+      X.font='bold 16px "Segoe UI",sans-serif';X.fillStyle='#f59e0b';
+      X.save();X.translate(cx+U/2-15,cy+U/2+10);X.rotate(-Math.PI/4);
+      X.fillText('d = √2',0,0);X.restore();
+
+      /* Pythagorean formula */
+      X.globalAlpha=dlP;
+      X.font='bold 15px "Segoe UI",sans-serif';X.textAlign='left';X.fillStyle='#e2e8f0';
+      X.fillText('Pythagoras:',520,110);
+      X.font='16px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+      X.fillText('d² = 1² + 1²',520,138);
+      X.fillText('d² = 2',520,163);
+      X.fillStyle='#fbbf24';X.font='bold 18px "Segoe UI",sans-serif';
+      X.fillText('d  = √2',520,193);
+    }
+
+    /* Step 3: Compass arc transferring √2 to number line */
+    const arcP=ease((p-0.5)*2.5);
+    if(arcP>0){
+      /* Number line at bottom */
+      const nlY=cy+U+70;
+      const nlX=cx;
+      X.globalAlpha=arcP;
+      X.strokeStyle='#94a3b8';X.lineWidth=2;
+      X.beginPath();X.moveTo(nlX-10,nlY);X.lineTo(nlX+3.5*U,nlY);X.stroke();
+      /* Arrow */
+      X.beginPath();X.moveTo(nlX+3.5*U-8,nlY-4);X.lineTo(nlX+3.5*U,nlY);X.lineTo(nlX+3.5*U-8,nlY+4);X.stroke();
+
+      /* Ticks: 0, 1, 2, 3 */
+      for(let i=0;i<=3;i++){
+        X.strokeStyle='#94a3b8';X.lineWidth=1.5;
+        X.beginPath();X.moveTo(nlX+i*U,nlY-6);X.lineTo(nlX+i*U,nlY+6);X.stroke();
+        X.fillStyle='#94a3b8';X.font='14px "Segoe UI",sans-serif';X.textAlign='center';
+        X.fillText(i,nlX+i*U,nlY+24);
+      }
+
+      /* Compass arc from diagonal endpoint to number line */
+      const sweepP=ease((p-0.55)*2.5);
+      if(sweepP>0){
+        const radius=Math.SQRT2*U;
+        const startAngle=-Math.PI/4; /* from top-right of square */
+        const endAngle=0; /* to the number line (horizontal) */
+        const currentAngle=lerp(startAngle,endAngle,easeInOut(sweepP));
+
+        X.strokeStyle='#f59e0b';X.lineWidth=2;X.setLineDash([5,4]);X.globalAlpha=arcP*0.7;
+        X.beginPath();
+        X.arc(nlX,nlY,radius,startAngle,currentAngle);
+        X.stroke();
+        X.setLineDash([]);
+
+        /* √2 point dot */
+        const dotP=ease((p-0.72)*4);
+        if(dotP>0){
+          X.globalAlpha=arcP*dotP;
+          const sqrtX=nlX+Math.SQRT2*U;
+          X.fillStyle='#f59e0b';
+          X.beginPath();X.arc(sqrtX,nlY,8,0,Math.PI*2);X.fill();
+          /* glow */
+          X.globalAlpha=arcP*dotP*0.3;
+          X.beginPath();X.arc(sqrtX,nlY,16,0,Math.PI*2);X.fill();
+
+          X.globalAlpha=arcP*dotP;
+          X.font='bold 15px "Segoe UI",sans-serif';X.fillStyle='#fbbf24';X.textAlign='center';
+          X.fillText('√2 ≈ 1,414',sqrtX,nlY+40);
+        }
+      }
+    }
+
+    /* Step 4: Explanation box */
+    const exP=ease((p-0.75)*3);
+    X.globalAlpha=exP;
+    roundRect(490,250,240,190,12);
+    X.fillStyle='#0f1720';X.fill();X.strokeStyle='#334155';X.lineWidth=1;X.stroke();
+
+    X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='left';X.fillStyle='#34d399';
+    X.fillText('🔧 Postup:',510,278);
+    X.font='13px "Segoe UI",sans-serif';X.fillStyle='#e2e8f0';
+    X.fillText('1. Narýsuj čtverec 1×1',510,302);
+    X.fillText('2. Spoj úhlopříčku',510,322);
+    X.fillText('   (d = √2 dle Pythagora)',510,340);
+    X.fillText('3. Kružítkem přenes',510,364);
+    X.fillText('   √2 na číselnou osu',510,382);
+    X.font='bold 13px "Segoe UI",sans-serif';X.fillStyle='#34d399';
+    X.fillText('→ Přesná hodnota √2!',510,410);
+
+    X.globalAlpha=1;
+  }
+
+  /* ═══ Phase 4: Square roots on number line (21600–28800) ═══ */
+  else if(t<28800){
+    const p=(t-21600)/7200;
+    
+    /* Title */
+    const tP=ease(p*4);
+    X.globalAlpha=tP;
+    X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#e2e8f0';
+    X.fillText('Odmocniny na číselné ose',W/2,40);
+    X.globalAlpha=1;
+
+    /* Number line */
+    const nlX=60,nlY=180,nlLen=640,maxV=5;
+    const stepPx=nlLen/maxV;
+    const nlA=ease(p*3);
+
+    X.globalAlpha=nlA;
+    X.strokeStyle='#64748b';X.lineWidth=2.5;
+    X.beginPath();X.moveTo(nlX,nlY);X.lineTo(nlX+nlLen,nlY);X.stroke();
+    X.beginPath();X.moveTo(nlX+nlLen-8,nlY-5);X.lineTo(nlX+nlLen,nlY);X.lineTo(nlX+nlLen-8,nlY+5);X.stroke();
+
+    for(let i=0;i<=maxV;i++){
+      X.strokeStyle='#64748b';X.lineWidth=2;
+      X.beginPath();X.moveTo(nlX+i*stepPx,nlY-8);X.lineTo(nlX+i*stepPx,nlY+8);X.stroke();
+      X.fillStyle='#e2e8f0';X.font='bold 15px "Segoe UI",sans-serif';X.textAlign='center';
+      X.fillText(i,nlX+i*stepPx,nlY+30);
+    }
+    X.globalAlpha=1;
+
+    /* Perfect squares – green dots */
+    const perfects=[
+      {val:1,label:'√1=1',n:1},
+      {val:2,label:'√4=2',n:4},
+      {val:3,label:'√9=3',n:9},
+      {val:4,label:'√16=4',n:16},
+    ];
+    for(let i=0;i<perfects.length;i++){
+      const dp=ease((p-0.1-i*0.06)*3);
+      if(dp>0){
+        const px=nlX+perfects[i].val*stepPx;
+        X.globalAlpha=dp;
+        X.fillStyle='#34d399';
+        X.beginPath();X.arc(px,nlY,8,0,Math.PI*2);X.fill();
+        X.globalAlpha=dp*0.3;
+        X.beginPath();X.arc(px,nlY,15,0,Math.PI*2);X.fill();
+        X.globalAlpha=dp;
+        X.font='bold 12px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#34d399';
+        X.fillText(perfects[i].label,px,nlY-18);
+      }
+    }
+
+    /* Irrational roots – orange/amber dots */
+    const irrationals=[
+      {val:Math.SQRT2,label:'√2≈1,41',dec:'1,414...'},
+      {val:Math.sqrt(3),label:'√3≈1,73',dec:'1,732...'},
+      {val:Math.sqrt(5),label:'√5≈2,24',dec:'2,236...'},
+      {val:Math.sqrt(7),label:'√7≈2,65',dec:'2,646...'},
+      {val:Math.sqrt(8),label:'√8≈2,83',dec:'2,828...'},
+      {val:Math.sqrt(10),label:'√10≈3,16',dec:'3,162...'},
+      {val:Math.sqrt(15),label:'√15≈3,87',dec:'3,873...'},
+    ];
+    for(let i=0;i<irrationals.length;i++){
+      const dp=ease((p-0.25-i*0.05)*3);
+      if(dp>0){
+        const px=nlX+irrationals[i].val*stepPx;
+        X.globalAlpha=dp;
+        X.fillStyle='#f59e0b';
+        X.beginPath();X.arc(px,nlY,6,0,Math.PI*2);X.fill();
+        X.globalAlpha=dp*0.25;
+        X.beginPath();X.arc(px,nlY,12,0,Math.PI*2);X.fill();
+        X.globalAlpha=dp;
+        X.font='12px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#f59e0b';
+        /* Alternate labels above/below to avoid overlap */
+        if(i%2===0){
+          X.fillText(irrationals[i].label,px,nlY+48);
+          /* Connecting line */
+          X.strokeStyle='#f59e0b44';X.lineWidth=1;
+          X.beginPath();X.moveTo(px,nlY+8);X.lineTo(px,nlY+35);X.stroke();
+        } else {
+          X.fillText(irrationals[i].label,px,nlY-25);
+          X.strokeStyle='#f59e0b44';X.lineWidth=1;
+          X.beginPath();X.moveTo(px,nlY-8);X.lineTo(px,nlY-14);X.stroke();
+        }
+      }
+    }
+
+    /* Legend */
+    const legP=ease((p-0.5)*2.5);
+    X.globalAlpha=legP;
+    
+    /* Green legend */
+    X.fillStyle='#34d399';
+    X.beginPath();X.arc(180,280,7,0,Math.PI*2);X.fill();
+    X.font='14px "Segoe UI",sans-serif';X.fillStyle='#34d399';X.textAlign='left';
+    X.fillText('Dokonalé čtverce – celá čísla',195,285);
+
+    /* Orange legend */
+    X.fillStyle='#f59e0b';
+    X.beginPath();X.arc(180,310,7,0,Math.PI*2);X.fill();
+    X.font='14px "Segoe UI",sans-serif';X.fillStyle='#f59e0b';X.textAlign='left';
+    X.fillText('Iracionální odmocniny – nekončící desetinný rozvoj',195,315);
+
+    /* Mini-squares visualization below */
+    const sqP=ease((p-0.6)*2);
+    X.globalAlpha=sqP;
+
+    /* Show √2 square */
+    const sqU=50;
+    const s2=Math.SQRT2*sqU;
+    X.strokeStyle='#f59e0b';X.lineWidth=2;
+    X.strokeRect(120-s2/2,400-s2/2,s2,s2);
+    X.fillStyle='rgba(245,158,11,0.1)';X.fillRect(120-s2/2,400-s2/2,s2,s2);
+    X.font='bold 13px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#f59e0b';
+    X.fillText('S=2',120,405);
+    X.font='12px "Segoe UI",sans-serif';
+    X.fillText('a=√2',120,400+s2/2+16);
+
+    /* Show √5 square */
+    const s5=Math.sqrt(5)*sqU;
+    X.strokeStyle='#f59e0b';X.lineWidth=2;
+    X.strokeRect(310-s5/2,400-s5/2,s5,s5);
+    X.fillStyle='rgba(245,158,11,0.1)';X.fillRect(310-s5/2,400-s5/2,s5,s5);
+    X.font='bold 13px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#f59e0b';
+    X.fillText('S=5',310,405);
+    X.font='12px "Segoe UI",sans-serif';
+    X.fillText('a=√5',310,400+s5/2+16);
+
+    /* Show 3×3 perfect square for comparison */
+    const s9=3*sqU;
+    X.strokeStyle='#34d399';X.lineWidth=2;
+    X.strokeRect(540-s9/2,400-s9/2,s9,s9);
+    X.fillStyle='rgba(52,211,153,0.08)';X.fillRect(540-s9/2,400-s9/2,s9,s9);
+    X.font='bold 13px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#34d399';
+    X.fillText('S=9',540,405);
+    X.font='12px "Segoe UI",sans-serif';
+    X.fillText('a=3 ✓',540,400+s9/2+16);
+
+    X.globalAlpha=1;
+  }
+
+  /* ═══ Phase 5: Summary (28800–36000) ═══ */
+  else{
+    const p=(t-28800)/7200;
+
+    /* Title */
+    const tP=ease(p*4);
+    X.globalAlpha=tP;
+    X.font='bold 20px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#e2e8f0';
+    X.fillText('📝  Shrnutí – co je odmocnina?',W/2,45);
+    X.globalAlpha=1;
+
+    /* Key facts appearing one by one */
+    const facts=[
+      {text:'√S  =  strana čtverce o obsahu S',color:'#fbbf24',y:100},
+      {text:'√ je opak ²  (odmocnění ↔ umocnění)',color:'#60a5fa',y:145},
+      {text:'Dokonalé čtverce: √1=1, √4=2, √9=3, √16=4, √25=5 …',color:'#34d399',y:190},
+      {text:'Většina odmocnin je iracionální (√2, √3, √5 …)',color:'#f59e0b',y:235},
+      {text:'Odmocnina je vždy ≥ 0  (hlavní odmocnina)',color:'#ef4444',y:280},
+    ];
+
+    for(let i=0;i<facts.length;i++){
+      const fp=ease((p-0.05-i*0.12)*3);
+      if(fp>0){
+        X.globalAlpha=fp;
+        roundRect(100,facts[i].y-18,560,38,10);
+        X.fillStyle='#0f172a';X.fill();
+        X.strokeStyle=facts[i].color+'55';X.lineWidth=1;X.stroke();
+        
+        /* Number badge */
+        X.fillStyle=facts[i].color;
+        X.beginPath();X.arc(125,facts[i].y+1,14,0,Math.PI*2);X.fill();
+        X.fillStyle='#0a0e1a';X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='center';
+        X.fillText(i+1,125,facts[i].y+6);
+
+        X.font='bold 15px "Segoe UI",sans-serif';X.fillStyle=facts[i].color;X.textAlign='left';
+        X.fillText(facts[i].text,150,facts[i].y+6);
+      }
+    }
+
+    /* Animated square root spiral at bottom */
+    const spirP=ease((p-0.55)*2);
+    if(spirP>0){
+      X.globalAlpha=spirP;
+      /* Draw a sequence of growing squares side by side */
+      const baseX=110,baseY=380;
+      const u=28;
+      const roots=[1,2,3,4,5,6,7,8,9];
+      for(let i=0;i<roots.length;i++){
+        const rp=ease((p-0.55-i*0.03)*3);
+        if(rp<=0)continue;
+        X.globalAlpha=spirP*rp;
+        const n=roots[i];
+        const side=Math.sqrt(n)*u;
+        const x=baseX+i*72;
+        const y=baseY;
+        
+        /* mini square */
+        const isPerfect=[1,4,9].includes(n);
+        X.strokeStyle=isPerfect?'#34d399':'#f59e0b';X.lineWidth=1.5;
+        X.strokeRect(x-side/2,y-side/2,side,side);
+        X.fillStyle=isPerfect?'rgba(52,211,153,0.08)':'rgba(245,158,11,0.08)';
+        X.fillRect(x-side/2,y-side/2,side,side);
+        
+        /* label */
+        X.font='bold 11px "Segoe UI",sans-serif';X.textAlign='center';
+        X.fillStyle=isPerfect?'#34d399':'#f59e0b';
+        X.fillText('√'+n,x,y+side/2+16);
+        
+        if(isPerfect){
+          X.font='10px "Segoe UI",sans-serif';X.fillStyle='#34d399';
+          X.fillText('='+Math.sqrt(n),x,y+side/2+30);
+        }
+      }
+    }
+
+    /* Final bottom message */
+    const finP=ease((p-0.82)*4);
+    X.globalAlpha=finP;
+    roundRect(170,460,420,30,10);
+    X.fillStyle='#1e293b';X.fill();X.strokeStyle='#60a5fa44';X.lineWidth=1;X.stroke();
+    X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#60a5fa';
+    X.fillText('🎯  Odmocnina = klíč ke geometrii i algebře!',W/2,480);
+    
+    X.globalAlpha=1;
+  }
+
+  document.getElementById('phase').textContent=getPhase(t);
+  document.getElementById('timer').textContent=(t/1000).toFixed(1)+'s / 36.0s';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

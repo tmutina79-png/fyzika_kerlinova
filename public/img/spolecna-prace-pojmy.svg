@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 330">
+  <defs>
+    <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.08"/></filter>
+  </defs>
+  <rect width="520" height="330" rx="16" fill="#f8fafc"/>
+  <text x="260" y="32" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="700" fill="#1e293b">Důležité pojmy</text>
+
+  <!-- Card 1: Celková práce -->
+  <rect x="20" y="52" width="230" height="80" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="46" cy="78" r="14" fill="#6366f1"/>
+  <text x="46" y="82" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="white">W</text>
+  <text x="68" y="76" font-family="system-ui" font-size="13" font-weight="700" fill="#1e293b">Celková práce</text>
+  <text x="68" y="94" font-family="system-ui" font-size="11" fill="#64748b">Vždy = 1 (= 100 % úkolu)</text>
+  <text x="68" y="110" font-family="system-ui" font-size="11" fill="#64748b">Např. vymalovat byt, naplnit bazén</text>
+
+  <!-- Card 2: Výkon / rychlost práce -->
+  <rect x="270" y="52" width="230" height="80" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="296" cy="78" r="14" fill="#10b981"/>
+  <text x="296" y="82" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="white">v</text>
+  <text x="318" y="76" font-family="system-ui" font-size="13" font-weight="700" fill="#1e293b">Výkon (rychlost práce)</text>
+  <text x="318" y="94" font-family="system-ui" font-size="11" fill="#64748b">Kolik práce udělá za 1 hodinu</text>
+  <text x="318" y="110" font-family="system-ui" font-size="11" fill="#94a3b8">v = 1 / t</text>
+
+  <!-- Card 3: Čas -->
+  <rect x="20" y="150" width="230" height="80" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="46" cy="176" r="14" fill="#f59e0b"/>
+  <text x="46" y="180" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="white">t</text>
+  <text x="68" y="174" font-family="system-ui" font-size="13" font-weight="700" fill="#1e293b">Čas práce</text>
+  <text x="68" y="192" font-family="system-ui" font-size="11" fill="#64748b">Doba, za kterou zvládne celý úkol</text>
+  <text x="68" y="208" font-family="system-ui" font-size="11" fill="#94a3b8">t = 1 / v</text>
+
+  <!-- Card 4: Vzorec -->
+  <rect x="270" y="150" width="230" height="80" rx="12" fill="white" stroke="#e2e8f0" stroke-width="1.5" filter="url(#sh)"/>
+  <circle cx="296" cy="176" r="14" fill="#ef4444"/>
+  <text x="296" y="180" text-anchor="middle" font-family="system-ui" font-size="12" font-weight="700" fill="white">Σ</text>
+  <text x="318" y="174" font-family="system-ui" font-size="13" font-weight="700" fill="#1e293b">Společný výkon</text>
+  <text x="318" y="192" font-family="system-ui" font-size="11" fill="#64748b">Sčítáme výkony pracovníků</text>
+  <text x="318" y="208" font-family="system-ui" font-size="11" fill="#94a3b8">v₁ + v₂ = 1/t₁ + 1/t₂</text>
+
+  <!-- Bottom formula box -->
+  <rect x="60" y="260" width="400" height="50" rx="12" fill="#eef2ff" stroke="#818cf8" stroke-width="2"/>
+  <text x="260" y="282" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="#4338ca">Klíčový vzorec:  1/t = 1/t₁ + 1/t₂</text>
+  <text x="260" y="300" text-anchor="middle" font-family="system-ui" font-size="11" fill="#6366f1">t … společný čas  |  t₁, t₂ … časy jednotlivých pracovníků</text>
+</svg>

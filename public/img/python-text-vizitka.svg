@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 320">
+  <!-- Pozadí - barva obrazovky -->
+  <rect width="500" height="320" fill="#2c3e50"/>
+  
+  <!-- Rámeček vizitky -->
+  <rect x="50" y="35" width="400" height="250" rx="0" fill="none" stroke="#ecf0f1" stroke-width="3"/>
+  
+  <!-- Jméno -->
+  <text x="250" y="100" fill="#e74c3c" font-family="Arial" font-size="36" text-anchor="middle" font-weight="bold">Jan Novák</text>
+  
+  <!-- Titul -->
+  <text x="250" y="140" fill="#ecf0f1" font-family="Arial" font-size="18" text-anchor="middle" font-style="italic">Student Gymnázia</text>
+  
+  <!-- Kontakt -->
+  <text x="250" y="190" fill="#3498db" font-family="Arial" font-size="14" text-anchor="middle">📧 jan.novak@skola.cz</text>
+  <text x="250" y="215" fill="#3498db" font-family="Arial" font-size="14" text-anchor="middle">📱 +420 123 456 789</text>
+  
+  <!-- Třída -->
+  <text x="250" y="260" fill="#2ecc71" font-family="Arial" font-size="20" text-anchor="middle" font-weight="bold">Sexta A</text>
+  
+  <!-- Popisky kódu -->
+  <g transform="translate(460, 100)">
+    <line x1="0" y1="0" x2="30" y2="-30" stroke="#e74c3c" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="35" y="-30" fill="#e74c3c" font-family="Courier" font-size="8" transform="rotate(-15, 35, -30)">pencolor("#e74c3c")</text>
+  </g>
+  
+  <g transform="translate(460, 140)">
+    <line x1="0" y1="0" x2="25" y2="0" stroke="#ecf0f1" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="30" y="4" fill="#ecf0f1" font-family="Courier" font-size="8">"italic"</text>
+  </g>
+  
+  <g transform="translate(460, 190)">
+    <line x1="0" y1="0" x2="30" y2="20" stroke="#3498db" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="35" y="25" fill="#3498db" font-family="Courier" font-size="8">pencolor("#3498db")</text>
+  </g>
+  
+  <g transform="translate(460, 260)">
+    <line x1="0" y1="0" x2="30" y2="30" stroke="#2ecc71" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="35" y="35" fill="#2ecc71" font-family="Courier" font-size="8">pencolor("#2ecc71")</text>
+  </g>
+  
+  <!-- Popisek -->
+  <text x="250" y="310" fill="#888" font-family="Arial" font-size="11" text-anchor="middle">Výstup programu – digitální vizitka vytvořená pomocí turtle.write()</text>
+</svg>

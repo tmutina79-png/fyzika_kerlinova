@@ -1,0 +1,281 @@
+---
+title: "Odmocniny – první hodina"
+description: "Co je odmocnina, jak ji počítáme, odhadujeme a kde ji potkáme v praxi. Lekce pro sekundu."
+order: 4
+---
+
+import SelfCheck from '../../components/SelfCheck.svelte';
+import Quiz from '../../components/Quiz.svelte';
+import VideoModal from '../../components/VideoModal.svelte';
+
+# Odmocniny – první hodina 🌱
+
+> **Klíčová otázka:** Máš čtverec o obsahu 25 cm². Jak dlouhá je jeho strana? Odpověď je 5 cm — protože 5 × 5 = 25. Právě jsi v hlavě spočítal odmocninu!
+
+---
+
+## 1. Co je odmocnina?
+
+**Odmocnina** je **opak umocňování** (druhé mocniny).
+
+| Umocnění (→) | Odmocnění (←) |
+|:-------------|:--------------|
+| $5^2 = 25$ | $\sqrt{25} = 5$ |
+| $3^2 = 9$ | $\sqrt{9} = 3$ |
+| $7^2 = 49$ | $\sqrt{49} = 7$ |
+
+**Slovy:** Odmocnina z čísla $a$ je takové číslo $b$, pro které platí:
+
+$$
+b^2 = a \qquad \Longleftrightarrow \qquad b = \sqrt{a}
+$$
+
+### Geometrický význam
+
+Odmocnina má krásný geometrický smysl — **hledáme stranu čtverce, když známe jeho obsah**:
+
+<figure class="my-6">
+  <img src="/img/odmocnina-ctverec.svg" alt="Odmocnina jako strana čtverce" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+> 💡 **Pamatuj si:** $\sqrt{S} = a$ znamená, že čtverec o obsahu $S$ má stranu $a$.
+
+<SelfCheck client:load id="odmocnina-co-je" label="Rozumím, že odmocnina je opak druhé mocniny." />
+
+---
+
+## 2. Značení
+
+Znak odmocniny se nazývá **radikál**: $\sqrt{\phantom{x}}$
+
+- $\sqrt{16}$ čteme **„odmocnina ze šestnácti"**
+- Číslo pod odmocninou se nazývá **odmocněnec** (radicand)
+- $\sqrt{16} = 4$, protože $4 \times 4 = 16$
+
+### ⚠️ Důležitá pravidla
+
+1. **Odmocnina je vždy nezáporná:** $\sqrt{25} = 5$ (nikoli $-5$)
+2. **Odmocnina z 0 je 0:** $\sqrt{0} = 0$
+3. **Odmocnina z 1 je 1:** $\sqrt{1} = 1$
+4. **Ze záporného čísla odmocnina neexistuje** (v oboru reálných čísel): $\sqrt{-4}$ nedává smysl
+
+> ⚠️ Proč ne $-5$? Ačkoliv $(-5)^2 = 25$, odmocnina $\sqrt{25}$ označuje vždy **kladnou** hodnotu. Říkáme jí **hlavní odmocnina**.
+
+<SelfCheck client:load id="odmocnina-znaceni" label="Vím, jak se značí odmocnina a že výsledek je vždy nezáporný." />
+
+---
+
+## 3. Tabulka druhých mocnin a odmocnin
+
+Tuto tabulku se vyplatí **znát zpaměti** — jsou to tzv. **dokonalé čtverce** (*perfect squares*):
+
+| $n$ | $n^2$ | $\sqrt{n^2} = n$ |
+|:---:|:-----:|:-----------------:|
+| 0 | 0 | $\sqrt{0} = 0$ |
+| 1 | 1 | $\sqrt{1} = 1$ |
+| 2 | 4 | $\sqrt{4} = 2$ |
+| 3 | 9 | $\sqrt{9} = 3$ |
+| 4 | 16 | $\sqrt{16} = 4$ |
+| 5 | 25 | $\sqrt{25} = 5$ |
+| 6 | 36 | $\sqrt{36} = 6$ |
+| 7 | 49 | $\sqrt{49} = 7$ |
+| 8 | 64 | $\sqrt{64} = 8$ |
+| 9 | 81 | $\sqrt{81} = 9$ |
+| 10 | 100 | $\sqrt{100} = 10$ |
+| 11 | 121 | $\sqrt{121} = 11$ |
+| 12 | 144 | $\sqrt{144} = 12$ |
+
+<SelfCheck client:load id="odmocnina-tabulka" label="Znám zpaměti odmocniny dokonalých čtverců do 144." />
+
+---
+
+## 4. Odmocniny na číselné ose
+
+Ne všechny odmocniny vycházejí „hezky" na celé číslo. Podívej se, kde leží na číselné ose:
+
+<figure class="my-6">
+  <img src="/img/odmocnina-osa.svg" alt="Odmocniny na číselné ose" class="w-full max-w-2xl mx-auto" />
+  <figcaption class="text-center text-sm text-primary-400 mt-2">Zelené body = odmocniny z dokonalých čtverců (celá čísla). Červené/oranžové = iracionální čísla.</figcaption>
+</figure>
+
+- $\sqrt{4} = 2$ — přesně na celém čísle ✅
+- $\sqrt{2} \approx 1{,}414$ — **iracionální číslo** (desetinný rozvoj nekončí a neopakuje se)
+- $\sqrt{3} \approx 1{,}732$ — také iracionální
+
+> 📌 **Iracionální číslo** = číslo, které nelze zapsat jako zlomek. Většina odmocnin je iracionální!
+
+### 🎬 Video: Jak vzniká odmocnina
+
+<VideoModal 
+  client:load 
+  src="/video-odmocniny.html" 
+  title="Jak vzniká odmocnina – vizualizace"
+  thumbnailImg="/img/odmocniny-video-thumb.svg"
+/>
+
+---
+
+## 5. Jak odhadnout odmocninu?
+
+Když odmocnina nevychází na celé číslo, můžeš ji **odhadnout**:
+
+<figure class="my-6">
+  <img src="/img/odmocnina-odhad.svg" alt="Odhad odmocniny z 7" class="w-full max-w-lg mx-auto" />
+</figure>
+
+### Postup krok za krokem
+
+> **Příklad:** Odhadni $\sqrt{20}$.
+
+**Krok 1:** Najdi dva po sobě jdoucí dokonalé čtverce:
+$$
+16 < 20 < 25 \qquad \Rightarrow \qquad 4 < \sqrt{20} < 5
+$$
+
+**Krok 2:** Číslo 20 leží blíže k 16 nebo k 25?
+- Od 16 je vzdáleno 4, od 25 je vzdáleno 5 → blíže k 16 → odhad bude blíže ke 4.
+
+**Krok 3:** Zkus 4,5:
+$$
+4{,}5^2 = 20{,}25 \approx 20 \quad ✓
+$$
+
+**Výsledek:** $\sqrt{20} \approx 4{,}47$
+
+<SelfCheck client:load id="odmocnina-odhad" label="Umím odhadnout odmocninu pomocí sevření mezi dva dokonalé čtverce." />
+
+---
+
+## 6. Graf funkce $y = \sqrt{x}$
+
+<figure class="my-6">
+  <img src="/img/odmocnina-graf.svg" alt="Graf funkce y = √x" class="w-full max-w-lg mx-auto" />
+  <figcaption class="text-center text-sm text-primary-400 mt-2">Křivka začíná v bodě $[0, 0]$, roste stále pomaleji a nikdy neklesá.</figcaption>
+</figure>
+
+**Co si z grafu zapamatovat:**
+- Funkce existuje jen pro $x \geq 0$ (nezáporná čísla)
+- Vždy roste, ale **čím dál pomaleji**
+- Prochází body $[0, 0]$, $[1, 1]$, $[4, 2]$, $[9, 3]$
+
+<SelfCheck client:load id="odmocnina-graf" label="Dokážu nakreslit přibližný tvar grafu odmocninové funkce." />
+
+---
+
+## 7. Základní pravidla počítání
+
+| Pravidlo | Příklad |
+|:---------|:--------|
+| $\sqrt{a \cdot b} = \sqrt{a} \cdot \sqrt{b}$ | $\sqrt{36} = \sqrt{4 \cdot 9} = \sqrt{4} \cdot \sqrt{9} = 2 \cdot 3 = 6$ |
+| $\sqrt{\frac{a}{b}} = \frac{\sqrt{a}}{\sqrt{b}}$ | $\sqrt{\frac{49}{4}} = \frac{\sqrt{49}}{\sqrt{4}} = \frac{7}{2} = 3{,}5$ |
+| $\sqrt{a^2} = a$ (pro $a \geq 0$) | $\sqrt{7^2} = 7$ |
+| $(\sqrt{a})^2 = a$ | $(\sqrt{5})^2 = 5$ |
+
+### ⚠️ Častá chyba!
+
+$$
+\sqrt{a + b} \neq \sqrt{a} + \sqrt{b}
+$$
+
+**Důkaz:** $\sqrt{9 + 16} = \sqrt{25} = 5$, ale $\sqrt{9} + \sqrt{16} = 3 + 4 = 7 \neq 5$
+
+> 🚫 Odmocninu **nelze** „rozdělit přes plus"!
+
+<SelfCheck client:load id="odmocnina-pravidla" label="Znám pravidla pro násobení a dělení pod odmocninou (a vím, že sčítání nefunguje!)." />
+
+---
+
+## 8. Odmocnina v praxi
+
+<figure class="my-6">
+  <img src="/img/odmocnina-praxe.svg" alt="Odmocnina v praxi" class="w-full max-w-2xl mx-auto" />
+</figure>
+
+### Pythagorova věta
+
+Odmocninu nejčastěji potkáš v Pythagorově větě:
+
+$$
+c = \sqrt{a^2 + b^2}
+$$
+
+**Příklad:** Žebřík o délce $c$ je opřen o zeď. Pata žebříku je 3 m od zdi, žebřík sahá do výšky 4 m. Jak je žebřík dlouhý?
+
+$$
+c = \sqrt{3^2 + 4^2} = \sqrt{9 + 16} = \sqrt{25} = 5 \text{ m}
+$$
+
+### Další situace
+
+| Kde | Jak se odmocnina použije |
+|:----|:------------------------|
+| **Úhlopříčka obrazovky** | $d = \sqrt{\text{šířka}^2 + \text{výška}^2}$ |
+| **Strana pozemku** | Čtverec o ploše 200 m² → strana $= \sqrt{200} \approx 14{,}1$ m |
+| **Vzdálenost bodů na mapě** | $d = \sqrt{(\Delta x)^2 + (\Delta y)^2}$ |
+| **Fyzika — volný pád** | Čas pádu $t = \sqrt{\frac{2h}{g}}$ |
+
+<SelfCheck client:load id="odmocnina-praxe" label="Vím, kde se odmocnina využívá v praxi (Pythagoras, vzdálenost, obsah)." />
+
+---
+
+## 📖 Slovník důležitých pojmů
+
+<div class="overflow-x-auto my-6">
+
+| Pojem | Anglicky | Definice |
+|:------|:---------|:---------|
+| **Odmocnina** | *square root* | Číslo, jehož druhá mocnina dá původní číslo |
+| **Radikál** | *radical sign* | Znak odmocniny $\sqrt{\phantom{x}}$ |
+| **Odmocněnec** | *radicand* | Číslo pod odmocninou |
+| **Dokonalý čtverec** | *perfect square* | Číslo, jehož odmocnina je celé číslo (1, 4, 9, 16…) |
+| **Iracionální číslo** | *irrational number* | Číslo, které nelze zapsat jako zlomek |
+| **Druhá mocnina** | *square / second power* | $a^2 = a \times a$ |
+| **Hlavní odmocnina** | *principal square root* | Nezáporná hodnota odmocniny |
+| **Pythagorova věta** | *Pythagorean theorem* | $c^2 = a^2 + b^2$ v pravoúhlém trojúhelníku |
+| **Odhad** | *estimation* | Přibližné určení hodnoty |
+| **Přepona** | *hypotenuse* | Nejdelší strana pravoúhlého trojúhelníku |
+
+</div>
+
+<SelfCheck client:load id="odmocnina-slovnik" label="Prošel/prošla jsem slovník a rozumím všem pojmům." />
+
+---
+
+## ✅ Celkový self-check
+
+<SelfCheck client:load id="odmocnina-celkovy" label="Lekci o odmocninách mám za sebou – jdu na kvíz!" />
+
+---
+
+## 📝 Kvízy
+
+<Quiz
+  client:load
+  questions={[
+    {
+      question: "Kolik je √64?",
+      options: ["6", "7", "8", "32"],
+      correct: 2
+    },
+    {
+      question: "Mezi kterými dvěma celými čísly leží √30?",
+      options: ["4 a 5", "5 a 6", "6 a 7", "3 a 4"],
+      correct: 1
+    },
+    {
+      question: "Platí √(9 + 16) = √9 + √16?",
+      options: ["Ano, je to 7", "Ne — √25 = 5, ale √9 + √16 = 7", "Ano, je to 5", "Záleží na situaci"],
+      correct: 1
+    },
+    {
+      question: "Kolik je √4 · √9?",
+      options: ["6", "36", "13", "√13"],
+      correct: 0
+    },
+    {
+      question: "Jaká je délka přepony pravoúhlého trojúhelníku s odvěsnami 5 cm a 12 cm?",
+      options: ["17 cm", "13 cm", "15 cm", "√17 cm"],
+      correct: 1
+    }
+  ]}
+/>

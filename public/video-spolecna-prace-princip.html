@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Princip společné práce – Vizualizace</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+canvas{border-radius:16px;box-shadow:0 0 60px rgba(99,102,241,.18);display:block}
+#phase{color:#a5b4fc;font-size:15px;margin-top:10px;font-weight:600;min-height:22px}
+#timer{color:#475569;font-size:12px;margin-top:4px}
+#title{color:#e2e8f0;font-size:22px;font-weight:700;margin-bottom:14px;letter-spacing:1px}
+#controls{display:flex;align-items:center;gap:10px;margin-top:12px}
+#controls button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:8px 16px;font-size:15px;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;display:flex;align-items:center;gap:6px}
+#controls button:hover{background:#334155;border-color:#a5b4fc}
+#controls button:active{background:#475569}
+#controls button .icon{font-size:18px}
+#scrubber{-webkit-appearance:none;appearance:none;width:320px;height:6px;border-radius:3px;background:#1e293b;outline:none;cursor:pointer}
+#scrubber::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#a5b4fc;cursor:pointer;border:2px solid #0f172a}
+#scrubber::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#a5b4fc;cursor:pointer;border:2px solid #0f172a}
+#info{color:#94a3b8;font-size:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="title">🤝 Princip společné práce</div>
+<canvas id="c" width="760" height="520"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="controls">
+  <button id="btnRew" title="Zpět 0,3s"><span class="icon">⏪</span></button>
+  <button id="btnPlay" title="Přehrát / Zastavit"><span class="icon" id="playIcon">⏸</span> <span id="playLabel">Pauza</span></button>
+  <button id="btnFwd" title="Vpřed 0,3s"><span class="icon">⏩</span></button>
+  <input type="range" id="scrubber" min="0" max="30000" value="0" step="100"/>
+</div>
+<div id="info">Ovládej šipkami ←→ a mezerníkem nebo posuvníkem</div>
+
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=C.width,H=C.height;
+const DUR=30000;
+let currentTime=0,playing=true,lastTs=null;
+const STEP=300;
+let scrubbing=false;
+
+const btnPlay=document.getElementById('btnPlay');
+const scrubber=document.getElementById('scrubber');
+const playIcon=document.getElementById('playIcon');
+const playLabel=document.getElementById('playLabel');
+
+document.getElementById('btnPlay').addEventListener('click',()=>{playing=!playing;playIcon.textContent=playing?'⏸':'▶';playLabel.textContent=playing?'Pauza':'Přehrát';if(playing)lastTs=null});
+document.getElementById('btnRew').addEventListener('click',()=>{currentTime=Math.max(0,currentTime-STEP);scrubber.value=currentTime});
+document.getElementById('btnFwd').addEventListener('click',()=>{currentTime=Math.min(DUR,currentTime+STEP);scrubber.value=currentTime});
+scrubber.addEventListener('input',()=>{scrubbing=true;currentTime=Number(scrubber.value)});
+scrubber.addEventListener('change',()=>{scrubbing=false});
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();btnPlay.click()}if(e.code==='ArrowLeft')document.getElementById('btnRew').click();if(e.code==='ArrowRight')document.getElementById('btnFwd').click()});
+
+/* ═══ HELPERS ═══ */
+function clamp(t){return Math.max(0,Math.min(1,t))}
+function ease(t){return 1-Math.pow(1-clamp(t),3)}
+function easeInOut(t){t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+
+function roundRect(x,y,w,h,r){
+  X.beginPath();X.moveTo(x+r,y);X.lineTo(x+w-r,y);X.quadraticCurveTo(x+w,y,x+w,y+r);
+  X.lineTo(x+w,y+h-r);X.quadraticCurveTo(x+w,y+h,x+w-r,y+h);X.lineTo(x+r,y+h);
+  X.quadraticCurveTo(x,y+h,x,y+h-r);X.lineTo(x,y+r);X.quadraticCurveTo(x,y,x+r,y);X.closePath();
+}
+
+/* Scene transition: returns alpha for entering (1) and exiting (0) */
+function sceneAlpha(t, enterAt, exitAt, fadeDur){
+  fadeDur=fadeDur||800;
+  let a=ease((t-enterAt)/fadeDur);
+  if(exitAt!==undefined && t>=exitAt) a*=1-ease((t-exitAt)/fadeDur);
+  return clamp(a);
+}
+
+/* ═══ PHASES ═══ */
+const phases=[
+  {t:0,     label:'① Představujeme pracovníky'},
+  {t:5000,  label:'② Pracovník A sám — 6 hodin'},
+  {t:9500,  label:'③ Pracovník B sám — 3 hodiny'},
+  {t:14000, label:'④ Výkony za 1 hodinu'},
+  {t:20000, label:'⑤ Sčítáme výkony'},
+  {t:25500, label:'⑥ Společně — výsledek!'},
+];
+function getPhase(t){let p=phases[0].label;for(const ph of phases)if(t>=ph.t)p=ph.label;return p}
+
+/* ═══ COLORS ═══ */
+const COL_A='#818cf8',COL_A_BG='#312e81',COL_A_LIGHT='#c7d2fe';
+const COL_B='#34d399',COL_B_BG='#064e3b',COL_B_LIGHT='#a7f3d0';
+const COL_AB='#fbbf24',COL_AB_BG='#78350f',COL_AB_LIGHT='#fde68a';
+
+/* ═══ PARTICLES ═══ */
+const particles=[];
+for(let i=0;i<60;i++){particles.push({x:Math.random()*W,y:Math.random()*H,r:0.3+Math.random()*1,vx:(Math.random()-0.5)*0.25,vy:(Math.random()-0.5)*0.25,a:0.02+Math.random()*0.04})}
+function drawParticles(){
+  for(const p of particles){
+    if(playing){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1}
+    X.fillStyle='rgba(148,163,184,'+p.a+')';X.beginPath();X.arc(p.x,p.y,p.r,0,Math.PI*2);X.fill();
+  }
+}
+
+/* ═══ WORKER ICON ═══ */
+function drawWorkerIcon(cx,cy,color,scale){
+  const s=scale||1;X.fillStyle=color;
+  X.beginPath();X.arc(cx,cy-10*s,7*s,0,Math.PI*2);X.fill();
+  X.beginPath();X.moveTo(cx,cy-3*s);X.lineTo(cx-9*s,cy+14*s);X.lineTo(cx+9*s,cy+14*s);X.closePath();X.fill();
+}
+
+/* ═══ PROGRESS BAR ═══ */
+function drawBar(x,y,w,h,progress,bgColor,fillColor,r){
+  r=r||8;
+  X.fillStyle=bgColor;roundRect(x,y,w,h,r);X.fill();
+  X.strokeStyle=fillColor;X.lineWidth=1.5;X.globalAlpha*=0.4;roundRect(x,y,w,h,r);X.stroke();X.globalAlpha/=0.4;
+  const fw=Math.max(0,w*clamp(progress));
+  if(fw>1){
+    X.save();roundRect(x,y,w,h,r);X.clip();
+    const g=X.createLinearGradient(x,y,x,y+h);g.addColorStop(0,fillColor);g.addColorStop(1,fillColor+'88');
+    X.fillStyle=g;X.fillRect(x,y,fw,h);
+    const shimX=(currentTime*0.05)%(w+60)-30;
+    const sg=X.createLinearGradient(x+shimX-20,0,x+shimX+20,0);
+    sg.addColorStop(0,'rgba(255,255,255,0)');sg.addColorStop(0.5,'rgba(255,255,255,0.1)');sg.addColorStop(1,'rgba(255,255,255,0)');
+    X.fillStyle=sg;X.fillRect(x,y,fw,h);
+    X.restore();
+  }
+  if(progress>0.01){
+    X.font='bold 12px "Segoe UI",sans-serif';X.textAlign='right';X.fillStyle='#e2e8f0';
+    X.fillText(Math.round(progress*100)+'%',x+w-10,y+h/2+5);
+  }
+}
+
+/* ═══════════════════════════════════════
+   SCENE 1: Two workers + bars (0 – 19.5s)
+   Fades out at 19.5s
+   ═══════════════════════════════════════ */
+function drawScene1(t){
+  const alpha=sceneAlpha(t,0,19500,1000);
+  if(alpha<=0)return;
+  X.save();X.globalAlpha=alpha;
+
+  const barX=130,barW=510,barH=34;
+
+  /* ── Worker A ── */
+  const aIn=ease((t-1000)/1000);
+  if(aIn>0){
+    X.globalAlpha=alpha*aIn;
+    drawWorkerIcon(55,108,COL_A,1.1);
+    X.font='bold 15px "Segoe UI",sans-serif';X.textAlign='left';X.fillStyle=COL_A;
+    X.fillText('Pracovník A',82,104);
+    X.font='12px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+    X.fillText('celá práce za 6 hodin',82,120);
+    X.globalAlpha=alpha;
+  }
+
+  /* A bar */
+  if(t>=3000){
+    const bApp=ease((t-3000)/600);
+    X.globalAlpha=alpha*bApp;
+    let aP=0;
+    if(t>=5000)aP=easeInOut(clamp((t-5000)/4000));
+    drawBar(barX,135,barW,barH,aP,COL_A_BG,COL_A);
+
+    /* Time markers */
+    if(t>=5000){
+      const el=clamp((t-5000)/4000);
+      for(let h=1;h<=6;h++){
+        const hp=h/6;
+        if(el>=hp-0.02){
+          X.globalAlpha=alpha*bApp*ease((el-hp+0.02)/0.08);
+          const mx=barX+barW*hp;
+          X.strokeStyle='rgba(255,255,255,0.25)';X.lineWidth=1;
+          X.beginPath();X.moveTo(mx,135);X.lineTo(mx,135+barH);X.stroke();
+          X.font='9px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#64748b';
+          X.fillText(h+'h',mx,135+barH+12);
+        }
+      }
+    }
+    /* 1-hour bracket */
+    if(t>=7000){
+      const hl=ease((t-7000)/800);
+      X.globalAlpha=alpha*hl;
+      X.strokeStyle=COL_A;X.lineWidth=2;X.setLineDash([4,3]);
+      roundRect(barX,135,barW/6,barH,8);X.stroke();X.setLineDash([]);
+      X.font='bold 11px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=COL_A_LIGHT;
+      X.fillText('⅙ práce za 1 hod',barX+barW/12,130);
+    }
+    X.globalAlpha=alpha;
+  }
+
+  /* ── Worker B ── */
+  const bIn=ease((t-8000)/1000);
+  if(bIn>0){
+    X.globalAlpha=alpha*bIn;
+    drawWorkerIcon(55,228,COL_B,1.1);
+    X.font='bold 15px "Segoe UI",sans-serif';X.textAlign='left';X.fillStyle=COL_B;
+    X.fillText('Pracovník B',82,224);
+    X.font='12px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+    X.fillText('celá práce za 3 hodiny',82,240);
+    X.globalAlpha=alpha;
+  }
+
+  /* B bar */
+  if(t>=8500){
+    const bApp2=ease((t-8500)/600);
+    X.globalAlpha=alpha*bApp2;
+    let bP=0;
+    if(t>=9500)bP=easeInOut(clamp((t-9500)/3000));
+    drawBar(barX,255,barW,barH,bP,COL_B_BG,COL_B);
+
+    if(t>=9500){
+      const el2=clamp((t-9500)/3000);
+      for(let h=1;h<=3;h++){
+        const hp=h/3;
+        if(el2>=hp-0.03){
+          X.globalAlpha=alpha*bApp2*ease((el2-hp+0.03)/0.08);
+          const mx=barX+barW*hp;
+          X.strokeStyle='rgba(255,255,255,0.25)';X.lineWidth=1;
+          X.beginPath();X.moveTo(mx,255);X.lineTo(mx,255+barH);X.stroke();
+          X.font='9px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#64748b';
+          X.fillText(h+'h',mx,255+barH+12);
+        }
+      }
+    }
+    if(t>=11000){
+      const hl2=ease((t-11000)/800);
+      X.globalAlpha=alpha*hl2;
+      X.strokeStyle=COL_B;X.lineWidth=2;X.setLineDash([4,3]);
+      roundRect(barX,255,barW/3,barH,8);X.stroke();X.setLineDash([]);
+      X.font='bold 11px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=COL_B_LIGHT;
+      X.fillText('⅓ práce za 1 hod',barX+barW/6,250);
+    }
+    X.globalAlpha=alpha;
+  }
+
+  /* ── Rate cards ── */
+  if(t>=14000){
+    const rcA=ease((t-14000)/800);
+    X.globalAlpha=alpha*rcA;
+
+    const cardW=220,cardH=60,gap=40;
+    const c1X=W/2-cardW-gap/2, c2X=W/2+gap/2, cY=340;
+
+    /* Card A */
+    roundRect(c1X,cY,cardW,cardH,10);X.fillStyle=COL_A_BG;X.fill();
+    X.strokeStyle=COL_A;X.lineWidth=1.5;roundRect(c1X,cY,cardW,cardH,10);X.stroke();
+    X.font='12px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=COL_A_LIGHT;
+    X.fillText('Výkon A za 1 hodinu',c1X+cardW/2,cY+22);
+    X.font='bold 22px "Segoe UI",sans-serif';X.fillStyle=COL_A;
+    X.fillText('1/6  práce',c1X+cardW/2,cY+48);
+
+    /* Card B */
+    if(t>=15200){
+      const rc2=ease((t-15200)/800);
+      X.globalAlpha=alpha*rc2;
+      roundRect(c2X,cY,cardW,cardH,10);X.fillStyle=COL_B_BG;X.fill();
+      X.strokeStyle=COL_B;X.lineWidth=1.5;roundRect(c2X,cY,cardW,cardH,10);X.stroke();
+      X.font='12px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=COL_B_LIGHT;
+      X.fillText('Výkon B za 1 hodinu',c2X+cardW/2,cY+22);
+      X.font='bold 22px "Segoe UI",sans-serif';X.fillStyle=COL_B;
+      X.fillText('1/3  práce',c2X+cardW/2,cY+48);
+    }
+
+    /* Plus */
+    if(t>=16000){
+      X.globalAlpha=alpha*ease((t-16000)/500);
+      X.font='bold 32px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#94a3b8';
+      X.fillText('+',W/2,cY+cardH/2+10);
+    }
+
+    /* Hint: nesčítáme časy! */
+    if(t>=17000){
+      X.globalAlpha=alpha*ease((t-17000)/600);
+      X.font='13px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#f87171';
+      X.fillText('⚠ Nesčítáme časy (6+3≠9) — sčítáme výkony!',W/2,cY+cardH+26);
+    }
+
+    X.globalAlpha=alpha;
+  }
+
+  X.restore();
+}
+
+/* ═══════════════════════════════════════
+   SCENE 2: Calculation (19.5 – 25s)
+   Fades in at 19.5s, fades out at 25s
+   ═══════════════════════════════════════ */
+function drawScene2(t){
+  const alpha=sceneAlpha(t,19500,25000,1000);
+  if(alpha<=0)return;
+  X.save();X.globalAlpha=alpha;
+
+  const cx=W/2,startY=100;
+
+  /* Title */
+  X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#e2e8f0';
+  X.fillText('Sčítáme výkony pracovníků',cx,startY);
+
+  /* Divider */
+  X.strokeStyle='#334155';X.lineWidth=1;
+  X.beginPath();X.moveTo(cx-180,startY+14);X.lineTo(cx+180,startY+14);X.stroke();
+
+  /* Step 1 */
+  const s1=ease((t-20000)/700);
+  if(s1>0){
+    X.globalAlpha=alpha*s1;
+    X.font='17px "Segoe UI",sans-serif';X.textAlign='center';
+
+    /* Color-coded fractions */
+    const line1Y=startY+55;
+    X.fillStyle=COL_A;X.fillText('1/6',cx-50,line1Y);
+    X.fillStyle='#94a3b8';X.fillText('+',cx,line1Y);
+    X.fillStyle=COL_B;X.fillText('1/3',cx+50,line1Y);
+  }
+
+  /* Step 2 */
+  if(t>=21200){
+    X.globalAlpha=alpha*ease((t-21200)/700);
+    const line2Y=startY+95;
+    X.font='15px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';X.fillText('společný jmenovatel:',cx,line2Y-18);
+    X.font='17px "Segoe UI",sans-serif';
+    X.fillStyle=COL_A;X.fillText('1/6',cx-55,line2Y);
+    X.fillStyle='#94a3b8';X.fillText('+',cx,line2Y);
+    X.fillStyle=COL_B;X.fillText('2/6',cx+55,line2Y);
+  }
+
+  /* Step 3 */
+  if(t>=22400){
+    X.globalAlpha=alpha*ease((t-22400)/700);
+    const line3Y=startY+140;
+    X.font='17px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';X.fillText('=',cx-40,line3Y);
+    X.font='bold 20px "Segoe UI",sans-serif';X.fillStyle='#e2e8f0';X.fillText('3/6',cx+10,line3Y);
+  }
+
+  /* Step 4: Result */
+  if(t>=23500){
+    const r4=ease((t-23500)/800);
+    X.globalAlpha=alpha*r4;
+
+    const boxW=300,boxH=56,boxY=startY+170;
+    const boxX=cx-boxW/2;
+    roundRect(boxX,boxY,boxW,boxH,12);X.fillStyle=COL_AB_BG;X.fill();
+    X.strokeStyle=COL_AB;X.lineWidth=2.5;roundRect(boxX,boxY,boxW,boxH,12);X.stroke();
+
+    X.shadowColor=COL_AB;X.shadowBlur=18*r4;
+    roundRect(boxX,boxY,boxW,boxH,12);X.stroke();
+    X.shadowBlur=0;
+
+    X.font='bold 24px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=COL_AB;
+    X.fillText('= 1/2  práce za hodinu',cx,boxY+boxH/2+9);
+  }
+
+  /* Explanation */
+  if(t>=24200){
+    X.globalAlpha=alpha*ease((t-24200)/600);
+    X.font='14px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#94a3b8';
+    X.fillText('Společně udělají za hodinu polovinu celé práce.',cx,startY+260);
+  }
+
+  X.restore();
+}
+
+/* ═══════════════════════════════════════
+   SCENE 3: Combined bar + final (25 – 30s)
+   ═══════════════════════════════════════ */
+function drawScene3(t){
+  const alpha=sceneAlpha(t,25000,undefined,1200);
+  if(alpha<=0)return;
+  X.save();X.globalAlpha=alpha;
+
+  const cx=W/2;
+
+  /* Title */
+  X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=COL_AB;
+  X.fillText('Společná práce — výsledek',cx,100);
+
+  /* Workers together */
+  const iconY=130;
+  drawWorkerIcon(cx-30,iconY,COL_A,0.85);
+  drawWorkerIcon(cx+30,iconY,COL_B,0.85);
+  X.font='13px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#94a3b8';
+  X.fillText('A + B pracují společně',cx,iconY+28);
+
+  /* Combined bar */
+  const barX=80,barW=600,barH=40,barY=180;
+  let combP=0;
+  if(t>=26000)combP=easeInOut(clamp((t-26000)/2500));
+  drawBar(barX,barY,barW,barH,combP,'#422006',COL_AB);
+
+  /* Time scale: 0h – 2h – 4h – 6h */
+  const hours=[0,1,2,3,4,5,6];
+  for(const h of hours){
+    const hx=barX+barW*(h/6);
+    X.strokeStyle='rgba(255,255,255,0.15)';X.lineWidth=1;
+    X.beginPath();X.moveTo(hx,barY+barH+2);X.lineTo(hx,barY+barH+8);X.stroke();
+    X.font='9px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#64748b';
+    X.fillText(h+'h',hx,barY+barH+20);
+  }
+
+  /* 2h marker - the answer */
+  if(t>=27000){
+    const mk=ease((t-27000)/800);
+    X.globalAlpha=alpha*mk;
+    const mx2=barX+barW*(2/6);
+    X.strokeStyle=COL_AB;X.lineWidth=2.5;
+    X.beginPath();X.moveTo(mx2,barY-4);X.lineTo(mx2,barY+barH+4);X.stroke();
+    X.fillStyle=COL_AB;X.beginPath();X.arc(mx2,barY-8,5,0,Math.PI*2);X.fill();
+    X.font='bold 13px "Segoe UI",sans-serif';X.fillStyle=COL_AB_LIGHT;
+    X.fillText('2 hodiny ✓',mx2,barY-20);
+    X.globalAlpha=alpha;
+  }
+
+  /* Comparison lines */
+  if(t>=27500){
+    const cmp=ease((t-27500)/1000);
+    X.globalAlpha=alpha*cmp*0.4;
+    /* A alone: 6h */
+    const ax6=barX+barW;
+    X.strokeStyle=COL_A;X.lineWidth=1;X.setLineDash([5,4]);
+    X.beginPath();X.moveTo(ax6,barY+barH+30);X.lineTo(ax6,barY+barH+42);X.stroke();
+    X.font='10px "Segoe UI",sans-serif';X.fillStyle=COL_A;X.globalAlpha=alpha*cmp*0.6;
+    X.fillText('A sám: 6h',ax6,barY+barH+54);
+    /* B alone: 3h */
+    const bx3=barX+barW*(3/6);
+    X.globalAlpha=alpha*cmp*0.4;
+    X.strokeStyle=COL_B;
+    X.beginPath();X.moveTo(bx3,barY+barH+30);X.lineTo(bx3,barY+barH+42);X.stroke();
+    X.globalAlpha=alpha*cmp*0.6;X.fillStyle=COL_B;
+    X.fillText('B sám: 3h',bx3,barY+barH+54);
+    X.setLineDash([]);
+    X.globalAlpha=alpha;
+  }
+
+  /* Big result box */
+  if(t>=28000){
+    const fin=ease((t-28000)/1000);
+    X.globalAlpha=alpha*fin;
+
+    const boxW=420,boxH=65,boxY=310,boxX=cx-boxW/2;
+
+    /* Glow */
+    const grd=X.createRadialGradient(cx,boxY+boxH/2,0,cx,boxY+boxH/2,boxW*0.6);
+    grd.addColorStop(0,'rgba(251,191,36,0.08)');grd.addColorStop(1,'rgba(251,191,36,0)');
+    X.fillStyle=grd;X.fillRect(boxX-50,boxY-20,boxW+100,boxH+40);
+
+    roundRect(boxX,boxY,boxW,boxH,14);X.fillStyle='#1c1917';X.fill();
+    X.strokeStyle=COL_AB;X.lineWidth=2.5;
+    X.shadowColor=COL_AB;X.shadowBlur=20*fin;
+    roundRect(boxX,boxY,boxW,boxH,14);X.stroke();
+    X.shadowBlur=0;
+
+    X.font='bold 26px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=COL_AB;
+    X.fillText('Společně to zvládnou za 2 hodiny!',cx,boxY+boxH/2+10);
+  }
+
+  /* Check + summary */
+  if(t>=29000){
+    const chk=ease((t-29000)/600);
+    X.globalAlpha=alpha*chk;
+
+    X.font='bold 36px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#34d399';
+    X.fillText('✓',cx,420);
+
+    X.font='14px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+    X.fillText('2 hodiny < 3 hodiny (B sám) — společná práce je vždy rychlejší!',cx,450);
+
+    /* Formula reminder */
+    X.font='13px "Segoe UI",sans-serif';X.fillStyle='#64748b';
+    X.fillText('1/t = 1/t₁ + 1/t₂    →    1/t = 1/6 + 1/3 = 1/2    →    t = 2',cx,478);
+  }
+
+  X.restore();
+}
+
+/* ═══ MAIN DRAW ═══ */
+function draw(t){
+  const bg=X.createRadialGradient(W/2,H/2,50,W/2,H/2,W*0.7);
+  bg.addColorStop(0,'#111827');bg.addColorStop(1,'#0a0e1a');
+  X.fillStyle=bg;X.fillRect(0,0,W,H);
+  drawParticles();
+
+  /* Persistent title */
+  const tA=ease(t/800);
+  X.globalAlpha=tA;X.font='bold 20px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#e2e8f0';
+  X.fillText('Princip společné práce',W/2,36);
+  X.font='14px "Segoe UI",sans-serif';X.fillStyle='#a5b4fc';
+  if(t<19500) X.fillText('Nesčítáme časy, ale výkony!',W/2,56);
+  X.globalAlpha=1;
+
+  /* Separator line */
+  X.strokeStyle='#1e293b';X.lineWidth=1;
+  X.beginPath();X.moveTo(30,68);X.lineTo(W-30,68);X.stroke();
+
+  /* Draw scenes with transitions */
+  drawScene1(t);
+  drawScene2(t);
+  drawScene3(t);
+}
+
+/* ═══ MAIN LOOP ═══ */
+function frame(ts){
+  if(lastTs===null)lastTs=ts;
+  const dt=ts-lastTs;lastTs=ts;
+  if(playing&&!scrubbing){currentTime=Math.min(DUR,currentTime+dt);if(currentTime>=DUR)currentTime=0}
+  if(!scrubbing)scrubber.value=currentTime;
+  draw(currentTime);
+  document.getElementById('phase').textContent=getPhase(currentTime);
+  document.getElementById('timer').textContent=(currentTime/1000).toFixed(1)+'s / '+(DUR/1000).toFixed(0)+'.0s';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

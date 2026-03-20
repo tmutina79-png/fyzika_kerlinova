@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Python – kreslení textu</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;font-family:'Segoe UI',system-ui,sans-serif;padding:16px;gap:8px}
+canvas{border-radius:12px;box-shadow:0 0 40px rgba(59,130,246,.15);max-width:100%;max-height:calc(100vh - 140px);width:auto;height:auto;background:#0f0f23}
+#phase{color:#60a5fa;font-size:14px;font-weight:600;min-height:20px;text-align:center}
+#timer{color:#475569;font-size:11px}
+#title{color:#e2e8f0;font-size:18px;font-weight:700;letter-spacing:0.5px;text-align:center}
+#controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+#controls button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;display:flex;align-items:center;gap:5px}
+#controls button:hover{background:#334155;border-color:#60a5fa}
+#controls button:active{background:#475569}
+#controls button .icon{font-size:15px}
+#scrubber{-webkit-appearance:none;appearance:none;width:200px;height:5px;border-radius:3px;background:#1e293b;outline:none;cursor:pointer}
+#scrubber::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#scrubber::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#info{color:#94a3b8;font-size:11px;text-align:center}
+</style>
+</head>
+<body>
+<div id="title">🐢 Python – kreslení textu pomocí write()</div>
+<canvas id="c" width="760" height="480"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="controls">
+  <button id="btnRew" title="Zpět 0,3s"><span class="icon">⏪</span> −0,3s</button>
+  <button id="btnPlay" title="Přehrát / Zastavit"><span class="icon" id="playIcon">⏸</span> <span id="playLabel">Pauza</span></button>
+  <button id="btnFwd" title="Vpřed 0,3s"><span class="icon">⏩</span> +0,3s</button>
+  <input type="range" id="scrubber" min="0" max="50000" value="0" step="100"/>
+</div>
+<div id="info">Ovládej tlačítky nebo táhni posuvník</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+let t = 0;
+let running = true;
+const DURATION = 50000;
+
+const phases = [
+  { start: 0, end: 5000, name: "1. Základní write()" },
+  { start: 5000, end: 12000, name: "2. Parametry write()" },
+  { start: 12000, end: 20000, name: "3. Barvy textu" },
+  { start: 20000, end: 28000, name: "4. Velikost a styly" },
+  { start: 28000, end: 36000, name: "5. Zarovnání (align)" },
+  { start: 36000, end: 44000, name: "6. Praktický příklad" },
+  { start: 44000, end: 50000, name: "7. Shrnutí" }
+];
+
+function easeOut(x) { return 1 - Math.pow(1 - x, 3); }
+function easeInOut(x) { return x < 0.5 ? 4*x*x*x : 1 - Math.pow(-2*x+2,3)/2; }
+
+function drawTurtle(x, y, angle = -90, color = "#2ecc71") {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate((angle + 90) * Math.PI / 180);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.lineTo(-8, 10);
+  ctx.lineTo(8, 10);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(0, -4, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function typewriterText(text, x, y, progress, font = "24px Arial", color = "#fff") {
+  const chars = Math.floor(text.length * progress);
+  ctx.font = font;
+  ctx.fillStyle = color;
+  ctx.fillText(text.substring(0, chars), x, y);
+  
+  // Blikající kurzor
+  if (progress < 1 && Math.floor(t / 300) % 2 === 0) {
+    const textWidth = ctx.measureText(text.substring(0, chars)).width;
+    ctx.fillRect(x + textWidth + 2, y - 18, 12, 22);
+  }
+}
+
+function drawCodeBlock(x, y, lines, highlight = -1) {
+  ctx.fillStyle = "#1e1e1e";
+  const lineHeight = 22;
+  const blockHeight = lines.length * lineHeight + 20;
+  ctx.fillRect(x, y, 340, blockHeight);
+  ctx.strokeStyle = "#3c3c3c";
+  ctx.strokeRect(x, y, 340, blockHeight);
+  
+  // Okénkové tlačítka
+  ctx.fillStyle = "#ff5f57"; ctx.beginPath(); ctx.arc(x+15, y+12, 5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#ffbd2e"; ctx.beginPath(); ctx.arc(x+32, y+12, 5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#28ca42"; ctx.beginPath(); ctx.arc(x+49, y+12, 5, 0, Math.PI*2); ctx.fill();
+  
+  ctx.font = "14px Courier New";
+  lines.forEach((line, i) => {
+    if (i === highlight) {
+      ctx.fillStyle = "rgba(255,255,0,0.1)";
+      ctx.fillRect(x, y + 25 + i * lineHeight, 340, lineHeight);
+    }
+    ctx.fillStyle = line.color || "#d4d4d4";
+    ctx.fillText(line.text, x + 15, y + 40 + i * lineHeight);
+  });
+}
+
+function draw() {
+  ctx.fillStyle = "#0f0f23";
+  ctx.fillRect(0, 0, W, H);
+  
+  const phase = phases.find(p => t >= p.start && t < p.end) || phases[phases.length - 1];
+  document.getElementById('phase').textContent = phase.name;
+  
+  // FÁZE 1: Základní write()
+  if (t < 5000) {
+    const p = Math.min(1, t / 4000);
+    
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#60a5fa";
+    ctx.textAlign = "center";
+    ctx.fillText("Příkaz write()", W/2, 50);
+    ctx.textAlign = "left";
+    
+    const codeLines = [
+      { text: "import turtle", color: "#c586c0" },
+      { text: "", color: "#d4d4d4" },
+      { text: "t = turtle.Turtle()", color: "#d4d4d4" },
+      { text: 't.write("Ahoj!")', color: "#ce9178" }
+    ];
+    
+    drawCodeBlock(50, 80, codeLines, p > 0.3 ? 3 : -1);
+    
+    // Plátno vpravo
+    ctx.fillStyle = "#1a1a2e";
+    ctx.fillRect(420, 80, 300, 200);
+    ctx.strokeStyle = "#334155";
+    ctx.strokeRect(420, 80, 300, 200);
+    
+    ctx.font = "12px Arial";
+    ctx.fillStyle = "#888";
+    ctx.fillText("Výstup:", 430, 75);
+    
+    // Želva a text
+    if (p > 0.5) {
+      const textP = Math.min(1, (p - 0.5) * 2);
+      drawTurtle(480, 180);
+      typewriterText("Ahoj!", 490, 175, textP, "20px Arial", "#fff");
+    }
+    
+    // Vysvětlení
+    if (p > 0.7) {
+      ctx.font = "16px Arial";
+      ctx.fillStyle = "#94a3b8";
+      ctx.fillText("Text se vykreslí na pozici želvy", 50, 320);
+      ctx.fillText("a želva zůstane na místě", 50, 345);
+    }
+  }
+  
+  // FÁZE 2: Parametry write()
+  else if (t < 12000) {
+    const p = Math.min(1, (t - 5000) / 6000);
+    
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#60a5fa";
+    ctx.textAlign = "center";
+    ctx.fillText("Parametry write()", W/2, 45);
+    ctx.textAlign = "left";
+    
+    const codeLines = [
+      { text: 't.write("Text",', color: "#ce9178" },
+      { text: '    move=False,', color: "#9cdcfe" },
+      { text: '    align="center",', color: "#9cdcfe" },
+      { text: '    font=("Arial", 24, "bold"))', color: "#9cdcfe" }
+    ];
+    
+    drawCodeBlock(50, 70, codeLines, Math.floor(p * 4));
+    
+    // Parametry vysvětlení
+    const params = [
+      { name: "move", desc: "Posunout želvu za text?", color: "#e74c3c", y: 200 },
+      { name: "align", desc: "Zarovnání: left, center, right", color: "#2ecc71", y: 250 },
+      { name: "font", desc: "Trojice: (název, velikost, styl)", color: "#f39c12", y: 300 }
+    ];
+    
+    params.forEach((param, i) => {
+      const paramP = Math.max(0, Math.min(1, (p - 0.2 - i * 0.25) * 4));
+      if (paramP > 0) {
+        ctx.globalAlpha = paramP;
+        ctx.fillStyle = param.color;
+        ctx.font = "bold 18px Arial";
+        ctx.fillText(param.name, 50, param.y);
+        ctx.fillStyle = "#d4d4d4";
+        ctx.font = "16px Arial";
+        ctx.fillText("→ " + param.desc, 130, param.y);
+        ctx.globalAlpha = 1;
+      }
+    });
+    
+    // Font trojice vizualizace
+    if (p > 0.8) {
+      ctx.fillStyle = "#1e1e1e";
+      ctx.fillRect(420, 180, 300, 100);
+      ctx.strokeStyle = "#f39c12";
+      ctx.strokeRect(420, 180, 300, 100);
+      
+      ctx.font = "14px Arial";
+      ctx.fillStyle = "#f39c12";
+      ctx.fillText('("Arial", 24, "bold")', 440, 210);
+      
+      ctx.fillStyle = "#888";
+      ctx.font = "12px Arial";
+      ctx.fillText("↓        ↓      ↓", 460, 235);
+      ctx.fillText("font   size   style", 450, 260);
+    }
+  }
+  
+  // FÁZE 3: Barvy textu
+  else if (t < 20000) {
+    const p = Math.min(1, (t - 12000) / 7000);
+    
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#60a5fa";
+    ctx.textAlign = "center";
+    ctx.fillText("Barvy textu – pencolor()", W/2, 45);
+    ctx.textAlign = "left";
+    
+    const colors = [
+      { name: "red", hex: "#e74c3c", text: "Červená" },
+      { name: "green", hex: "#2ecc71", text: "Zelená" },
+      { name: "blue", hex: "#3498db", text: "Modrá" },
+      { name: "#f39c12", hex: "#f39c12", text: "Oranžová (hex)" },
+      { name: "#9b59b6", hex: "#9b59b6", text: "Fialová (hex)" }
+    ];
+    
+    colors.forEach((c, i) => {
+      const colorP = Math.max(0, Math.min(1, (p - i * 0.15) * 5));
+      if (colorP > 0) {
+        ctx.globalAlpha = colorP;
+        const y = 100 + i * 70;
+        
+        // Kód
+        ctx.font = "14px Courier New";
+        ctx.fillStyle = "#888";
+        ctx.fillText(`t.pencolor("${c.name}")`, 50, y);
+        
+        // Ukázka textu
+        ctx.font = "bold 24px Arial";
+        ctx.fillStyle = c.hex;
+        ctx.fillText(c.text, 350, y);
+        
+        // Barevný čtverec
+        ctx.fillRect(310, y - 20, 25, 25);
+        
+        ctx.globalAlpha = 1;
+      }
+    });
+  }
+  
+  // FÁZE 4: Velikost a styly
+  else if (t < 28000) {
+    const p = Math.min(1, (t - 20000) / 7000);
+    
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#60a5fa";
+    ctx.textAlign = "center";
+    ctx.fillText("Velikost a styly písma", W/2, 45);
+    ctx.textAlign = "left";
+    
+    const styles = [
+      { font: "16px Arial", style: '"normal"', text: "Normální text" },
+      { font: "bold 20px Arial", style: '"bold"', text: "Tučný text" },
+      { font: "italic 18px Georgia", style: '"italic"', text: "Kurzíva" },
+      { font: "bold italic 22px Arial", style: '"bold italic"', text: "Tučná kurzíva" },
+      { font: "32px Courier New", style: "36px", text: "Velký text" }
+    ];
+    
+    styles.forEach((s, i) => {
+      const styleP = Math.max(0, Math.min(1, (p - i * 0.15) * 4));
+      if (styleP > 0) {
+        ctx.globalAlpha = styleP;
+        const y = 100 + i * 70;
+        
+        // Kód stylu
+        ctx.font = "14px Courier New";
+        ctx.fillStyle = "#ce9178";
+        ctx.fillText(s.style, 50, y);
+        
+        // Ukázka
+        ctx.font = s.font;
+        ctx.fillStyle = "#fff";
+        ctx.fillText(s.text, 250, y);
+        
+        ctx.globalAlpha = 1;
+      }
+    });
+  }
+  
+  // FÁZE 5: Zarovnání
+  else if (t < 36000) {
+    const p = Math.min(1, (t - 28000) / 7000);
+    
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#60a5fa";
+    ctx.textAlign = "center";
+    ctx.fillText("Zarovnání textu (align)", W/2, 45);
+    
+    const aligns = [
+      { align: "left", color: "#e74c3c", desc: "Text jde DOPRAVA od želvy" },
+      { align: "center", color: "#2ecc71", desc: "Želva je UPROSTŘED textu" },
+      { align: "right", color: "#3498db", desc: "Text jde DOLEVA od želvy" }
+    ];
+    
+    aligns.forEach((a, i) => {
+      const alignP = Math.max(0, Math.min(1, (p - i * 0.25) * 3));
+      if (alignP > 0) {
+        ctx.globalAlpha = alignP;
+        const x = 130 + i * 220;
+        const y = 200;
+        
+        // Box
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillRect(x - 95, y - 80, 190, 160);
+        ctx.strokeStyle = a.color;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x - 95, y - 80, 190, 160);
+        ctx.lineWidth = 1;
+        
+        // Nadpis
+        ctx.font = "bold 14px Arial";
+        ctx.fillStyle = a.color;
+        ctx.textAlign = "center";
+        ctx.fillText(`align="${a.align}"`, x, y - 55);
+        
+        // Želva
+        drawTurtle(x, y, -90, a.color);
+        
+        // Text
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = a.align;
+        ctx.fillText("Ahoj!", x, y - 10);
+        
+        // Popis
+        ctx.textAlign = "center";
+        ctx.font = "11px Arial";
+        ctx.fillStyle = "#888";
+        ctx.fillText(a.desc, x, y + 60);
+        
+        ctx.globalAlpha = 1;
+      }
+    });
+    
+    ctx.textAlign = "left";
+  }
+  
+  // FÁZE 6: Praktický příklad
+  else if (t < 44000) {
+    const p = Math.min(1, (t - 36000) / 7000);
+    
+    ctx.font = "bold 28px Arial";
+    ctx.fillStyle = "#60a5fa";
+    ctx.textAlign = "center";
+    ctx.fillText("Praktický příklad: Vizitka", W/2, 45);
+    ctx.textAlign = "left";
+    
+    // Vizitka
+    ctx.fillStyle = "#2c3e50";
+    ctx.fillRect(200, 80, 360, 220);
+    
+    // Rámeček
+    if (p > 0.1) {
+      ctx.strokeStyle = "#ecf0f1";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(220, 100, 320, 180);
+      ctx.lineWidth = 1;
+    }
+    
+    // Jméno
+    if (p > 0.25) {
+      ctx.font = "bold 32px Arial";
+      ctx.fillStyle = "#e74c3c";
+      ctx.textAlign = "center";
+      ctx.fillText("Jan Novák", 380, 150);
+    }
+    
+    // Titul
+    if (p > 0.4) {
+      ctx.font = "italic 16px Arial";
+      ctx.fillStyle = "#ecf0f1";
+      ctx.fillText("Student Gymnázia", 380, 180);
+    }
+    
+    // Kontakt
+    if (p > 0.55) {
+      ctx.font = "14px Arial";
+      ctx.fillStyle = "#3498db";
+      ctx.fillText("📧 jan.novak@skola.cz", 380, 215);
+    }
+    
+    if (p > 0.7) {
+      ctx.fillText("📱 +420 123 456 789", 380, 240);
+    }
+    
+    // Třída
+    if (p > 0.85) {
+      ctx.font = "bold 18px Arial";
+      ctx.fillStyle = "#2ecc71";
+      ctx.fillText("Sexta A", 380, 270);
+    }
+    
+    ctx.textAlign = "left";
+    
+    // Kód vlevo
+    if (p > 0.3) {
+      const codeLines = [
+        { text: 't.pencolor("#e74c3c")', color: "#e74c3c" },
+        { text: 't.write("Jan Novák")', color: "#d4d4d4" }
+      ];
+      ctx.font = "11px Courier New";
+      ctx.fillStyle = "#888";
+      ctx.fillText("Kód:", 30, 340);
+      codeLines.forEach((line, i) => {
+        ctx.fillStyle = line.color;
+        ctx.fillText(line.text, 30, 360 + i * 18);
+      });
+    }
+  }
+  
+  // FÁZE 7: Shrnutí
+  else {
+    const p = Math.min(1, (t - 44000) / 5000);
+    
+    ctx.font = "bold 32px Arial";
+    ctx.fillStyle = "#60a5fa";
+    ctx.textAlign = "center";
+    ctx.fillText("📝 Shrnutí", W/2, 50);
+    
+    const summary = [
+      { cmd: 't.write("text")', desc: "Vypíše text na pozici želvy", color: "#fff" },
+      { cmd: 't.pencolor("red")', desc: "Nastaví barvu textu", color: "#e74c3c" },
+      { cmd: 'font=("Arial", 24, "bold")', desc: "Font, velikost, styl", color: "#f39c12" },
+      { cmd: 'align="center"', desc: "Zarovnání textu", color: "#2ecc71" },
+      { cmd: "t.hideturtle()", desc: "Skryje želvu", color: "#9b59b6" },
+      { cmd: "t.penup() + t.goto(x, y)", desc: "Přesun bez kreslení", color: "#3498db" }
+    ];
+    
+    summary.forEach((s, i) => {
+      const sumP = Math.max(0, Math.min(1, (p - i * 0.12) * 5));
+      if (sumP > 0) {
+        ctx.globalAlpha = sumP;
+        const y = 100 + i * 55;
+        
+        ctx.font = "bold 15px Courier New";
+        ctx.fillStyle = s.color;
+        ctx.textAlign = "left";
+        ctx.fillText(s.cmd, 80, y);
+        
+        ctx.font = "14px Arial";
+        ctx.fillStyle = "#888";
+        ctx.fillText("→ " + s.desc, 420, y);
+        
+        ctx.globalAlpha = 1;
+      }
+    });
+    
+    if (p > 0.9) {
+      ctx.font = "bold 20px Arial";
+      ctx.fillStyle = "#2ecc71";
+      ctx.textAlign = "center";
+      ctx.fillText("🐢 Teď umíš kreslit text v Pythonu!", W/2, 440);
+    }
+    
+    ctx.textAlign = "left";
+  }
+  
+  // Timer
+  const sec = Math.floor(t / 1000);
+  const total = Math.floor(DURATION / 1000);
+  document.getElementById('timer').textContent = `${sec}s / ${total}s`;
+  document.getElementById('scrubber').value = t;
+}
+
+function loop() {
+  if (running) {
+    t += 16;
+    if (t > DURATION) t = 0;
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// Controls
+document.getElementById('btnPlay').onclick = () => {
+  running = !running;
+  document.getElementById('playIcon').textContent = running ? '⏸' : '▶️';
+  document.getElementById('playLabel').textContent = running ? 'Pauza' : 'Přehrát';
+};
+
+document.getElementById('btnRew').onclick = () => {
+  t = Math.max(0, t - 300);
+  draw();
+};
+
+document.getElementById('btnFwd').onclick = () => {
+  t = Math.min(DURATION, t + 300);
+  draw();
+};
+
+document.getElementById('scrubber').oninput = (e) => {
+  t = parseInt(e.target.value);
+  draw();
+};
+
+loop();
+</script>
+</body>
+</html>

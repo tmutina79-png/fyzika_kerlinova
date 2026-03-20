@@ -1,0 +1,151 @@
+{
+  "currentLesson": {
+    "id": "funkce",
+    "title": "Funkce – úvod pro kvartu",
+    "description": "Co je funkce, jak ji zapisujeme, definiční obor, obor hodnot, graf a praktické příklady.",
+    "keyPoints": [
+      "Funkce přiřazuje každému vstupu právě jeden výstup",
+      "Graf funkce ověříme testem svislou přímkou",
+      "Definiční obor = přípustné vstupy, obor hodnot = možné výstupy"
+    ],
+    "icon": "📈",
+    "color": "indigo"
+  },
+  "lessons": [
+    {
+      "id": "odmocniny",
+      "title": "Odmocniny",
+      "subtitle": "sekunda",
+      "description": "Druhá odmocnina, odhady, vlastnosti a praktické výpočty.",
+      "icon": "√",
+      "isUnlocked": true,
+      "completed": true
+    },
+    {
+      "id": "umernost",
+      "title": "Přímá a nepřímá úměrnost",
+      "subtitle": "tercie",
+      "description": "Úměrnost, trojčlenka, grafy a reálné příklady.",
+      "icon": "⚖️",
+      "isUnlocked": true,
+      "completed": true
+    },
+    {
+      "id": "funkce",
+      "title": "Funkce",
+      "subtitle": "kvarta",
+      "description": "Pojem funkce, definiční obor, obor hodnot, grafy.",
+      "icon": "📈",
+      "isUnlocked": true,
+      "completed": false
+    },
+    {
+      "id": "lekce-1",
+      "title": "Úvod do derivací",
+      "subtitle": "vyšší gymnázium",
+      "description": "Derivace, tečna ke grafu, pravidla derivování.",
+      "icon": "📐",
+      "isUnlocked": true,
+      "completed": false
+    },
+    {
+      "id": "relativita",
+      "title": "Teorie relativity",
+      "subtitle": "fyzika",
+      "description": "STR, OTR, dilatace času, E = mc².",
+      "icon": "🔭",
+      "isUnlocked": true,
+      "completed": false
+    },
+    {
+      "id": "lekce-2",
+      "title": "Limity funkcí",
+      "subtitle": "vyšší gymnázium",
+      "description": "Pojem limity, výpočet limit, l'Hôpitalovo pravidlo.",
+      "icon": "♾️",
+      "isUnlocked": false,
+      "completed": false
+    },
+    {
+      "id": "karel-capek",
+      "title": "Karel Čapek",
+      "subtitle": "tercie · český jazyk",
+      "description": "Život, dílo a odkaz Karla Čapka — od slova robot po obranu demokracie.",
+      "icon": "🖊️",
+      "isUnlocked": true,
+      "completed": false
+    },
+    {
+      "id": "lekce-3",
+      "title": "Integrály",
+      "subtitle": "vyšší gymnázium",
+      "description": "Neurčitý a určitý integrál, metody integrace.",
+      "icon": "∫",
+      "isUnlocked": false,
+      "completed": false
+    }
+  ],
+  "practiceProblems": [
+    {
+      "question": "Vypočítej: f(x) = 3x − 2. Kolik je f(5)?",
+      "answer": "f(5) = 3·5 − 2 = 13",
+      "category": "Funkce"
+    },
+    {
+      "question": "Jaký je definiční obor funkce f(x) = √(x − 4)?",
+      "answer": "D(f) = ⟨4, +∞) — pod odmocninou musí být x − 4 ≥ 0",
+      "category": "Definiční obor"
+    },
+    {
+      "question": "Je y = x² prostá funkce?",
+      "answer": "Ne — např. f(2) = f(−2) = 4, různé vstupy dávají stejný výstup.",
+      "category": "Vlastnosti"
+    },
+    {
+      "question": "Vypočítej: √144 + √81",
+      "answer": "√144 + √81 = 12 + 9 = 21",
+      "category": "Odmocniny"
+    },
+    {
+      "question": "Auto jede 90 km/h. Za kolik minut ujede 60 km?",
+      "answer": "t = 60/90 h = 2/3 h = 40 minut",
+      "category": "Úměrnost"
+    },
+    {
+      "question": "Urči obor hodnot funkce f(x) = |x| + 1.",
+      "answer": "H(f) = ⟨1, +∞) — absolutní hodnota je ≥ 0, plus 1.",
+      "category": "Funkce"
+    },
+    {
+      "question": "Doplň: 6 dělníků postaví zeď za 10 dní. Za kolik dní ji postaví 15 dělníků?",
+      "answer": "Nepřímá úměrnost: 6 · 10 = 15 · x → x = 60/15 = 4 dny",
+      "category": "Úměrnost"
+    },
+    {
+      "question": "Jaký je Lorentzův faktor γ pro v = 0,6c?",
+      "answer": "γ = 1/√(1 − 0,36) = 1/√0,64 = 1/0,8 = 1,25",
+      "category": "Relativita"
+    },
+    {
+      "question": "Vypočítej: f(x) = x² − 3x + 2. Kolik je f(0)?",
+      "answer": "f(0) = 0 − 0 + 2 = 2",
+      "category": "Funkce"
+    },
+    {
+      "question": "Mezi kterými celými čísly leží √50?",
+      "answer": "7² = 49 a 8² = 64, takže 7 < √50 < 8 (blíže k 7).",
+      "category": "Odmocniny"
+    }
+  ],
+  "flashcards": [
+    { "question": "Co je funkce?", "answer": "Předpis, který každému vstupu přiřadí právě jeden výstup." },
+    { "question": "Co je definiční obor?", "answer": "Množina všech přípustných vstupů — D(f)." },
+    { "question": "Co je obor hodnot?", "answer": "Množina všech výstupů funkce — H(f)." },
+    { "question": "Jak funguje test svislou přímkou?", "answer": "Pokud každá svislá přímka protne křivku nejvýše v 1 bodě, je to graf funkce." },
+    { "question": "Co je prostá funkce?", "answer": "Funkce, kde různé vstupy dávají vždy různé výstupy (injekce)." },
+    { "question": "Co znamená E = mc²?", "answer": "Hmotnost a energie jsou ekvivalentní. Malá hmotnost = obrovská energie." },
+    { "question": "Co je Lorentzův faktor?", "answer": "γ = 1/√(1 − v²/c²) — klíčový koeficient speciální relativity." },
+    { "question": "Co je přímá úměrnost?", "answer": "Když se jedna veličina zvětší k-krát, druhá se také zvětší k-krát. y = kx." },
+    { "question": "Co je nepřímá úměrnost?", "answer": "Když se jedna veličina zvětší k-krát, druhá se k-krát zmenší. y = a/x." }
+  ]
+}

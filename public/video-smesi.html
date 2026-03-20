@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Směsi – Vizuální animace</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+canvas{border-radius:16px;box-shadow:0 0 60px rgba(59,130,246,.2)}
+#phase{color:#60a5fa;font-size:15px;margin-top:10px;font-weight:600;min-height:22px}
+#timer{color:#475569;font-size:12px;margin-top:4px}
+#title{color:#e2e8f0;font-size:22px;font-weight:700;margin-bottom:14px;letter-spacing:1px}
+#controls{display:flex;align-items:center;gap:10px;margin-top:12px}
+#controls button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:8px 16px;font-size:15px;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;display:flex;align-items:center;gap:6px}
+#controls button:hover{background:#334155;border-color:#60a5fa}
+#controls button:active{background:#475569}
+#controls button .icon{font-size:18px}
+#scrubber{-webkit-appearance:none;appearance:none;width:300px;height:6px;border-radius:3px;background:#1e293b;outline:none;cursor:pointer}
+#scrubber::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#scrubber::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#info{color:#94a3b8;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="title">🧪 Směsi – jak vznikají a jak je počítáme</div>
+<canvas id="c" width="760" height="500"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="controls">
+  <button id="btnRew" title="Zpět 0,3s"><span class="icon">⏪</span> −0,3s</button>
+  <button id="btnPlay" title="Přehrát / Zastavit"><span class="icon" id="playIcon">⏸</span> <span id="playLabel">Pauza</span></button>
+  <button id="btnFwd" title="Vpřed 0,3s"><span class="icon">⏩</span> +0,3s</button>
+  <input type="range" id="scrubber" min="0" max="36000" value="0" step="100"/>
+</div>
+<div id="info">Ovládej tlačítky nebo táhni posuvník • dva roztoky → míchání → výsledek → výpočet</div>
+
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=C.width,H=C.height;
+const DUR=36000;
+let currentTime=0,playing=true,lastTs=null;
+const STEP=300;
+
+/* Controls */
+const btnPlay=document.getElementById('btnPlay');
+const btnRew=document.getElementById('btnRew');
+const btnFwd=document.getElementById('btnFwd');
+const scrubber=document.getElementById('scrubber');
+const playIcon=document.getElementById('playIcon');
+const playLabel=document.getElementById('playLabel');
+let scrubbing=false;
+
+btnPlay.addEventListener('click',()=>{playing=!playing;playIcon.textContent=playing?'⏸':'▶';playLabel.textContent=playing?'Pauza':'Přehrát';if(playing)lastTs=null});
+btnRew.addEventListener('click',()=>{currentTime=Math.max(0,currentTime-STEP);scrubber.value=currentTime});
+btnFwd.addEventListener('click',()=>{currentTime=Math.min(DUR,currentTime+STEP);scrubber.value=currentTime});
+scrubber.addEventListener('input',()=>{scrubbing=true;currentTime=Number(scrubber.value)});
+scrubber.addEventListener('change',()=>{scrubbing=false});
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();btnPlay.click()}if(e.code==='ArrowLeft')btnRew.click();if(e.code==='ArrowRight')btnFwd.click()});
+
+/* Phases */
+const phases=[
+  {t:0,    label:"① Dva roztoky s různou koncentrací"},
+  {t:7000, label:"② Míchání – obě kapaliny se spojují"},
+  {t:14000,label:"③ Výsledná směs – koncentrace mezi oběma"},
+  {t:21000,label:"④ Rovnice a výpočet krok za krokem"},
+  {t:28500,label:"⑤ Ověření výsledku a shrnutí"},
+];
+function getPhase(t){let p=phases[0].label;for(const ph of phases)if(t>=ph.t)p=ph.label;return p}
+
+/* Helpers */
+function lerp(a,b,t){return a+(b-a)*clamp(t)}
+function clamp(t){return Math.max(0,Math.min(1,t))}
+function ease(t){return 1-Math.pow(1-clamp(t),3)}
+function easeInOut(t){t=clamp(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+
+function roundRect(x,y,w,h,r){
+  X.beginPath();X.moveTo(x+r,y);X.lineTo(x+w-r,y);X.quadraticCurveTo(x+w,y,x+w,y+r);
+  X.lineTo(x+w,y+h-r);X.quadraticCurveTo(x+w,y+h,x+w-r,y+h);X.lineTo(x+r,y+h);
+  X.quadraticCurveTo(x,y+h,x,y+h-r);X.lineTo(x,y+r);X.quadraticCurveTo(x,y,x+r,y);X.closePath();
+}
+
+/* ── Draw beaker ── */
+function drawBeaker(cx,cy,w,h,fillLevel,fillColor,borderColor,label,concLabel,volLabel,alpha){
+  X.globalAlpha=alpha;
+  // beaker body
+  roundRect(cx-w/2,cy-h/2,w,h,8);
+  X.fillStyle='#0f172a';X.fill();
+  X.strokeStyle=borderColor;X.lineWidth=2.5;X.stroke();
+
+  // liquid fill
+  const lh=h*fillLevel;
+  if(lh>2){
+    X.save();
+    roundRect(cx-w/2,cy-h/2,w,h,8);X.clip();
+    X.fillStyle=fillColor;
+    X.globalAlpha=alpha*0.45;
+    X.fillRect(cx-w/2,cy+h/2-lh,w,lh);
+    // surface shimmer
+    X.globalAlpha=alpha*0.25;
+    X.fillStyle='#ffffff';
+    X.fillRect(cx-w/2,cy+h/2-lh,w,3);
+    X.restore();
+  }
+  X.globalAlpha=alpha;
+
+  // concentration text
+  if(concLabel){
+    X.font='bold 22px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle=borderColor;
+    X.fillText(concLabel,cx,cy+6);
+  }
+  // label below
+  if(label){
+    X.font='bold 13px "Segoe UI",sans-serif';X.fillStyle=borderColor;
+    X.textAlign='center';X.fillText(label,cx,cy+h/2+22);
+  }
+  // volume
+  if(volLabel){
+    X.font='12px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+    X.textAlign='center';X.fillText(volLabel,cx,cy+h/2+40);
+  }
+  X.globalAlpha=1;
+}
+
+/* ── Particles ── */
+const particles=[];
+for(let i=0;i<80;i++){
+  particles.push({
+    x:Math.random(),y:Math.random(),
+    vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,
+    r:2+Math.random()*3,
+    type:i<30?'A':'B',
+    color:i<30?'#818cf8':'#34d399'
+  });
+}
+function drawParticles(cx,cy,w,h,prog,alpha){
+  X.save();
+  roundRect(cx-w/2,cy-h/2,w,h,8);X.clip();
+  X.globalAlpha=alpha*0.8;
+  const dt=0.008;
+  for(const p of particles){
+    p.x+=p.vx*dt;p.y+=p.vy*dt;
+    if(p.x<0||p.x>1){p.vx*=-1;p.x=clamp(p.x)}
+    if(p.y<0||p.y>1){p.vy*=-1;p.y=clamp(p.y)}
+    const px=cx-w/2+10+p.x*(w-20);
+    const py=cy-h/2+10+p.y*(h-20);
+    X.fillStyle=p.color;
+    X.beginPath();X.arc(px,py,p.r*prog,0,Math.PI*2);X.fill();
+  }
+  X.restore();
+  X.globalAlpha=1;
+}
+
+/* ── Pour stream ── */
+function drawStream(fromX,fromY,toX,toY,prog,color){
+  const cp=ease(prog);
+  if(cp<=0)return;
+  X.globalAlpha=cp*0.6;
+  X.strokeStyle=color;X.lineWidth=8;X.lineCap='round';
+  const curY=lerp(fromY,toY,cp);
+  X.beginPath();X.moveTo(fromX,fromY);
+  X.quadraticCurveTo((fromX+toX)/2,lerp(fromY,toY,0.5),toX,curY);
+  X.stroke();
+  // drops
+  for(let i=0;i<3;i++){
+    const dp=((prog*3+i*0.33)%1);
+    const dx=lerp(fromX,toX,dp);
+    const dy=lerp(fromY,toY,dp*dp);
+    X.fillStyle=color;X.globalAlpha=cp*0.4;
+    X.beginPath();X.arc(dx+Math.sin(dp*10)*5,dy,4-dp*2,0,Math.PI*2);X.fill();
+  }
+  X.globalAlpha=1;
+}
+
+/* ── Formula animation ── */
+function drawFormula(cx,cy,prog){
+  const a=ease(prog);
+  X.globalAlpha=a;
+
+  // background card
+  roundRect(cx-300,cy-100,600,200,16);
+  X.fillStyle='#0f172a';X.fill();
+  X.strokeStyle='#334155';X.lineWidth=1.5;X.stroke();
+
+  X.textAlign='center';
+
+  // Title
+  X.font='bold 18px "Segoe UI",sans-serif';X.fillStyle='#e2e8f0';
+  X.fillText('Rovnice pro směsi',cx,cy-70);
+
+  // Main equation
+  const eq1=ease((prog-0.1)*2);
+  X.globalAlpha=a*eq1;
+  X.font='bold 20px "Segoe UI",sans-serif';X.fillStyle='#fbbf24';
+  X.fillText('c₁ · V₁  +  c₂ · V₂  =  c · (V₁ + V₂)',cx,cy-35);
+
+  // Substitution
+  const eq2=ease((prog-0.35)*2);
+  X.globalAlpha=a*eq2;
+  X.font='17px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+  X.fillText('Dosadíme:',cx-180,cy+5);
+  X.fillStyle='#818cf8';X.fillText('0,20 · 2',cx-60,cy+5);
+  X.fillStyle='#94a3b8';X.fillText('+',cx+10,cy+5);
+  X.fillStyle='#34d399';X.fillText('0,50 · 3',cx+85,cy+5);
+  X.fillStyle='#94a3b8';X.fillText('=  c · 5',cx+200,cy+5);
+
+  // Steps
+  const eq3=ease((prog-0.55)*2);
+  X.globalAlpha=a*eq3;
+  X.font='17px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+  X.fillText('0,4  +  1,5  =  5c',cx,cy+40);
+
+  const eq4=ease((prog-0.7)*2);
+  X.globalAlpha=a*eq4;
+  X.fillText('1,9  =  5c',cx,cy+65);
+
+  // Result
+  const eq5=ease((prog-0.85)*2);
+  X.globalAlpha=a*eq5;
+  X.font='bold 22px "Segoe UI",sans-serif';X.fillStyle='#f59e0b';
+  X.fillText('c  =  0,38  =  38 %',cx,cy+95);
+
+  X.globalAlpha=1;
+}
+
+/* ── Verification ── */
+function drawVerification(cx,cy,prog){
+  const a=ease(prog);
+  X.globalAlpha=a;
+
+  // Number line
+  const nlY=cy-40;
+  const nlLeft=cx-280,nlRight=cx+280;
+  X.strokeStyle='#475569';X.lineWidth=2;
+  X.beginPath();X.moveTo(nlLeft,nlY);X.lineTo(nlRight,nlY);X.stroke();
+
+  // ticks 0% 20% 38% 50% 100%
+  const marks=[
+    {pct:0,x:nlLeft,color:'#94a3b8',label:'0 %'},
+    {pct:20,x:nlLeft+0.2*(nlRight-nlLeft),color:'#6366f1',label:'20 % (A)'},
+    {pct:38,x:nlLeft+0.38*(nlRight-nlLeft),color:'#f59e0b',label:'38 % (směs)'},
+    {pct:50,x:nlLeft+0.5*(nlRight-nlLeft),color:'#10b981',label:'50 % (B)'},
+    {pct:100,x:nlRight,color:'#94a3b8',label:'100 %'},
+  ];
+  for(const m of marks){
+    const mp=ease((prog-0.1)*2);
+    X.globalAlpha=a*mp;
+    X.strokeStyle=m.color;X.lineWidth=2;
+    X.beginPath();X.moveTo(m.x,nlY-10);X.lineTo(m.x,nlY+10);X.stroke();
+    X.fillStyle=m.color;X.font=m.pct===38?'bold 13px "Segoe UI",sans-serif':'12px "Segoe UI",sans-serif';
+    X.textAlign='center';X.fillText(m.label,m.x,nlY+28);
+    if(m.pct===38){
+      X.fillStyle='#f59e0b';
+      X.beginPath();X.arc(m.x,nlY,8,0,Math.PI*2);X.fill();
+    }
+  }
+
+  // Arrow between A and B showing "směs leží mezi"
+  const arrowProg=ease((prog-0.4)*2);
+  X.globalAlpha=a*arrowProg;
+  const ax=marks[1].x,bx=marks[3].x;
+  X.strokeStyle='#fbbf24';X.lineWidth=3;X.setLineDash([6,4]);
+  X.beginPath();X.moveTo(ax,nlY-20);X.lineTo(bx,nlY-20);X.stroke();
+  X.setLineDash([]);
+
+  // Checkmark
+  const checkP=ease((prog-0.6)*2);
+  X.globalAlpha=a*checkP;
+  X.font='bold 16px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillStyle='#34d399';X.fillText('✓  20 % < 38 % < 50 %  — správně!',cx,nlY-40);
+
+  // Summary box
+  const sumP=ease((prog-0.7)*1.5);
+  X.globalAlpha=a*sumP;
+  roundRect(cx-250,cy+30,500,110,14);
+  X.fillStyle='#0f1720';X.fill();X.strokeStyle='#334155';X.lineWidth=1;X.stroke();
+
+  X.font='bold 16px "Segoe UI",sans-serif';X.fillStyle='#e2e8f0';
+  X.textAlign='center';X.fillText('📝 Shrnutí',cx,cy+60);
+
+  X.font='14px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+  X.fillText('1. Spočítej čistou látku v každém roztoku  (m = c · V)',cx,cy+85);
+  X.fillText('2. Sečti čistou látku  →  vyděl celkovým objemem',cx,cy+107);
+  X.fillText('3. Ověř, že výsledek leží MEZI vstupními koncentracemi',cx,cy+129);
+
+  X.globalAlpha=1;
+}
+
+/* ── Main loop ── */
+function frame(ts){
+  if(lastTs===null)lastTs=ts;
+  const dt=ts-lastTs;lastTs=ts;
+  if(playing&&!scrubbing)currentTime=(currentTime+dt)%DUR;
+  const t=currentTime;
+  if(!scrubbing)scrubber.value=t;
+
+  X.fillStyle='#0a0e1a';X.fillRect(0,0,W,H);
+
+  /* ═══ Phase 1: Two beakers appear (0–7000) ═══ */
+  if(t<7000){
+    const p=t/7000;
+
+    // Beaker A slides in from left
+    const aSlide=ease(p*2.5);
+    const ax=lerp(-100,180,aSlide);
+    drawBeaker(ax,230,130,180,0.6,'rgba(99,102,241,0.4)','#6366f1','Roztok A','20 %','2 litry',ease(p*3));
+
+    // Beaker B slides in from right
+    const bSlide=ease((p-0.15)*2.5);
+    const bx=lerp(860,530,bSlide);
+    drawBeaker(bx,230,130,180,0.75,'rgba(16,185,129,0.4)','#10b981','Roztok B','50 %','3 litry',ease((p-0.15)*3));
+
+    // Labels appear
+    const labP=ease((p-0.5)*3);
+    X.globalAlpha=labP;
+    X.font='bold 15px "Segoe UI",sans-serif';X.textAlign='center';
+
+    // Pure substance labels
+    X.fillStyle='#818cf8';X.fillText('Čistá látka: 0,20 × 2 = 0,4 l',180,405);
+    X.fillStyle='#34d399';X.fillText('Čistá látka: 0,50 × 3 = 1,5 l',530,405);
+
+    // Animated concentration bars
+    const barP=ease((p-0.65)*4);
+    // Bar A
+    X.fillStyle='#1e293b';roundRect(115,430,130,16,6);X.fill();
+    X.fillStyle='#6366f1';roundRect(115,430,130*0.2*barP,16,6);X.fill();
+    // Bar B
+    X.fillStyle='#1e293b';roundRect(465,430,130,16,6);X.fill();
+    X.fillStyle='#10b981';roundRect(465,430,130*0.5*barP,16,6);X.fill();
+
+    X.globalAlpha=1;
+  }
+
+  /* ═══ Phase 2: Pouring / mixing (7000–14000) ═══ */
+  else if(t<14000){
+    const p=(t-7000)/7000;
+
+    // Beakers tilt toward center
+    const tiltA=ease(p*2)*0.3;
+    const tiltB=ease(p*2)*(-0.3);
+    const moveA=ease(p*2)*80;
+    const moveB=ease(p*2)*(-80);
+
+    // Draw tilting beakers
+    X.save();
+    X.translate(180+moveA,230);X.rotate(tiltA);
+    drawBeaker(0,0,130,180,Math.max(0,0.6-p*0.8),'rgba(99,102,241,0.4)','#6366f1','','20 %','',1);
+    X.restore();
+
+    X.save();
+    X.translate(530+moveB,230);X.rotate(tiltB);
+    drawBeaker(0,0,130,180,Math.max(0,0.75-p*0.8),'rgba(16,185,129,0.4)','#10b981','','50 %','',1);
+    X.restore();
+
+    // Pour streams into center beaker
+    if(p>0.15){
+      drawStream(260,160,380,200,(p-0.15)*2,'rgba(99,102,241,0.6)');
+      drawStream(450,160,380,200,(p-0.2)*2,'rgba(16,185,129,0.6)');
+    }
+
+    // Center beaker fills up
+    if(p>0.25){
+      const fillP=ease((p-0.25)*2);
+      drawBeaker(380,280,150,200,fillP*0.85,'rgba(245,158,11,0.3)','#f59e0b','Směs','?','',ease((p-0.25)*3));
+
+      // Particles swirling inside
+      if(p>0.4){
+        drawParticles(380,280,150,200,ease((p-0.4)*2),ease((p-0.4)*3));
+      }
+    }
+
+    // "Míchání..." label
+    if(p>0.3&&p<0.85){
+      const pulse=0.7+0.3*Math.sin(t/200);
+      X.globalAlpha=pulse;
+      X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#fbbf24';
+      X.fillText('⟳  Míchání...',380,120);
+      X.globalAlpha=1;
+    }
+
+    // Final state
+    if(p>0.85){
+      const fp=ease((p-0.85)*7);
+      X.globalAlpha=fp;
+      X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#94a3b8';
+      X.fillText('Čistá látka se neztrácí!',380,420);
+      X.fillText('0,4 + 1,5 = 1,9 litrů čisté látky v 5 litrech směsi',380,445);
+      X.globalAlpha=1;
+    }
+  }
+
+  /* ═══ Phase 3: Result (14000–21000) ═══ */
+  else if(t<21000){
+    const p=(t-14000)/7000;
+
+    // Show final beaker centered
+    const fillP=ease(p*3);
+    drawBeaker(380,220,160,220,0.85*fillP,'rgba(245,158,11,0.35)','#f59e0b','Výsledná směs','','5 litrů',1);
+    drawParticles(380,220,160,220,1,ease(p*4)*0.5);
+
+    // Concentration reveals
+    const cReveal=ease((p-0.2)*2.5);
+    X.globalAlpha=cReveal;
+    X.font='bold 36px "Segoe UI",sans-serif';X.textAlign='center';X.fillStyle='#f59e0b';
+    X.fillText('38 %',380,228);
+
+    // Side comparison
+    const compP=ease((p-0.4)*2.5);
+    X.globalAlpha=compP;
+
+    // Left mini beaker A
+    drawBeaker(120,200,80,120,0.6,'rgba(99,102,241,0.3)','#6366f1','','20 %','2 l',compP);
+    // Right mini beaker B
+    drawBeaker(640,200,80,120,0.75,'rgba(16,185,129,0.3)','#10b981','','50 %','3 l',compP);
+
+    // Arrows
+    X.strokeStyle='#94a3b8';X.lineWidth=2;X.setLineDash([5,4]);
+    X.beginPath();X.moveTo(165,200);X.lineTo(295,210);X.stroke();
+    X.beginPath();X.moveTo(595,200);X.lineTo(465,210);X.stroke();
+    X.setLineDash([]);
+
+    // "Between" indicator
+    const betP=ease((p-0.6)*2.5);
+    X.globalAlpha=betP;
+    X.font='bold 15px "Segoe UI",sans-serif';X.fillStyle='#34d399';
+    X.textAlign='center';X.fillText('20 %  <  38 %  <  50 %  ✓',380,400);
+
+    X.font='13px "Segoe UI",sans-serif';X.fillStyle='#94a3b8';
+    X.fillText('Koncentrace směsi leží vždy MEZI koncentracemi složek',380,425);
+
+    // Animated bar
+    const barP=ease((p-0.5)*3);
+    X.fillStyle='#1e293b';roundRect(180,440,400,14,7);X.fill();
+    // gradient bar
+    const grd=X.createLinearGradient(180,0,580,0);
+    grd.addColorStop(0,'#6366f1');grd.addColorStop(0.38,'#f59e0b');grd.addColorStop(1,'#10b981');
+    X.fillStyle=grd;roundRect(180,440,400*barP,14,7);X.fill();
+    // marker at 38%
+    if(barP>0.38){
+      X.fillStyle='#f59e0b';
+      X.beginPath();X.arc(180+400*0.38,447,8,0,Math.PI*2);X.fill();
+      X.fillStyle='#0a0e1a';X.font='bold 9px sans-serif';X.textAlign='center';
+      X.fillText('38',180+400*0.38,450);
+    }
+
+    X.globalAlpha=1;
+  }
+
+  /* ═══ Phase 4: Formula (21000–28500) ═══ */
+  else if(t<28500){
+    const p=(t-21000)/7500;
+    drawFormula(W/2,H/2,p);
+  }
+
+  /* ═══ Phase 5: Verification & summary (28500–36000) ═══ */
+  else{
+    const p=(t-28500)/7500;
+    drawVerification(W/2,H/2,p);
+  }
+
+  document.getElementById('phase').textContent=getPhase(t);
+  document.getElementById('timer').textContent=`${(t/1000).toFixed(1)}s / 36.0s`;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

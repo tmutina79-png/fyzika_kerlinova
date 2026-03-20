@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 460" font-family="'Segoe UI',system-ui,sans-serif">
+  <defs>
+    <linearGradient id="lc1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.05"/>
+    </linearGradient>
+    <linearGradient id="lc2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="500" height="460" rx="16" fill="#f8fafc"/>
+
+  <!-- title -->
+  <text x="250" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#1e3a5f">Minkowského časoprostorový diagram</text>
+
+  <!-- grid -->
+  <g stroke="#cbd5e1" stroke-width="0.5">
+    <line x1="50" y1="60" x2="50" y2="420"/><line x1="100" y1="60" x2="100" y2="420"/>
+    <line x1="150" y1="60" x2="150" y2="420"/><line x1="200" y1="60" x2="200" y2="420"/>
+    <line x1="300" y1="60" x2="300" y2="420"/><line x1="350" y1="60" x2="350" y2="420"/>
+    <line x1="400" y1="60" x2="400" y2="420"/><line x1="450" y1="60" x2="450" y2="420"/>
+    <line x1="50" y1="100" x2="450" y2="100"/><line x1="50" y1="150" x2="450" y2="150"/>
+    <line x1="50" y1="200" x2="450" y2="200"/><line x1="50" y1="300" x2="450" y2="300"/>
+    <line x1="50" y1="350" x2="450" y2="350"/><line x1="50" y1="400" x2="450" y2="400"/>
+  </g>
+
+  <!-- axes -->
+  <line x1="250" y1="60" x2="250" y2="420" stroke="#1e3a5f" stroke-width="2"/>
+  <line x1="50" y1="250" x2="450" y2="250" stroke="#1e3a5f" stroke-width="2"/>
+  <!-- arrowheads -->
+  <polygon points="250,55 246,65 254,65" fill="#1e3a5f"/>
+  <polygon points="455,250 445,246 445,254" fill="#1e3a5f"/>
+
+  <!-- axis labels -->
+  <text x="260" y="72" font-size="14" font-weight="600" fill="#1e3a5f">ct (čas)</text>
+  <text x="456" y="246" font-size="14" font-weight="600" fill="#1e3a5f">x</text>
+
+  <!-- future light cone fill -->
+  <polygon points="250,250 50,60 450,60" fill="url(#lc1)"/>
+  <!-- past light cone fill -->
+  <polygon points="250,250 50,440 450,440" fill="url(#lc2)"/>
+
+  <!-- light cone lines (45°) -->
+  <line x1="250" y1="250" x2="440" y2="60" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="8,4"/>
+  <line x1="250" y1="250" x2="60" y2="60" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="8,4"/>
+  <line x1="250" y1="250" x2="440" y2="440" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="8,4"/>
+  <line x1="250" y1="250" x2="60" y2="440" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="8,4"/>
+
+  <!-- world line (observer) -->
+  <line x1="250" y1="400" x2="250" y2="100" stroke="#ef4444" stroke-width="3"/>
+  <circle cx="250" cy="250" r="5" fill="#ef4444"/>
+
+  <!-- world line (moving object) -->
+  <path d="M180,400 Q220,300 260,200 Q280,150 290,100" stroke="#10b981" stroke-width="2.5" fill="none"/>
+
+  <!-- labels -->
+  <text x="300" y="88" font-size="12" font-weight="600" fill="#f59e0b">Světelný kužel</text>
+  <text x="300" y="102" font-size="12" fill="#f59e0b">(budoucnost)</text>
+  <text x="300" y="418" font-size="12" font-weight="600" fill="#3b82f6">Světelný kužel</text>
+  <text x="300" y="432" font-size="12" fill="#3b82f6">(minulost)</text>
+
+  <text x="210" y="120" font-size="11" font-weight="600" fill="#ef4444">Pozorovatel</text>
+  <text x="296" y="164" font-size="11" font-weight="600" fill="#10b981">Pohybující se</text>
+  <text x="296" y="178" font-size="11" fill="#10b981">objekt</text>
+
+  <!-- event label -->
+  <text x="256" y="268" font-size="12" font-weight="700" fill="#1e3a5f">Událost</text>
+
+  <!-- region labels -->
+  <text x="80" y="250" font-size="11" fill="#64748b" font-style="italic">Prostorově</text>
+  <text x="80" y="264" font-size="11" fill="#64748b" font-style="italic">oddělená oblast</text>
+  <text x="370" y="250" font-size="11" fill="#64748b" font-style="italic">Prostorově</text>
+  <text x="370" y="264" font-size="11" fill="#64748b" font-style="italic">oddělená oblast</text>
+</svg>

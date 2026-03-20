@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 380" fill="none">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="560" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fdf4ff"/>
+      <stop offset="100%" stop-color="#faf5ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="560" height="380" rx="18" fill="url(#bg3)" stroke="#d8b4fe" stroke-width="2"/>
+  <text x="280" y="38" font-family="Georgia, serif" font-size="20" fill="#7c3aed" text-anchor="middle" font-weight="bold">💡 Vliv Karla Čapka na společnost</text>
+
+  <!-- Central node -->
+  <circle cx="280" cy="200" r="50" fill="#8b5cf6" opacity="0.15"/>
+  <circle cx="280" cy="200" r="40" fill="#8b5cf6" opacity="0.25"/>
+  <text x="280" y="195" font-family="Georgia, serif" font-size="14" fill="#5b21b6" text-anchor="middle" font-weight="bold">Karel</text>
+  <text x="280" y="212" font-family="Georgia, serif" font-size="14" fill="#5b21b6" text-anchor="middle" font-weight="bold">Čapek</text>
+
+  <!-- Branch 1: Robot -->
+  <line x1="245" y1="175" x2="110" y2="95" stroke="#3b82f6" stroke-width="2" stroke-dasharray="6,3"/>
+  <rect x="30" y="60" width="160" height="70" rx="12" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="110" y="82" font-size="24" text-anchor="middle">🤖</text>
+  <text x="110" y="100" font-family="sans-serif" font-size="10" fill="#1e40af" text-anchor="middle" font-weight="bold">Slovo „robot"</text>
+  <text x="110" y="115" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Celosvětově přijaté slovo</text>
+  <text x="110" y="125" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">ve 100+ jazycích</text>
+
+  <!-- Branch 2: Democracy -->
+  <line x1="315" y1="170" x2="450" y2="90" stroke="#10b981" stroke-width="2" stroke-dasharray="6,3"/>
+  <rect x="370" y="55" width="170" height="70" rx="12" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+  <text x="455" y="77" font-size="24" text-anchor="middle">🏛️</text>
+  <text x="455" y="95" font-family="sans-serif" font-size="10" fill="#065f46" text-anchor="middle" font-weight="bold">Obrana demokracie</text>
+  <text x="455" y="110" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Hlas proti fašismu</text>
+  <text x="455" y="120" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">a totalitě</text>
+
+  <!-- Branch 3: Warnings -->
+  <line x1="240" y1="210" x2="95" y2="260" stroke="#ef4444" stroke-width="2" stroke-dasharray="6,3"/>
+  <rect x="20" y="235" width="155" height="75" rx="12" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="97" y="257" font-size="24" text-anchor="middle">⚠️</text>
+  <text x="97" y="275" font-family="sans-serif" font-size="10" fill="#991b1b" text-anchor="middle" font-weight="bold">Varování před technikou</text>
+  <text x="97" y="290" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Předpověděl hrozby AI,</text>
+  <text x="97" y="300" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">zbraní hromadného ničení</text>
+
+  <!-- Branch 4: Culture -->
+  <line x1="320" y1="225" x2="440" y2="275" stroke="#f59e0b" stroke-width="2" stroke-dasharray="6,3"/>
+  <rect x="375" y="250" width="165" height="75" rx="12" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="457" y="272" font-size="24" text-anchor="middle">🎭</text>
+  <text x="457" y="290" font-family="sans-serif" font-size="10" fill="#92400e" text-anchor="middle" font-weight="bold">Česká kultura</text>
+  <text x="457" y="305" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Pátečníci, přátelství s TGM,</text>
+  <text x="457" y="315" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">formoval český jazyk</text>
+
+  <!-- Bottom quote -->
+  <rect x="100" y="342" width="360" height="28" rx="8" fill="#faf5ff" stroke="#d8b4fe"/>
+  <text x="280" y="361" font-family="Georgia, serif" font-size="11" fill="#7c3aed" text-anchor="middle" font-style="italic">„Být člověkem znamená být odpovědný."</text>
+</svg>

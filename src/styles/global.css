@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/* ---------- KaTeX ---------- */
+@import "katex/dist/katex.min.css";
+
+/* ---------- Theme tokens (Tailwind v4 @theme) ---------- */
+@theme {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #1e3a5f;
+  --color-primary-700: #1e3a8a;
+  --color-primary-800: #1e2d5b;
+  --color-primary-900: #0f172a;
+  --color-accent: #2563eb;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+}
+
+/* ---------- Base ---------- */
+body {
+  @apply bg-white text-primary-900 font-sans leading-relaxed;
+}
+
+/* ---------- Prose (lesson content) ---------- */
+.prose h1 { @apply text-3xl font-bold mt-8 mb-4 text-primary-700; }
+.prose h2 { @apply text-2xl font-semibold mt-6 mb-3 text-primary-700; }
+.prose h3 { @apply text-xl font-semibold mt-4 mb-2 text-primary-600; }
+.prose p  { @apply mb-4; }
+.prose ul { @apply list-disc pl-6 mb-4; }
+.prose ol { @apply list-decimal pl-6 mb-4; }
+.prose li { @apply mb-1; }
+.prose code { @apply bg-primary-100 text-primary-800 rounded px-1.5 py-0.5 text-sm; }
+.prose pre { @apply bg-primary-900 text-primary-100 rounded-lg p-4 mb-4 overflow-x-auto; }
+.prose pre code { @apply bg-transparent text-inherit p-0; }
+.prose blockquote { @apply border-l-4 border-primary-400 pl-4 italic text-primary-600 mb-4; }
+.prose a { @apply text-accent underline hover:text-primary-500; }
+.prose hr { @apply border-primary-200 my-8; }
+
+/* KaTeX blocks */
+.prose .katex-display { @apply my-6 overflow-x-auto; }
+
+/* ---------- Zoom-fullscreen on click ---------- */
+.zoom-fullscreen {
+  cursor: zoom-in;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+}
+.zoom-fullscreen.zoomed {
+  position: fixed;
+  inset: 3vh 3vw;
+  width: 94vw;
+  height: 94vh;
+  object-fit: contain;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.7);
+  cursor: zoom-out;
+}

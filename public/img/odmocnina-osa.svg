@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 120" font-family="system-ui, sans-serif">
+  <text x="350" y="18" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a5f">Odmocniny na číselné ose</text>
+
+  <!-- Main line -->
+  <line x1="20" y1="60" x2="680" y2="60" stroke="#1e3a5f" stroke-width="2"/>
+
+  <!-- Ticks & labels for integers 0–7 -->
+  <g font-size="13" fill="#1e3a5f" font-weight="600">
+    <line x1="40" y1="52" x2="40" y2="68" stroke="#1e3a5f" stroke-width="2"/><text x="40" y="88" text-anchor="middle">0</text>
+    <line x1="130" y1="52" x2="130" y2="68" stroke="#1e3a5f" stroke-width="2"/><text x="130" y="88" text-anchor="middle">1</text>
+    <line x1="220" y1="52" x2="220" y2="68" stroke="#1e3a5f" stroke-width="2"/><text x="220" y="88" text-anchor="middle">2</text>
+    <line x1="310" y1="52" x2="310" y2="68" stroke="#1e3a5f" stroke-width="2"/><text x="310" y="88" text-anchor="middle">3</text>
+    <line x1="400" y1="52" x2="400" y2="68" stroke="#1e3a5f" stroke-width="2"/><text x="400" y="88" text-anchor="middle">4</text>
+    <line x1="490" y1="52" x2="490" y2="68" stroke="#1e3a5f" stroke-width="2"/><text x="490" y="88" text-anchor="middle">5</text>
+    <line x1="580" y1="52" x2="580" y2="68" stroke="#1e3a5f" stroke-width="2"/><text x="580" y="88" text-anchor="middle">6</text>
+    <line x1="670" y1="52" x2="670" y2="68" stroke="#1e3a5f" stroke-width="2"/><text x="670" y="88" text-anchor="middle">7</text>
+  </g>
+
+  <!-- √1 = 1 -->
+  <circle cx="130" cy="60" r="6" fill="#2563eb"/>
+  <text x="130" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#2563eb">√1</text>
+
+  <!-- √4 = 2 -->
+  <circle cx="220" cy="60" r="6" fill="#16a34a"/>
+  <text x="220" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#16a34a">√4</text>
+
+  <!-- √2 ≈ 1.41 -->
+  <circle cx="167" cy="60" r="5" fill="#dc2626"/>
+  <text x="167" y="42" text-anchor="middle" font-size="10" font-weight="700" fill="#dc2626">√2≈1,41</text>
+
+  <!-- √3 ≈ 1.73 -->
+  <circle cx="196" cy="60" r="5" fill="#ea580c"/>
+  <text x="196" y="107" text-anchor="middle" font-size="10" font-weight="700" fill="#ea580c">√3≈1,73</text>
+  <line x1="196" y1="68" x2="196" y2="98" stroke="#ea580c" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- √9 = 3 -->
+  <circle cx="310" cy="60" r="6" fill="#16a34a"/>
+  <text x="310" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#16a34a">√9</text>
+
+  <!-- √5 ≈ 2.24 -->
+  <circle cx="242" cy="60" r="5" fill="#dc2626"/>
+  <text x="242" y="107" text-anchor="middle" font-size="10" font-weight="700" fill="#dc2626">√5≈2,24</text>
+  <line x1="242" y1="68" x2="242" y2="98" stroke="#dc2626" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- √16 = 4 -->
+  <circle cx="400" cy="60" r="6" fill="#16a34a"/>
+  <text x="400" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#16a34a">√16</text>
+
+  <!-- √25 = 5 -->
+  <circle cx="490" cy="60" r="6" fill="#16a34a"/>
+  <text x="490" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#16a34a">√25</text>
+
+  <!-- √36 = 6 -->
+  <circle cx="580" cy="60" r="6" fill="#16a34a"/>
+  <text x="580" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#16a34a">√36</text>
+</svg>

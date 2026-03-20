@@ -1,0 +1,253 @@
+---
+title: "Teorie relativity"
+description: "Speciální a obecná teorie relativity – pojmy, vysvětlení, grafická znázornění, deformační křivka a příklady."
+order: 5
+---
+
+import SelfCheck from '../../components/SelfCheck.svelte';
+import Quiz from '../../components/Quiz.svelte';
+
+# ⚛️ Teorie relativity
+
+> *„Vložte ruku na minutu na horký sporák a bude vám to připadat jako hodina. Sedněte si na hodinu vedle krásné dívky a bude vám to připadat jako minuta. To je relativita."*
+> — Albert Einstein
+
+---
+
+## 📖 Klíčové pojmy
+
+| Pojem | Význam |
+|---|---|
+| **Inerciální soustava** | Vztažná soustava, která se pohybuje rovnoměrně přímočaře (bez zrychlení). |
+| **Rychlost světla (*c*)** | Maximální rychlost ve vesmíru: $c \approx 3 \times 10^8 \;\text{m/s}$. |
+| **Lorentzův faktor (*γ*)** | $\gamma = \dfrac{1}{\sqrt{1 - v^2/c^2}}$ – klíčový koeficient relativistických jevů. |
+| **Dilatace času** | Čas plyne pomaleji pro pohybující se pozorovatele. |
+| **Kontrakce délky** | Objekty se ve směru pohybu zkracují. |
+| **Ekvivalence E = mc²** | Hmotnost a energie jsou dvě formy téhož. |
+| **Časoprostor** | Čtyřrozměrný prostor spojující 3 prostorové a 1 časovou dimenzi. |
+| **Světelný kužel** | Oblast v časoprostorovém diagramu, kam může dorazit světlo z dané události. |
+| **Gravitační zakřivení** | Hmotná tělesa zakřivují okolní časoprostor (obecná teorie relativity). |
+
+---
+
+## 1️⃣ Speciální teorie relativity (STR)
+
+Albert Einstein publikoval STR v roce **1905**. Stojí na dvou postulátecch:
+
+1. **Princip relativity** – Fyzikální zákony platí stejně ve všech inerciálních soustavách.
+2. **Konstantnost rychlosti světla** – Rychlost světla ve vakuu je stejná pro všechny pozorovatele, nezávisle na pohybu zdroje.
+
+Z těchto dvou jednoduchých pravidel plynou překvapivé důsledky.
+
+---
+
+### ⏱️ Dilatace času
+
+Hodiny pohybujícího se pozorovatele **tikají pomaleji** ve srovnání s hodinami v klidu:
+
+$$
+\Delta t' = \frac{\Delta t}{\gamma} = \Delta t \cdot \sqrt{1 - \frac{v^2}{c^2}}
+$$
+
+kde $\Delta t$ je čas naměřený v klidu a $\Delta t'$ je čas naměřený pohybujícím se pozorovatelem.
+
+<img src="/img/relativita-dilatace.svg" alt="Dilatace času – srovnání hodin" class="w-full max-w-xl mx-auto my-6 rounded-xl shadow" />
+
+> **Příklad z praxe:** Miony (nestabilní částice) vznikají v horních vrstvách atmosféry. Jejich poločas rozpadu je tak krátký, že by se klasicky nemohly dostat na povrch Země. Díky dilataci času (pohybují se téměř rychlostí světla) žijí z našeho pohledu déle a dorazí až k nám.
+
+<SelfCheck client:load id="str-dilatace" label="Rozumím, proč čas plyne pomaleji pro rychle se pohybující objekt" />
+
+---
+
+### 📏 Kontrakce délky
+
+Objekt pohybující se rychlostí $v$ se **ve směru pohybu zkrátí**:
+
+$$
+L = L_0 \cdot \sqrt{1 - \frac{v^2}{c^2}} = \frac{L_0}{\gamma}
+$$
+
+kde $L_0$ je vlastní délka (v klidu) a $L$ je pozorovaná délka.
+
+<img src="/img/relativita-kontrakce.svg" alt="Kontrakce délky" class="w-full max-w-xl mx-auto my-6 rounded-xl shadow" />
+
+> Při rychlosti $0{,}8c$ se loď dlouhá 100 m zkrátí na pouhých **60 m** z pohledu pozorovatele na Zemi!
+
+<SelfCheck client:load id="str-kontrakce" label="Chápu Lorentzovu kontrakci délky" />
+
+---
+
+### ⚡ E = mc² – Ekvivalence hmotnosti a energie
+
+Nejslavnější rovnice fyziky říká, že **hmotnost je forma energie**:
+
+$$
+E = mc^2
+$$
+
+Protože $c^2 \approx 9 \times 10^{16} \;\text{m}^2/\text{s}^2$, i malá hmotnost odpovídá obrovské energii.
+
+<img src="/img/relativita-emc2.svg" alt="E=mc² – ekvivalence hmotnosti a energie" class="w-full max-w-lg mx-auto my-6 rounded-xl shadow" />
+
+**Kde to vidíme v praxi:**
+- ☢️ **Jaderné reakce** – štěpení uranu v reaktorech, fúze vodíku ve hvězdách
+- ⭐ **Slunce** – každou sekundu přemění ~4 miliony tun hmoty na energii
+- 💊 **PET scan** – anihilace elektron-pozitron v medicínském zobrazování
+
+<SelfCheck client:load id="str-emc2" label="Rozumím rovnici E = mc² a jejímu praktickému významu" />
+
+---
+
+## 2️⃣ Obecná teorie relativity (OTR)
+
+Einstein rozšířil STR v roce **1915** na neinerciální soustavy (se zrychlením) a gravitaci:
+
+> **Hmotnost a energie zakřivují časoprostor. Tělesa se pohybují po geodetikách (nejkratších dráhách) v zakřiveném časoprostoru.**
+
+To znamená, že **gravitace není síla** v klasickém smyslu – je to důsledek zakřivení prostoru!
+
+---
+
+### 🌐 Deformační křivka časoprostoru
+
+<img src="/img/relativita-deformace.svg" alt="Deformace časoprostoru – potenciálová jáma" class="w-full max-w-2xl mx-auto my-6 rounded-xl shadow" />
+
+Na obrázku vidíme:
+- **Rovná mřížka** (vlevo) = plochý časoprostor bez hmotných těles
+- **Zakřivená mřížka** (vpravo) = deformace kolem hmotného tělesa M
+- **Potenciálová jáma** (dole) = čím blíže k hmotě, tím hlubší „propadlina"
+
+> Einsteinova rovnice pole popisuje zakřivení přesně:
+> $$G_{\mu\nu} + \Lambda g_{\mu\nu} = \frac{8\pi G}{c^4} T_{\mu\nu}$$
+> (Tenzor zakřivení = rozložení hmoty a energie)
+
+**Důkazy OTR:**
+- 🌑 **Ohýbání světla** – světlo hvězd se ohýbá kolem Slunce (potvrzeno 1919)
+- ⏱️ **Gravitační dilatace času** – hodiny blíže gravitačnímu poli tikají pomaleji (potvrzeno GPS satelity)
+- 🌊 **Gravitační vlny** – detekce detektorem LIGO (2015, Nobelova cena 2017)
+- 🕳️ **Černé díry** – první fotografie M87* (2019, Event Horizon Telescope)
+
+<SelfCheck client:load id="otr-zakladni" label="Chápu rozdíl mezi STR a OTR" />
+
+---
+
+### 🗺️ Časoprostorový diagram (Minkowského diagram)
+
+<img src="/img/relativita-casoprostor.svg" alt="Minkowského časoprostorový diagram" class="w-full max-w-xl mx-auto my-6 rounded-xl shadow" />
+
+V diagramu:
+- **Svislá osa** = čas ($ct$), **vodorovná osa** = prostor ($x$)
+- **Světelný kužel** (žlutě) = hranice 45°, kam dosáhne světlo
+- **Budoucnost** = uvnitř horního kužele
+- **Minulost** = uvnitř dolního kužele
+- **Prostorově oddělená oblast** = vně kužele (žádný signál tam nedorazí)
+
+---
+
+## 📐 3 řešené příklady
+
+### Příklad 1: Dilatace času astronauta
+
+> Astronaut letí rychlostí $v = 0{,}9c$. Na Zemi uplyne 10 let. Kolik let uplyne astronautovi?
+
+**Řešení:**
+
+$$\gamma = \frac{1}{\sqrt{1 - (0{,}9)^2}} = \frac{1}{\sqrt{1 - 0{,}81}} = \frac{1}{\sqrt{0{,}19}} \approx 2{,}294$$
+
+$$\Delta t' = \frac{\Delta t}{\gamma} = \frac{10}{2{,}294} \approx \boxed{4{,}36 \;\text{let}}$$
+
+Astronautovi uplyne jen asi **4 roky a 4 měsíce**, zatímco na Zemi uplyne plných 10 let.
+
+---
+
+### Příklad 2: Energie z hmotnosti
+
+> Kolik energie se uvolní při úplné přeměně $m = 1\;\text{g} = 0{,}001\;\text{kg}$ hmoty?
+
+**Řešení:**
+
+$$E = mc^2 = 0{,}001 \times (3 \times 10^8)^2 = 0{,}001 \times 9 \times 10^{16}$$
+
+$$E = \boxed{9 \times 10^{13} \;\text{J} = 90 \;\text{TJ}}$$
+
+To je energie srovnatelná s výbuchem asi **21 kilotun TNT** – přibližně energie bomby shozené na Hirošimu. Z pouhého **jednoho gramu**!
+
+---
+
+### Příklad 3: Kontrakce kosmické lodi
+
+> Kosmická loď má vlastní délku $L_0 = 200\;\text{m}$ a letí rychlostí $v = 0{,}95c$. Jaká je její pozorovaná délka?
+
+**Řešení:**
+
+$$\gamma = \frac{1}{\sqrt{1 - (0{,}95)^2}} = \frac{1}{\sqrt{1 - 0{,}9025}} = \frac{1}{\sqrt{0{,}0975}} \approx 3{,}203$$
+
+$$L = \frac{L_0}{\gamma} = \frac{200}{3{,}203} \approx \boxed{62{,}4 \;\text{m}}$$
+
+Z pohledu pozorovatele na Zemi se loď zkrátila na necelou **třetinu** své klidové délky!
+
+---
+
+## 📚 Slovník důležitých pojmů
+
+| Pojem | Anglicky | Definice |
+|---|---|---|
+| Inerciální soustava | Inertial frame | Soustava pohybující se rovnoměrně přímočaře |
+| Dilatace času | Time dilation | Zpomalení plynutí času při vysokých rychlostech |
+| Kontrakce délky | Length contraction | Zkrácení objektu ve směru pohybu |
+| Lorentzův faktor | Lorentz factor | $\gamma = 1/\sqrt{1 - v^2/c^2}$ |
+| Časoprostor | Spacetime | 4D prostor (3 prostorové + 1 časová dimenze) |
+| Světelný kužel | Light cone | Oblast dosažitelná světlem z dané události |
+| Geodetika | Geodesic | Nejkratší dráha v zakřiveném prostoru |
+| Gravitační vlny | Gravitational waves | Vlnění zakřiveného časoprostoru |
+| Černá díra | Black hole | Objekt s tak silnou gravitací, že z něj neunikne ani světlo |
+| Ekvivalence | Mass-energy equivalence | Hmotnost je forma energie ($E = mc^2$) |
+
+---
+
+## ✅ Ověř si porozumění
+
+<SelfCheck client:load id="rel-pojmy" label="Umím vysvětlit rozdíl mezi STR a OTR" />
+<SelfCheck client:load id="rel-vzorce" label="Umím pracovat s Lorentzovým faktorem γ" />
+<SelfCheck client:load id="rel-priklady" label="Zvládnu vypočítat dilataci času i kontrakci délky" />
+<SelfCheck client:load id="rel-deformace" label="Chápu, proč hmotnost zakřivuje časoprostor" />
+
+---
+
+## 🧪 Kvíz
+
+<Quiz
+  client:load
+  questions={[
+    {
+      question: "Astronaut letí rychlostí 0,6c. Jaký je Lorentzův faktor γ?",
+      options: ["γ = 1,00", "γ = 1,25", "γ = 1,50", "γ = 2,00"],
+      correct: 1,
+      explanation: "γ = 1/√(1 − 0,36) = 1/√0,64 = 1/0,8 = 1,25."
+    },
+    {
+      question: "Co popisuje slavná rovnice E = mc²?",
+      options: ["Vztah síly a zrychlení", "Ekvivalenci hmotnosti a energie", "Gravitační přitažlivost dvou těles", "Zákon zachování hybnosti"],
+      correct: 1,
+      explanation: "E = mc² vyjadřuje, že hmotnost a energie jsou dvě formy téhož."
+    },
+    {
+      question: "Který jev NENÍ důkazem obecné teorie relativity?",
+      options: ["Ohýbání světla kolem Slunce", "Gravitační vlny detekované LIGO", "Fotoelektrický jev", "Gravitační dilatace času v GPS"],
+      correct: 2,
+      explanation: "Fotoelektrický jev vysvětluje kvantová teorie – nikoliv OTR."
+    },
+    {
+      question: "Hodinky astronauta letícího rychlostí 0,8c ukazují 1 rok. Kolik let uběhlo na Zemi?",
+      options: ["0,6 roku", "1 rok", "≈ 1,67 roku", "2 roky"],
+      correct: 2,
+      explanation: "γ = 1/√(1 − 0,64) = 1/0,6 ≈ 1,67. Na Zemi uběhlo γ · 1 = 1,67 roku."
+    },
+    {
+      question: "Co se stane s relativistickou hmotností tělesa, když se jeho rychlost blíží rychlosti světla?",
+      options: ["Klesá k nule", "Zůstává stejná", "Roste nade všechny meze", "Osciluje"],
+      correct: 2,
+      explanation: "S rostoucí rychlostí roste γ → ∞, a tím i relativistická hmotnost m = γ · m₀."
+    }
+  ]}
+/>

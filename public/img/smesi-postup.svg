@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 380">
+  <defs>
+    <linearGradient id="p1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/></linearGradient>
+    <linearGradient id="p2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#10b981"/></linearGradient>
+    <linearGradient id="p3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
+    <linearGradient id="p4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f87171"/><stop offset="100%" stop-color="#ef4444"/></linearGradient>
+    <filter id="dsp"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/></filter>
+  </defs>
+  <rect width="520" height="380" rx="16" fill="#f8fafc"/>
+  <text x="260" y="32" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="700" fill="#1e293b">Postup řešení příkladů na směsi – 4 kroky</text>
+
+  <!-- Step 1 -->
+  <rect x="30" y="54" width="460" height="60" rx="12" fill="white" stroke="#c7d2fe" stroke-width="1.5" filter="url(#dsp)"/>
+  <circle cx="60" cy="84" r="18" fill="url(#p1)"/>
+  <text x="60" y="89" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="white">1</text>
+  <text x="90" y="76" font-family="system-ui" font-size="13" font-weight="700" fill="#312e81">Sestav tabulku</text>
+  <text x="90" y="96" font-family="system-ui" font-size="11" fill="#64748b">Zapiš objem (V), koncentraci (c) a množství čisté látky (m = c · V)</text>
+
+  <!-- Arrow -->
+  <text x="260" y="128" text-anchor="middle" font-family="system-ui" font-size="16" fill="#cbd5e1">▼</text>
+
+  <!-- Step 2 -->
+  <rect x="30" y="136" width="460" height="60" rx="12" fill="white" stroke="#a7f3d0" stroke-width="1.5" filter="url(#dsp)"/>
+  <circle cx="60" cy="166" r="18" fill="url(#p2)"/>
+  <text x="60" y="171" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="white">2</text>
+  <text x="90" y="158" font-family="system-ui" font-size="13" font-weight="700" fill="#064e3b">Zapiš rovnici pro čistou látku</text>
+  <text x="90" y="178" font-family="system-ui" font-size="11" fill="#64748b">c₁ · V₁ + c₂ · V₂ = c · (V₁ + V₂)     — zákon zachování</text>
+
+  <!-- Arrow -->
+  <text x="260" y="210" text-anchor="middle" font-family="system-ui" font-size="16" fill="#cbd5e1">▼</text>
+
+  <!-- Step 3 -->
+  <rect x="30" y="218" width="460" height="60" rx="12" fill="white" stroke="#fde68a" stroke-width="1.5" filter="url(#dsp)"/>
+  <circle cx="60" cy="248" r="18" fill="url(#p3)"/>
+  <text x="60" y="253" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="white">3</text>
+  <text x="90" y="240" font-family="system-ui" font-size="13" font-weight="700" fill="#78350f">Dosaď a vyřeš</text>
+  <text x="90" y="260" font-family="system-ui" font-size="11" fill="#64748b">Dosaď známé hodnoty, vyjádři neznámou (objem nebo koncentraci)</text>
+
+  <!-- Arrow -->
+  <text x="260" y="292" text-anchor="middle" font-family="system-ui" font-size="16" fill="#cbd5e1">▼</text>
+
+  <!-- Step 4 -->
+  <rect x="30" y="300" width="460" height="60" rx="12" fill="white" stroke="#fca5a5" stroke-width="1.5" filter="url(#dsp)"/>
+  <circle cx="60" cy="330" r="18" fill="url(#p4)"/>
+  <text x="60" y="335" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="700" fill="white">4</text>
+  <text x="90" y="322" font-family="system-ui" font-size="13" font-weight="700" fill="#7f1d1d">Ověř výsledek</text>
+  <text x="90" y="342" font-family="system-ui" font-size="11" fill="#64748b">Koncentrace směsi musí ležet MEZI koncentracemi obou složek!</text>
+</svg>

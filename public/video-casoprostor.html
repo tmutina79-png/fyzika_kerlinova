@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Časoprostor – Vizuální animace</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+  canvas{border-radius:16px;box-shadow:0 0 60px rgba(59,130,246,.25)}
+  #info{color:#94a3b8;font-size:13px;margin-top:12px;text-align:center}
+  #title{color:#e2e8f0;font-size:22px;font-weight:700;margin-bottom:14px;letter-spacing:1px}
+  #phase{color:#60a5fa;font-size:15px;margin-top:8px;font-weight:600;min-height:22px}
+  #timer{color:#475569;font-size:12px;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="title">⚛️ Časoprostor — Teorie relativity</div>
+<canvas id="c" width="720" height="480"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="info">Automatická 10s animace • zakřivení časoprostoru hmotným tělesem</div>
+
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=C.width,H=C.height;
+const DURATION=10000; // 10 seconds
+let start=null;
+
+/* ── Phases (timeline) ── */
+const phases=[
+  {t:0,    label:"Plochý časoprostor – bez hmotnosti"},
+  {t:2000, label:"Hmotné těleso vstupuje…"},
+  {t:3500, label:"Časoprostor se zakřivuje"},
+  {t:5500, label:"Světelné paprsky se ohýbají"},
+  {t:7500, label:"Gravitační vlny se šíří"},
+  {t:9500, label:""},
+];
+
+function getPhase(t){
+  let p=phases[0].label;
+  for(const ph of phases) if(t>=ph.t) p=ph.label;
+  return p;
+}
+
+/* ── Draw grid ── */
+function drawGrid(t,massStrength,mx,my){
+  const cols=22,rows=15;
+  const gw=W/(cols-1),gh=H/(rows-1);
+
+  X.strokeStyle='rgba(59,130,246,0.3)';
+  X.lineWidth=1;
+
+  // horizontal lines
+  for(let r=0;r<rows;r++){
+    X.beginPath();
+    for(let c=0;c<cols;c++){
+      let x=c*gw, y=r*gh;
+      // deform toward mass
+      const dx=x-mx, dy=y-my;
+      const dist=Math.sqrt(dx*dx+dy*dy)+1;
+      const pull=massStrength*3000/(dist*dist);
+      const ax=x - dx*pull;
+      const ay=y + Math.abs(dy)<dist? dy*pull*0.5 + pull*40 : dy*pull*0.2;
+      const fx=x - dx*pull;
+      const fy=y + pull*35;
+      if(c===0) X.moveTo(fx,fy); else X.lineTo(fx,fy);
+    }
+    X.stroke();
+  }
+
+  // vertical lines
+  for(let c=0;c<cols;c++){
+    X.beginPath();
+    for(let r=0;r<rows;r++){
+      let x=c*gw, y=r*gh;
+      const dx=x-mx, dy=y-my;
+      const dist=Math.sqrt(dx*dx+dy*dy)+1;
+      const pull=massStrength*3000/(dist*dist);
+      const fx=x - dx*pull;
+      const fy=y + pull*35;
+      if(r===0) X.moveTo(fx,fy); else X.lineTo(fx,fy);
+    }
+    X.stroke();
+  }
+}
+
+/* ── Stars background ── */
+const stars=[];
+for(let i=0;i<120;i++) stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.3,b:Math.random()});
+
+function drawStars(t){
+  for(const s of stars){
+    const a=0.3+0.7*Math.abs(Math.sin(t/1000+s.b*6));
+    X.fillStyle=`rgba(255,255,255,${a})`;
+    X.beginPath();
+    X.arc(s.x,s.y,s.r,0,Math.PI*2);
+    X.fill();
+  }
+}
+
+/* ── Light rays ── */
+function drawLightRays(t,massStrength,mx,my,rayAlpha){
+  if(rayAlpha<=0) return;
+  const rays=8;
+  X.lineWidth=2;
+  for(let i=0;i<rays;i++){
+    const angle=(Math.PI*2/rays)*i;
+    X.beginPath();
+    X.strokeStyle=`rgba(251,191,36,${rayAlpha*0.7})`;
+    let px=mx+Math.cos(angle)*300;
+    let py=my+Math.sin(angle)*300;
+    const steps=60;
+    X.moveTo(px,py);
+    for(let s=1;s<=steps;s++){
+      const frac=s/steps;
+      let lx=px+(mx-px)*frac;
+      let ly=py+(my-py)*frac;
+      // bend light toward mass
+      const dx=lx-mx,dy=ly-my;
+      const dist=Math.sqrt(dx*dx+dy*dy)+1;
+      const bend=massStrength*800/(dist*dist);
+      // perpendicular deflection
+      const perpX=-dy/dist*bend*20;
+      const perpY=dx/dist*bend*20;
+      lx+=perpX*Math.sin(frac*Math.PI);
+      ly+=perpY*Math.sin(frac*Math.PI);
+      X.lineTo(lx,ly);
+    }
+    X.stroke();
+  }
+}
+
+/* ── Gravitational waves ── */
+function drawGravWaves(t,mx,my,waveAlpha){
+  if(waveAlpha<=0)return;
+  const count=5;
+  for(let i=0;i<count;i++){
+    const phase=(t/800+i/count)%1;
+    const r=phase*220;
+    const a=waveAlpha*(1-phase)*0.5;
+    X.strokeStyle=`rgba(168,85,247,${a})`;
+    X.lineWidth=2.5;
+    X.beginPath();
+    X.arc(mx,my,r,0,Math.PI*2);
+    X.stroke();
+  }
+}
+
+/* ── Mass object ── */
+function drawMass(mx,my,massAlpha,pulse){
+  if(massAlpha<=0)return;
+  // glow
+  const grad=X.createRadialGradient(mx,my,0,mx,my,60);
+  grad.addColorStop(0,`rgba(251,191,36,${massAlpha*0.6})`);
+  grad.addColorStop(0.5,`rgba(251,146,36,${massAlpha*0.2})`);
+  grad.addColorStop(1,`rgba(251,146,36,0)`);
+  X.fillStyle=grad;
+  X.beginPath();
+  X.arc(mx,my,60+pulse*8,0,Math.PI*2);
+  X.fill();
+
+  // sphere
+  const sg=X.createRadialGradient(mx-6,my-6,0,mx,my,22);
+  sg.addColorStop(0,`rgba(255,230,140,${massAlpha})`);
+  sg.addColorStop(1,`rgba(245,158,11,${massAlpha})`);
+  X.fillStyle=sg;
+  X.beginPath();
+  X.arc(mx,my,20+pulse*3,0,Math.PI*2);
+  X.fill();
+
+  X.fillStyle=`rgba(255,255,255,${massAlpha*0.9})`;
+  X.font='bold 16px "Segoe UI",system-ui,sans-serif';
+  X.textAlign='center';
+  X.textBaseline='middle';
+  X.fillText('M',mx,my);
+}
+
+/* ── Formula overlay ── */
+function drawFormula(t){
+  const fade=Math.min(1,Math.max(0,(t-4000)/1000));
+  if(fade<=0)return;
+  X.fillStyle=`rgba(255,255,255,${fade*0.85})`;
+  X.font='bold 20px "Segoe UI",system-ui,sans-serif';
+  X.textAlign='center';
+  X.fillText('Gμν + Λgμν = (8πG/c⁴) Tμν',W/2,H-40);
+  
+  // E=mc2 appears later
+  const fade2=Math.min(1,Math.max(0,(t-7000)/800));
+  if(fade2>0){
+    X.fillStyle=`rgba(251,191,36,${fade2*0.9})`;
+    X.font='bold 26px "Segoe UI",system-ui,sans-serif';
+    X.fillText('E = mc²',W/2,H-70);
+  }
+}
+
+/* ── Main loop ── */
+function frame(ts){
+  if(!start) start=ts;
+  const elapsed=(ts-start)%DURATION;
+  const t=elapsed;
+
+  // clear
+  X.fillStyle='#0a0e1a';
+  X.fillRect(0,0,W,H);
+
+  drawStars(t);
+
+  // mass position & strength ramp
+  const mx=W/2, my=H/2-20;
+  // mass enters from t=2000 to t=3500
+  const massAlpha=Math.min(1,Math.max(0,(t-2000)/1500));
+  const massStrength=Math.min(1,Math.max(0,(t-2000)/2000));
+  const pulse=Math.sin(t/300)*massAlpha;
+
+  // light rays: appear t=5500..9000
+  const rayAlpha=Math.min(1,Math.max(0,(t-5500)/800))*Math.min(1,Math.max(0,(9500-t)/500));
+
+  // grav waves: appear t=7500..10000
+  const waveAlpha=Math.min(1,Math.max(0,(t-7500)/600));
+
+  drawGrid(t,massStrength,mx,my);
+  drawLightRays(t,massStrength,mx,my,rayAlpha);
+  drawGravWaves(t,mx,my,waveAlpha);
+  drawMass(mx,my,massAlpha,pulse);
+  drawFormula(t);
+
+  // phase label
+  document.getElementById('phase').textContent=getPhase(t);
+  document.getElementById('timer').textContent=`${(t/1000).toFixed(1)}s / 10.0s`;
+
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

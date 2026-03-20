@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 320" font-family="system-ui, sans-serif">
+  <text x="350" y="24" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a5f">Funkce v reálném životě</text>
+
+  <!-- ===== 1. Teplota ===== -->
+  <g transform="translate(20,40)">
+    <rect x="0" y="0" width="200" height="260" rx="12" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+    <text x="100" y="30" text-anchor="middle" font-size="28">🌡️</text>
+    <text x="100" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a5f">Teplota během dne</text>
+    <text x="100" y="70" text-anchor="middle" font-size="11" fill="#64748b">čas → teplota</text>
+
+    <!-- Mini graph -->
+    <line x1="30" y1="230" x2="180" y2="230" stroke="#1e3a5f" stroke-width="1"/>
+    <line x1="30" y1="230" x2="30" y2="85" stroke="#1e3a5f" stroke-width="1"/>
+    <polyline points="30,200 55,180 80,140 105,105 130,100 155,120 175,160"
+      fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="105" y="248" text-anchor="middle" font-size="10" fill="#64748b">hodina</text>
+    <text x="20" y="160" text-anchor="middle" font-size="10" fill="#64748b" transform="rotate(-90,20,160)">°C</text>
+  </g>
+
+  <!-- ===== 2. Cena jízdného ===== -->
+  <g transform="translate(250,40)">
+    <rect x="0" y="0" width="200" height="260" rx="12" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+    <text x="100" y="30" text-anchor="middle" font-size="28">🚌</text>
+    <text x="100" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a5f">Cena jízdného</text>
+    <text x="100" y="70" text-anchor="middle" font-size="11" fill="#64748b">vzdálenost → cena</text>
+
+    <!-- Mini step function -->
+    <line x1="30" y1="230" x2="180" y2="230" stroke="#1e3a5f" stroke-width="1"/>
+    <line x1="30" y1="230" x2="30" y2="85" stroke="#1e3a5f" stroke-width="1"/>
+    <polyline points="30,200 70,200 70,170 110,170 110,140 150,140 150,110 180,110"
+      fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="105" y="248" text-anchor="middle" font-size="10" fill="#64748b">km</text>
+    <text x="20" y="160" text-anchor="middle" font-size="10" fill="#64748b" transform="rotate(-90,20,160)">Kč</text>
+  </g>
+
+  <!-- ===== 3. Známka z testu ===== -->
+  <g transform="translate(480,40)">
+    <rect x="0" y="0" width="200" height="260" rx="12" fill="#fef3c7" stroke="#fde68a" stroke-width="1.5"/>
+    <text x="100" y="30" text-anchor="middle" font-size="28">📊</text>
+    <text x="100" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#1e3a5f">Body → Známka</text>
+    <text x="100" y="70" text-anchor="middle" font-size="11" fill="#64748b">skóre → hodnocení</text>
+
+    <!-- Mini mapping -->
+    <g font-size="11" fill="#1e3a5f">
+      <text x="40" y="100">0–20 b.</text><text x="130" y="100" font-weight="700" fill="#dc2626">→ 5</text>
+      <text x="40" y="122">21–40 b.</text><text x="130" y="122" font-weight="700" fill="#ea580c">→ 4</text>
+      <text x="40" y="144">41–60 b.</text><text x="130" y="144" font-weight="700" fill="#ca8a04">→ 3</text>
+      <text x="40" y="166">61–80 b.</text><text x="130" y="166" font-weight="700" fill="#16a34a">→ 2</text>
+      <text x="40" y="188">81–100 b.</text><text x="130" y="188" font-weight="700" fill="#2563eb">→ 1</text>
+    </g>
+
+    <text x="100" y="220" text-anchor="middle" font-size="10" fill="#64748b">Každému skóre přiřadíme</text>
+    <text x="100" y="234" text-anchor="middle" font-size="10" fill="#64748b">právě jednu známku</text>
+  </g>
+</svg>

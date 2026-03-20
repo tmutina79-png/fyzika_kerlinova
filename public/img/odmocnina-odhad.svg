@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" font-family="system-ui, sans-serif">
+  <text x="300" y="22" text-anchor="middle" font-size="15" font-weight="700" fill="#1e3a5f">Jak odhadnout odmocninu? Příklad: √7</text>
+
+  <!-- Number line segment 2–3 -->
+  <line x1="50" y1="80" x2="550" y2="80" stroke="#1e3a5f" stroke-width="2.5"/>
+
+  <!-- Tick 2 -->
+  <line x1="50" y1="70" x2="50" y2="90" stroke="#1e3a5f" stroke-width="2.5"/>
+  <text x="50" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a5f">2</text>
+  <text x="50" y="128" text-anchor="middle" font-size="11" fill="#16a34a" font-weight="600">2² = 4</text>
+
+  <!-- Tick 3 -->
+  <line x1="550" y1="70" x2="550" y2="90" stroke="#1e3a5f" stroke-width="2.5"/>
+  <text x="550" y="110" text-anchor="middle" font-size="14" font-weight="700" fill="#1e3a5f">3</text>
+  <text x="550" y="128" text-anchor="middle" font-size="11" fill="#16a34a" font-weight="600">3² = 9</text>
+
+  <!-- Middle label -->
+  <text x="300" y="54" text-anchor="middle" font-size="12" fill="#64748b">4 &lt; 7 &lt; 9   →   2 &lt; √7 &lt; 3</text>
+
+  <!-- √7 ≈ 2.646 → position: 50 + (0.646/1)*500 ≈ 373 -->
+  <circle cx="373" cy="80" r="7" fill="#dc2626"/>
+  <text x="373" y="68" text-anchor="middle" font-size="13" font-weight="700" fill="#dc2626">√7 ≈ 2,65</text>
+
+  <!-- 2.5 tick for reference -->
+  <line x1="300" y1="74" x2="300" y2="86" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="300" y="150" text-anchor="middle" font-size="11" fill="#94a3b8">2,5</text>
+  <text x="300" y="166" text-anchor="middle" font-size="10" fill="#94a3b8">2,5² = 6,25</text>
+
+  <!-- 2.65 check -->
+  <text x="373" y="150" text-anchor="middle" font-size="10" fill="#dc2626">zkouška: 2,65² = 7,02 ✓</text>
+
+  <!-- Bottom tip -->
+  <rect x="100" y="174" width="400" height="24" rx="8" fill="#1e3a5f" opacity="0.06"/>
+  <text x="300" y="192" text-anchor="middle" font-size="12" fill="#1e3a5f" font-weight="600">💡 Najdi dva po sobě jdoucí celé čísla, jejichž druhé mocniny „sevřou" číslo pod odmocninou.</text>
+</svg>

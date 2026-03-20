@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 320" fill="none">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="560" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fefce8"/>
+      <stop offset="100%" stop-color="#fef9c3"/>
+    </linearGradient>
+  </defs>
+  <rect width="560" height="320" rx="18" fill="url(#bg4)" stroke="#fde047" stroke-width="2"/>
+  <text x="280" y="35" font-family="Georgia, serif" font-size="18" fill="#854d0e" text-anchor="middle" font-weight="bold">🕰️ Životní milníky Karla Čapka</text>
+
+  <!-- Timeline -->
+  <line x1="60" y1="70" x2="500" y2="70" stroke="#ca8a04" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- 1890 -->
+  <circle cx="80" cy="70" r="10" fill="#eab308"/>
+  <text x="80" y="60" font-family="sans-serif" font-size="10" fill="#854d0e" text-anchor="middle" font-weight="bold">1890</text>
+  <rect x="35" y="85" width="90" height="50" rx="8" fill="#fff" stroke="#eab308"/>
+  <text x="80" y="102" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle">Narozen v</text>
+  <text x="80" y="114" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle" font-weight="bold">Malých Svatoňovicích</text>
+  <text x="80" y="128" font-family="sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle">Královéhradecko</text>
+
+  <!-- 1917 -->
+  <circle cx="185" cy="70" r="10" fill="#eab308"/>
+  <text x="185" y="60" font-family="sans-serif" font-size="10" fill="#854d0e" text-anchor="middle" font-weight="bold">1917</text>
+  <rect x="140" y="85" width="90" height="50" rx="8" fill="#fff" stroke="#eab308"/>
+  <text x="185" y="102" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle">Novinář v</text>
+  <text x="185" y="114" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle" font-weight="bold">Národních listech</text>
+  <text x="185" y="128" font-family="sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle">poté Lidové noviny</text>
+
+  <!-- 1921 -->
+  <circle cx="290" cy="70" r="10" fill="#eab308"/>
+  <text x="290" y="60" font-family="sans-serif" font-size="10" fill="#854d0e" text-anchor="middle" font-weight="bold">1921</text>
+  <rect x="245" y="85" width="90" height="50" rx="8" fill="#fff" stroke="#eab308"/>
+  <text x="290" y="102" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle">Premiéra</text>
+  <text x="290" y="114" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle" font-weight="bold">R.U.R.</text>
+  <text x="290" y="128" font-family="sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle">světový úspěch</text>
+
+  <!-- 1935 -->
+  <circle cx="395" cy="70" r="10" fill="#eab308"/>
+  <text x="395" y="60" font-family="sans-serif" font-size="10" fill="#854d0e" text-anchor="middle" font-weight="bold">1935</text>
+  <rect x="350" y="85" width="90" height="50" rx="8" fill="#fff" stroke="#eab308"/>
+  <text x="395" y="102" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle">Svatba s</text>
+  <text x="395" y="114" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle" font-weight="bold">Olgou Scheinpflugovou</text>
+  <text x="395" y="128" font-family="sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle">herečka a spisovatelka</text>
+
+  <!-- 1938 -->
+  <circle cx="500" cy="70" r="10" fill="#374151"/>
+  <text x="500" y="60" font-family="sans-serif" font-size="10" fill="#374151" text-anchor="middle" font-weight="bold">1938</text>
+  <rect x="455" y="85" width="90" height="50" rx="8" fill="#fff" stroke="#374151"/>
+  <text x="500" y="102" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle" font-weight="bold">† 25. prosince</text>
+  <text x="500" y="114" font-family="sans-serif" font-size="9" fill="#374151" text-anchor="middle">Praha</text>
+  <text x="500" y="128" font-family="sans-serif" font-size="8" fill="#9ca3af" text-anchor="middle">zápal plic</text>
+
+  <!-- Fun facts section -->
+  <text x="280" y="170" font-family="sans-serif" font-size="14" fill="#854d0e" text-anchor="middle" font-weight="bold">💡 Věděl/a jsi, že…</text>
+
+  <rect x="30" y="185" width="240" height="55" rx="10" fill="#fff" stroke="#fde047"/>
+  <text x="40" y="205" font-family="sans-serif" font-size="10" fill="#374151">🎓 Studoval filozofii v Praze, Berlíně</text>
+  <text x="40" y="220" font-family="sans-serif" font-size="10" fill="#374151">    i v Paříži? (Doktorát z filozofie 1915)</text>
+
+  <rect x="290" y="185" width="240" height="55" rx="10" fill="#fff" stroke="#fde047"/>
+  <text x="300" y="205" font-family="sans-serif" font-size="10" fill="#374151">🐕 Miloval psy a kočky? Napsal Dášeňku</text>
+  <text x="300" y="220" font-family="sans-serif" font-size="10" fill="#374151">    a měl foxteriéra jménem Dášeňka!</text>
+
+  <rect x="30" y="250" width="240" height="55" rx="10" fill="#fff" stroke="#fde047"/>
+  <text x="40" y="270" font-family="sans-serif" font-size="10" fill="#374151">🌱 Byl vášnivý zahradník? Napsal</text>
+  <text x="40" y="285" font-family="sans-serif" font-size="10" fill="#374151">    knihu „Zahradníkův rok" (1929)!</text>
+
+  <rect x="290" y="250" width="240" height="55" rx="10" fill="#fff" stroke="#fde047"/>
+  <text x="300" y="270" font-family="sans-serif" font-size="10" fill="#374151">📸 Byl nadšený fotograf — vydal knihu</text>
+  <text x="300" y="285" font-family="sans-serif" font-size="10" fill="#374151">    vlastních cestovních fotografií!</text>
+</svg>

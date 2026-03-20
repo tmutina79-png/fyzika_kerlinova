@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" fill="none">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="600" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#f0f9ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" rx="18" fill="url(#bg2)" stroke="#93c5fd" stroke-width="2"/>
+  <text x="300" y="38" font-family="Georgia, serif" font-size="20" fill="#1e40af" text-anchor="middle" font-weight="bold">📚 Hlavní díla Karla Čapka</text>
+
+  <!-- Timeline line -->
+  <line x1="50" y1="80" x2="550" y2="80" stroke="#bfdbfe" stroke-width="3"/>
+
+  <!-- 1920 R.U.R. -->
+  <circle cx="90" cy="80" r="8" fill="#3b82f6"/>
+  <text x="90" y="70" font-family="sans-serif" font-size="10" fill="#3b82f6" text-anchor="middle" font-weight="bold">1920</text>
+  <rect x="45" y="95" width="90" height="70" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="90" y="112" font-family="Georgia, serif" font-size="11" fill="#1e3a5f" text-anchor="middle" font-weight="bold">R.U.R.</text>
+  <text x="90" y="126" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Drama</text>
+  <text x="90" y="142" font-size="26" text-anchor="middle">🤖</text>
+  <text x="90" y="158" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">slovo „robot"</text>
+
+  <!-- 1922 Věc Makropulos -->
+  <circle cx="195" cy="80" r="8" fill="#8b5cf6"/>
+  <text x="195" y="70" font-family="sans-serif" font-size="10" fill="#8b5cf6" text-anchor="middle" font-weight="bold">1922</text>
+  <rect x="148" y="95" width="94" height="70" rx="8" fill="#fff" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="195" y="112" font-family="Georgia, serif" font-size="10" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Věc Makropulos</text>
+  <text x="195" y="126" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Drama</text>
+  <text x="195" y="142" font-size="26" text-anchor="middle">⏳</text>
+  <text x="195" y="158" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">nesmrtelnost</text>
+
+  <!-- 1924 Krakatit -->
+  <circle cx="300" cy="80" r="8" fill="#ef4444"/>
+  <text x="300" y="70" font-family="sans-serif" font-size="10" fill="#ef4444" text-anchor="middle" font-weight="bold">1924</text>
+  <rect x="255" y="95" width="90" height="70" rx="8" fill="#fff" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="300" y="112" font-family="Georgia, serif" font-size="11" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Krakatit</text>
+  <text x="300" y="126" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Román</text>
+  <text x="300" y="142" font-size="26" text-anchor="middle">💣</text>
+  <text x="300" y="158" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">zbraň zkázy</text>
+
+  <!-- 1936 Válka s mloky -->
+  <circle cx="405" cy="80" r="8" fill="#10b981"/>
+  <text x="405" y="70" font-family="sans-serif" font-size="10" fill="#10b981" text-anchor="middle" font-weight="bold">1936</text>
+  <rect x="355" y="95" width="100" height="70" rx="8" fill="#fff" stroke="#10b981" stroke-width="1.5"/>
+  <text x="405" y="112" font-family="Georgia, serif" font-size="10" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Válka s mloky</text>
+  <text x="405" y="126" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Román</text>
+  <text x="405" y="142" font-size="26" text-anchor="middle">🦎</text>
+  <text x="405" y="158" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">satira na fašismus</text>
+
+  <!-- 1937 Bílá nemoc -->
+  <circle cx="510" cy="80" r="8" fill="#f59e0b"/>
+  <text x="510" y="70" font-family="sans-serif" font-size="10" fill="#f59e0b" text-anchor="middle" font-weight="bold">1937</text>
+  <rect x="462" y="95" width="96" height="70" rx="8" fill="#fff" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="510" y="112" font-family="Georgia, serif" font-size="11" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Bílá nemoc</text>
+  <text x="510" y="126" font-family="sans-serif" font-size="8" fill="#6b7280" text-anchor="middle">Drama</text>
+  <text x="510" y="142" font-size="26" text-anchor="middle">🏥</text>
+  <text x="510" y="158" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">proti válce</text>
+
+  <!-- Second row — more works -->
+  <text x="300" y="200" font-family="sans-serif" font-size="13" fill="#475569" text-anchor="middle" font-weight="bold">Další významná díla</text>
+
+  <!-- Povídky z jedné kapsy -->
+  <rect x="30" y="215" width="120" height="80" rx="10" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="90" y="240" font-size="28" text-anchor="middle">🔍</text>
+  <text x="90" y="260" font-family="Georgia, serif" font-size="9" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Povídky z jedné</text>
+  <text x="90" y="272" font-family="Georgia, serif" font-size="9" fill="#1e3a5f" text-anchor="middle" font-weight="bold">a druhé kapsy</text>
+  <text x="90" y="288" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">1929 · detektivky</text>
+
+  <!-- Hovory s TGM -->
+  <rect x="170" y="215" width="120" height="80" rx="10" fill="#e0e7ff" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="230" y="240" font-size="28" text-anchor="middle">🎙️</text>
+  <text x="230" y="260" font-family="Georgia, serif" font-size="9" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Hovory s T. G.</text>
+  <text x="230" y="272" font-family="Georgia, serif" font-size="9" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Masarykem</text>
+  <text x="230" y="288" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">1928–35 · rozhovory</text>
+
+  <!-- Dášeňka -->
+  <rect x="310" y="215" width="120" height="80" rx="10" fill="#fce7f3" stroke="#ec4899" stroke-width="1.5"/>
+  <text x="370" y="240" font-size="28" text-anchor="middle">🐕</text>
+  <text x="370" y="260" font-family="Georgia, serif" font-size="9" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Dášeňka čili</text>
+  <text x="370" y="272" font-family="Georgia, serif" font-size="9" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Život štěněte</text>
+  <text x="370" y="288" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">1933 · pro děti</text>
+
+  <!-- Matka -->
+  <rect x="450" y="215" width="120" height="80" rx="10" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+  <text x="510" y="240" font-size="28" text-anchor="middle">🕊️</text>
+  <text x="510" y="260" font-family="Georgia, serif" font-size="9" fill="#1e3a5f" text-anchor="middle" font-weight="bold">Matka</text>
+  <text x="510" y="272" font-family="Georgia, serif" font-size="9" fill="#1e3a5f" text-anchor="middle" font-weight="bold">&amp; První parta</text>
+  <text x="510" y="288" font-family="sans-serif" font-size="7" fill="#9ca3af" text-anchor="middle">1938 · antiválečné</text>
+
+  <!-- Bottom note -->
+  <rect x="80" y="320" width="440" height="55" rx="12" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="300" y="340" font-family="sans-serif" font-size="11" fill="#475569" text-anchor="middle">🌍 Čapkova díla přeložena do <tspan font-weight="bold">více než 30 jazyků</tspan></text>
+  <text x="300" y="358" font-family="sans-serif" font-size="11" fill="#475569" text-anchor="middle">7× nominován na <tspan font-weight="bold">Nobelovu cenu za literaturu</tspan></text>
+</svg>

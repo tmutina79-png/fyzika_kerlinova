@@ -1,0 +1,166 @@
+{
+  "tomorrow": {
+    "date": "2026-03-20",
+    "dayLabel": "Pátek 20. března",
+    "className": "Kvarta A",
+    "schedule": [
+      {
+        "hour": 1,
+        "time": "8:00–8:45",
+        "subject": "Matematika",
+        "topic": "Funkce – definiční obor a obor hodnot",
+        "teacher": "Mgr. Novotná",
+        "room": "učebna 204",
+        "icon": "📐",
+        "color": "indigo",
+        "lessonLink": "/docs/funkce",
+        "note": "Doneste kalkulačky"
+      },
+      {
+        "hour": 2,
+        "time": "8:55–9:40",
+        "subject": "Fyzika",
+        "topic": "Teorie relativity – dilatace času",
+        "teacher": "RNDr. Dvořák",
+        "room": "laboratoř F1",
+        "icon": "🔭",
+        "color": "violet",
+        "lessonLink": "/docs/relativita",
+        "note": ""
+      },
+      {
+        "hour": 3,
+        "time": "9:55–10:40",
+        "subject": "Český jazyk",
+        "topic": "Karel Čapek – R.U.R. (rozbor)",
+        "teacher": "PhDr. Šťastná",
+        "room": "učebna 112",
+        "icon": "📖",
+        "color": "rose",
+        "lessonLink": null,
+        "note": "Mít přečtenou 2. a 3. scénu"
+      },
+      {
+        "hour": 4,
+        "time": "10:55–11:40",
+        "subject": "Angličtina",
+        "topic": "Conditionals II & III",
+        "teacher": "Mgr. Králová, MA",
+        "room": "jazyková učebna J2",
+        "icon": "🇬🇧",
+        "color": "sky",
+        "lessonLink": null,
+        "note": "Odevzdat esej 'My future'"
+      },
+      {
+        "hour": 5,
+        "time": "11:50–12:35",
+        "subject": "Dějepis",
+        "topic": "Studená válka – Berlínská zeď",
+        "teacher": "Mgr. Procházka",
+        "room": "učebna 301",
+        "icon": "🏛️",
+        "color": "amber",
+        "lessonLink": null,
+        "note": ""
+      },
+      {
+        "hour": 6,
+        "time": "12:45–13:30",
+        "subject": "Tělocvik",
+        "topic": "Volejbal – turnaj",
+        "teacher": "Mgr. Horák",
+        "room": "tělocvična",
+        "icon": "🏐",
+        "color": "emerald",
+        "lessonLink": null,
+        "note": "Sportovní úbor"
+      }
+    ]
+  },
+  "homework": [
+    {
+      "id": "hw1",
+      "subject": "Matematika",
+      "title": "Příklady na definiční obor (str. 42, cv. 5–12)",
+      "dueDate": "2026-03-20",
+      "dueLabel": "Zítra",
+      "icon": "📐",
+      "done": false,
+      "urgent": true
+    },
+    {
+      "id": "hw2",
+      "subject": "Angličtina",
+      "title": "Esej 'My future' – 250 slov",
+      "dueDate": "2026-03-20",
+      "dueLabel": "Zítra",
+      "icon": "🇬🇧",
+      "done": false,
+      "urgent": true
+    },
+    {
+      "id": "hw3",
+      "subject": "Český jazyk",
+      "title": "Přečíst R.U.R. – 2. a 3. scéna",
+      "dueDate": "2026-03-20",
+      "dueLabel": "Zítra",
+      "icon": "📖",
+      "done": true,
+      "urgent": false
+    },
+    {
+      "id": "hw4",
+      "subject": "Fyzika",
+      "title": "Úlohy na dilataci času (pracovní list)",
+      "dueDate": "2026-03-23",
+      "dueLabel": "Pondělí",
+      "icon": "🔭",
+      "done": false,
+      "urgent": false
+    },
+    {
+      "id": "hw5",
+      "subject": "Dějepis",
+      "title": "Referát o Berlínské zdi – osnova",
+      "dueDate": "2026-03-25",
+      "dueLabel": "Středa",
+      "icon": "🏛️",
+      "done": false,
+      "urgent": false
+    }
+  ],
+  "pastTopics": [
+    {
+      "subject": "Matematika",
+      "topics": [
+        { "title": "Odmocniny", "link": "/docs/odmocniny", "date": "3. 3." },
+        { "title": "Přímá a nepřímá úměrnost", "link": "/docs/umernost", "date": "10. 3." },
+        { "title": "Funkce – úvod, zápis", "link": "/docs/funkce", "date": "17. 3." }
+      ],
+      "icon": "📐"
+    },
+    {
+      "subject": "Fyzika",
+      "topics": [
+        { "title": "Teorie relativity – STR", "link": "/docs/relativita", "date": "12. 3." },
+        { "title": "Teorie relativity – OTR", "link": "/docs/relativita", "date": "19. 3." }
+      ],
+      "icon": "🔭"
+    },
+    {
+      "subject": "Český jazyk",
+      "topics": [
+        { "title": "Meziválečná literatura", "link": null, "date": "5. 3." },
+        { "title": "Karel Čapek – život a dílo", "link": null, "date": "12. 3." }
+      ],
+      "icon": "📖"
+    }
+  ],
+  "quickTests": [
+    { "id": "qt-funkce", "title": "Kvíz: Funkce", "questionCount": 5, "link": "/docs/funkce", "icon": "📈" },
+    { "id": "qt-odmocniny", "title": "Kvíz: Odmocniny", "questionCount": 4, "link": "/docs/odmocniny", "icon": "√" },
+    { "id": "qt-umernost", "title": "Kvíz: Úměrnost", "questionCount": 5, "link": "/docs/umernost", "icon": "⚖️" },
+    { "id": "qt-relativita", "title": "Kvíz: Relativita", "questionCount": 3, "link": "/docs/relativita", "icon": "🔭" }
+  ]
+}

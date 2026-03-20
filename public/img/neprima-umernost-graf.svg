@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" font-family="system-ui, sans-serif">
+  <defs>
+    <marker id="ani" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#1e3a5f"/></marker>
+  </defs>
+
+  <text x="260" y="22" text-anchor="middle" font-size="16" font-weight="700" fill="#1e3a5f">Graf nepřímé úměrnosti  y = k/x</text>
+
+  <!-- Grid -->
+  <g stroke="#e2e8f0" stroke-width="0.7">
+    <line x1="60" y1="60" x2="60" y2="380"/><line x1="120" y1="60" x2="120" y2="380"/>
+    <line x1="180" y1="60" x2="180" y2="380"/><line x1="240" y1="60" x2="240" y2="380"/>
+    <line x1="300" y1="60" x2="300" y2="380"/><line x1="360" y1="60" x2="360" y2="380"/>
+    <line x1="420" y1="60" x2="420" y2="380"/><line x1="480" y1="60" x2="480" y2="380"/>
+    <line x1="40" y1="80" x2="500" y2="80"/><line x1="40" y1="140" x2="500" y2="140"/>
+    <line x1="40" y1="200" x2="500" y2="200"/><line x1="40" y1="260" x2="500" y2="260"/>
+    <line x1="40" y1="320" x2="500" y2="320"/><line x1="40" y1="380" x2="500" y2="380"/>
+  </g>
+
+  <!-- Axes -->
+  <line x1="60" y1="380" x2="500" y2="380" stroke="#1e3a5f" stroke-width="2" marker-end="url(#ani)"/>
+  <line x1="60" y1="380" x2="60" y2="50" stroke="#1e3a5f" stroke-width="2" marker-end="url(#ani)"/>
+  <text x="505" y="394" font-size="14" font-weight="600" fill="#1e3a5f">x</text>
+  <text x="45" y="52" font-size="14" font-weight="600" fill="#1e3a5f">y</text>
+  <text x="52" y="396" text-anchor="end" font-size="11" fill="#64748b">0</text>
+
+  <!-- X labels -->
+  <text x="120" y="398" text-anchor="middle" font-size="11" fill="#64748b">1</text>
+  <text x="180" y="398" text-anchor="middle" font-size="11" fill="#64748b">2</text>
+  <text x="240" y="398" text-anchor="middle" font-size="11" fill="#64748b">3</text>
+  <text x="300" y="398" text-anchor="middle" font-size="11" fill="#64748b">4</text>
+  <text x="360" y="398" text-anchor="middle" font-size="11" fill="#64748b">5</text>
+  <text x="420" y="398" text-anchor="middle" font-size="11" fill="#64748b">6</text>
+  <text x="480" y="398" text-anchor="middle" font-size="11" fill="#64748b">7</text>
+
+  <!-- Y labels -->
+  <text x="50" y="324" text-anchor="end" font-size="11" fill="#64748b">1</text>
+  <text x="50" y="264" text-anchor="end" font-size="11" fill="#64748b">2</text>
+  <text x="50" y="204" text-anchor="end" font-size="11" fill="#64748b">3</text>
+  <text x="50" y="144" text-anchor="end" font-size="11" fill="#64748b">4</text>
+  <text x="50" y="84" text-anchor="end" font-size="11" fill="#64748b">5</text>
+
+  <!-- y = 6/x (blue) — přesně vypočtené body: px_x = 60+x*60, px_y = 380-y*60 -->
+  <polyline
+    points="120,20 126,53 132,80 144,123 150,140 165,174 180,200 210,236 240,260 270,277 300,290 360,308 420,320 480,329"
+    fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+  />
+  <text x="130" y="14" font-size="13" font-weight="700" fill="#2563eb">y = 6/x</text>
+
+  <!-- y = 12/x (red) — přesně vypočtené body -->
+  <polyline
+    points="180,20 192,53 204,80 222,114 240,140 270,174 300,200 360,236 420,260 480,277"
+    fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+  />
+  <text x="190" y="14" font-size="13" font-weight="700" fill="#dc2626">y = 12/x</text>
+
+  <!-- Dashed asymptote indicators -->
+  <text x="490" y="350" font-size="10" fill="#94a3b8" font-style="italic">Křivka se blíží k osám,</text>
+  <text x="490" y="364" font-size="10" fill="#94a3b8" font-style="italic">ale nikdy se jich nedotkne</text>
+
+  <!-- Highlighted point on blue curve: x=2, y=3 → pixel (180, 200) -->
+  <circle cx="180" cy="200" r="5" fill="#2563eb"/>
+  <line x1="180" y1="380" x2="180" y2="200" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 3" opacity="0.5"/>
+  <line x1="60" y1="200" x2="180" y2="200" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 3" opacity="0.5"/>
+
+  <!-- Highlighted point on blue curve: x=3, y=2 → pixel (240, 260) -->
+  <circle cx="240" cy="260" r="5" fill="#2563eb"/>
+  <line x1="240" y1="380" x2="240" y2="260" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 3" opacity="0.5"/>
+  <line x1="60" y1="260" x2="240" y2="260" stroke="#2563eb" stroke-width="1" stroke-dasharray="5 3" opacity="0.5"/>
+
+  <!-- Product annotation -->
+  <rect x="260" y="110" width="150" height="50" rx="8" fill="white" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="335" y="130" text-anchor="middle" font-size="12" font-weight="600" fill="#2563eb">2 × 3 = 6 ✓</text>
+  <text x="335" y="148" text-anchor="middle" font-size="12" font-weight="600" fill="#2563eb">3 × 2 = 6 ✓</text>
+  <text x="335" y="165" text-anchor="middle" font-size="10" fill="#64748b">x · y = k = const.</text>
+</svg>
