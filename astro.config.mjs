@@ -8,9 +8,8 @@ import rehypeKatex from 'rehype-katex';
 
 // https://astro.build/config
 export default defineConfig({
-  // Pro GitHub Pages odkomentuj a uprav tyto řádky:
-  // site: 'https://your-username.github.io',
-  // base: '/your-repo-name',
+  site: 'https://tmutina79-png.github.io',
+  base: '/lekce',
   output: 'static',
 
   integrations: [
