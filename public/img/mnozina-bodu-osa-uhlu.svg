@@ -5,50 +5,58 @@
       <stop offset="100%" style="stop-color:#1e293b"/>
     </linearGradient>
   </defs>
-  
+
   <!-- Background -->
   <rect width="500" height="400" fill="url(#bg)"/>
-  
-  <!-- Ramena úhlu -->
-  <line x1="250" y1="320" x2="50" y2="100" stroke="#34d399" stroke-width="4"/>
-  <line x1="250" y1="320" x2="450" y2="100" stroke="#34d399" stroke-width="4"/>
-  
+
+  <!-- Ramena úhlu: V=(250,350), arm a to (70,80), arm b to (430,80) -->
+  <!-- Směry (-2,-3) a (2,-3) — symetrické kolem svislice -->
+  <line x1="250" y1="350" x2="70" y2="80" stroke="#34d399" stroke-width="4"/>
+  <line x1="250" y1="350" x2="430" y2="80" stroke="#34d399" stroke-width="4"/>
+
   <!-- Vrchol V -->
-  <circle cx="250" cy="320" r="7" fill="#fbbf24"/>
-  <text x="255" y="350" fill="#fbbf24" font-size="18" font-weight="bold">V</text>
-  
-  <!-- Osa úhlu -->
-  <line x1="250" y1="320" x2="250" y2="40" stroke="#818cf8" stroke-width="4" stroke-dasharray="10,5"/>
-  
+  <circle cx="250" cy="350" r="7" fill="#fbbf24"/>
+  <text x="256" y="372" fill="#fbbf24" font-size="18" font-weight="bold">V</text>
+
+  <!-- Osa úhlu (svislá) -->
+  <line x1="250" y1="350" x2="250" y2="50" stroke="#818cf8" stroke-width="4" stroke-dasharray="10,5"/>
+
   <!-- Oblouky pro označení úhlů -->
-  <path d="M 220 290 A 40 40 0 0 1 250 280" fill="none" stroke="#a5b4fc" stroke-width="2"/>
-  <path d="M 250 280 A 40 40 0 0 1 280 290" fill="none" stroke="#a5b4fc" stroke-width="2"/>
-  
-  <!-- Body na ose -->
-  <circle cx="250" cy="200" r="5" fill="#f87171"/>
-  <text x="260" y="205" fill="#f87171" font-size="14">X₁</text>
-  
-  <circle cx="250" cy="120" r="5" fill="#f87171"/>
-  <text x="260" y="125" fill="#f87171" font-size="14">X₂</text>
-  
-  <!-- Vzdálenosti od X₁ k ramenům (kolmice) -->
-  <line x1="250" y1="200" x2="170" y2="158" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4,2"/>
-  <line x1="250" y1="200" x2="330" y2="158" stroke="#f87171" stroke-width="1.5" stroke-dasharray="4,2"/>
-  
-  <!-- Značky kolmosti -->
-  <rect x="172" y="152" width="8" height="8" fill="none" stroke="#94a3b8" stroke-width="1" transform="rotate(-36, 176, 156)"/>
-  <rect x="320" y="152" width="8" height="8" fill="none" stroke="#94a3b8" stroke-width="1" transform="rotate(36, 324, 156)"/>
-  
+  <path d="M 225 316 A 40 40 0 0 1 250 310" fill="none" stroke="#a5b4fc" stroke-width="2"/>
+  <path d="M 250 310 A 40 40 0 0 1 275 316" fill="none" stroke="#a5b4fc" stroke-width="2"/>
+
+  <!-- Bod X₁ na ose -->
+  <circle cx="250" cy="200" r="6" fill="#f87171"/>
+  <text x="258" y="195" fill="#f87171" font-size="15" font-weight="bold">X</text>
+
+  <!-- Kolmice z X₁ na ramena -->
+  <!-- Pata na rameni a: (181, 246), pata na rameni b: (319, 246) -->
+  <line x1="250" y1="200" x2="181" y2="246" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6,3"/>
+  <line x1="250" y1="200" x2="319" y2="246" stroke="#f87171" stroke-width="2.5" stroke-dasharray="6,3"/>
+
+  <!-- Paty kolmic -->
+  <circle cx="181" cy="246" r="3.5" fill="#f87171"/>
+  <circle cx="319" cy="246" r="3.5" fill="#f87171"/>
+
+  <!-- Značky pravého úhlu u paty na rameni a -->
+  <polyline points="176,238 184,233 189,241" fill="none" stroke="#a5b4fc" stroke-width="1.8"/>
+  <!-- Značky pravého úhlu u paty na rameni b -->
+  <polyline points="325,238 317,233 311,241" fill="none" stroke="#a5b4fc" stroke-width="1.8"/>
+
+  <!-- Popisky vzdáleností d -->
+  <text x="202" y="216" fill="#f87171" font-size="15" font-weight="600">d</text>
+  <text x="290" y="216" fill="#f87171" font-size="15" font-weight="600">d</text>
+
   <!-- Popisky ramen -->
-  <text x="60" y="85" fill="#34d399" font-size="16" font-weight="bold">a</text>
-  <text x="430" y="85" fill="#34d399" font-size="16" font-weight="bold">b</text>
-  
+  <text x="72" y="68" fill="#34d399" font-size="16" font-weight="bold">a</text>
+  <text x="422" y="68" fill="#34d399" font-size="16" font-weight="bold">b</text>
+
   <!-- Označení osy -->
-  <text x="230" y="55" fill="#818cf8" font-size="16" font-weight="bold">o</text>
-  
+  <text x="230" y="65" fill="#818cf8" font-size="16" font-weight="bold">o</text>
+
   <!-- Titulek -->
   <text x="250" y="30" text-anchor="middle" fill="#e2e8f0" font-size="20" font-weight="bold">Osa úhlu</text>
-  
+
   <!-- Definice -->
-  <text x="250" y="385" text-anchor="middle" fill="#94a3b8" font-size="13">Množina všech bodů X stejně vzdálených od obou ramen úhlu</text>
+  <text x="250" y="390" text-anchor="middle" fill="#94a3b8" font-size="13">Množina všech bodů X stejně vzdálených od obou ramen úhlu</text>
 </svg>
