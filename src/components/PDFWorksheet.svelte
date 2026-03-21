@@ -91,7 +91,7 @@
     <line x1="12" y1="18" x2="12" y2="12" stroke="white" stroke-width="2"/>
     <polyline points="9 15 12 18 15 15" fill="none" stroke="white" stroke-width="2"/>
   </svg>
-  <span>📄 Stáhnout PDF</span>
+  <span>Stáhnout PDF</span>
 </button>
 
 <style>
