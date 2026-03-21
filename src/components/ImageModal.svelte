@@ -1,6 +1,12 @@
 <script>
+  // @ts-ignore
+  const baseUrl = typeof __BASE_URL__ !== 'undefined' ? __BASE_URL__ : '';
+  
   let { src, alt = '', class: className = '' } = $props();
   let open = $state(false);
+
+  // Přidání base URL k cestě
+  const fullSrc = src.startsWith('/') ? `${baseUrl}${src}` : src;
 
   function onKey(e) {
     if (!open) return;
@@ -12,7 +18,7 @@
 
 <div class={className}>
   <button class="img-btn" onclick={() => open = true} aria-label="Zvětšit obrázek">
-    <img {src} {alt} class="img-preview" />
+    <img src={fullSrc} {alt} class="img-preview" />
     <div class="zoom-hint">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg>
       <span>Zvětšit</span>
@@ -23,7 +29,7 @@
 {#if open}
   <div class="modal-backdrop" role="dialog" aria-modal="true" onclick={() => open = false}>
     <button class="modal-close" onclick={() => open = false} aria-label="Zavřít">✕</button>
-    <img src={src} alt={alt} class="modal-img" />
+    <img src={fullSrc} alt={alt} class="modal-img" />
   </div>
 {/if}
 
