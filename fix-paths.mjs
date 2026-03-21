@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
-const base = '/lekce';
+const base = '/matematika-nastenka';
 
 // Only run when CI is true (GitHub Actions)
 if (!process.env.CI) {
