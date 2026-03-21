@@ -12,7 +12,7 @@ import QRCode from '../../components/QRCode.svelte';
 
 <div class="relative">
   <h1 class="m-0 pr-20">Množina bodů daných vlastností 📐</h1>
-  <div class="absolute top-0 right-0 flex flex-col items-center gap-1 qr-corner">
+  <div class="absolute -top-4 -right-4 flex flex-col items-center gap-1 qr-corner" style="z-index:10">
     <QRCode client:load url="https://tmutina79-png.github.io/matematika-nastenka/docs/mnozina-bodu/" title="QR kód – Množina bodů" />
     <span class="text-xs text-primary-400 font-semibold uppercase tracking-wide">QR kód</span>
   </div>
