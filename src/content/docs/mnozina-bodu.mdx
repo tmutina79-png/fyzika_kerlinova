@@ -8,8 +8,12 @@ import SelfCheck from '../../components/SelfCheck.svelte';
 import Quiz from '../../components/Quiz.svelte';
 import VideoModal from '../../components/VideoModal.svelte';
 import ImageModal from '../../components/ImageModal.svelte';
+import QRCode from '../../components/QRCode.svelte';
 
-# Množina bodů daných vlastností 📐
+<div class="flex items-center gap-3 flex-wrap">
+  <h1 class="m-0">Množina bodů daných vlastností 📐</h1>
+  <QRCode client:load url="https://tmutina79-png.github.io/matematika-nastenka/docs/mnozina-bodu-priklady" title="QR kód – Příklady z praxe" />
+</div>
 
 > **Klíčová otázka:** Jaké všechny body v rovině mají od bodu S vzdálenost přesně 5 cm? A jaké body jsou stejně daleko od dvou daných bodů?
 
