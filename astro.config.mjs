@@ -26,5 +26,8 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    define: {
+      __BASE_URL__: JSON.stringify(process.env.CI ? '/matematika-nastenka' : ''),
+    },
   },
 });

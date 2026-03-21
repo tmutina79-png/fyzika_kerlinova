@@ -1,8 +1,15 @@
 <script>
+  // @ts-ignore
+  const baseUrl = typeof __BASE_URL__ !== 'undefined' ? __BASE_URL__ : '';
+  
   let { src = '', title = 'Vizualizace', thumbnailImg = '' } = $props();
   let open = $state(false);
   let iframeEl = $state(null);
   let isPlaying = $state(true);
+
+  // Přidání base URL k cestám
+  const fullSrc = src.startsWith('/') ? `${baseUrl}${src}` : src;
+  const fullThumb = thumbnailImg.startsWith('/') ? `${baseUrl}${thumbnailImg}` : thumbnailImg;
 
   function close(e) {
     if (e.target === e.currentTarget) open = false;
@@ -34,9 +41,9 @@
 <svelte:window onkeydown={onKey} />
 
 <!-- Thumbnail -->
-{#if thumbnailImg}
+{#if fullThumb}
 <button class="img-thumbnail" onclick={() => { open = true; isPlaying = true; }} aria-label="Přehrát vizualizaci">
-  <img src={thumbnailImg} alt={title} class="img-thumb-pic" />
+  <img src={fullThumb} alt={title} class="img-thumb-pic" />
   <div class="img-play-overlay">
     <div class="play-btn">
       <svg viewBox="0 0 24 24" width="32" height="32" fill="white">
@@ -92,7 +99,7 @@
         <button class="modal-close" onclick={() => open = false} aria-label="Zavřít">✕</button>
       </div>
       <div class="modal-body">
-        <iframe bind:this={iframeEl} {src} title={title} frameborder="0" allowfullscreen></iframe>
+        <iframe bind:this={iframeEl} src={fullSrc} title={title} frameborder="0" allowfullscreen></iframe>
       </div>
     </div>
   </div>
