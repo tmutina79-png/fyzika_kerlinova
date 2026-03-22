@@ -29,7 +29,8 @@ const lessons = [
   <body class="min-h-screen flex flex-col">
     <!-- ====== Top bar ====== -->
     <header class="bg-primary-700 text-white px-6 py-3 flex items-center justify-between shadow-md sticky top-0 z-40">
-      <a href={base} class="text-lg font-bold tracking-wide hover:text-primary-200 transition-colors">
+      <a href={base} id="home-link" class="text-lg font-bold tracking-wide hover:text-primary-200 transition-colors"
+         onclick="sessionStorage.removeItem('sidebar-details-state')">
         🎓 Studijní portál
       </a>
       <div class="flex items-center gap-4">
