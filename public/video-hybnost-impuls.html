@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hybnost – Impuls síly a airbag</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+canvas{border-radius:16px;box-shadow:0 0 60px rgba(59,130,246,.2)}
+#phase{color:#60a5fa;font-size:15px;margin-top:10px;font-weight:600;min-height:22px}
+#timer{color:#475569;font-size:12px;margin-top:4px}
+#title{color:#e2e8f0;font-size:22px;font-weight:700;margin-bottom:14px;letter-spacing:1px}
+#controls{display:flex;align-items:center;gap:10px;margin-top:12px}
+#controls button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:8px 16px;font-size:15px;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;display:flex;align-items:center;gap:6px}
+#controls button:hover{background:#334155;border-color:#60a5fa}
+#scrubber{-webkit-appearance:none;appearance:none;width:300px;height:6px;border-radius:3px;background:#1e293b;outline:none;cursor:pointer}
+#scrubber::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#info{color:#94a3b8;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="title">🛡️ Impuls síly – proč airbag zachraňuje život</div>
+<canvas id="c" width="760" height="480"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="controls">
+  <button id="btnRew"><span class="icon">⏪</span> −0,3s</button>
+  <button id="btnPlay"><span class="icon" id="playIcon">⏸</span> <span id="playLabel">Pauza</span></button>
+  <button id="btnFwd"><span class="icon">⏩</span> +0,3s</button>
+  <input type="range" id="scrubber" min="0" max="25000" value="0" step="100"/>
+</div>
+<div id="info">Srovnání nárazu BEZ a S airbagem • impuls síly F·Δt = Δp</div>
+
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=C.width,H=C.height;
+const DUR=25000;
+let currentTime=0,playing=true,lastTs=null;
+const STEP=300;
+
+const btnPlay=document.getElementById('btnPlay');
+const btnRew=document.getElementById('btnRew');
+const btnFwd=document.getElementById('btnFwd');
+const scrubber=document.getElementById('scrubber');
+const playIcon=document.getElementById('playIcon');
+const playLabel=document.getElementById('playLabel');
+let scrubbing=false;
+
+btnPlay.addEventListener('click',()=>{playing=!playing;playIcon.textContent=playing?'⏸':'▶';playLabel.textContent=playing?'Pauza':'Přehrát';if(playing)lastTs=null});
+btnRew.addEventListener('click',()=>{currentTime=Math.max(0,currentTime-STEP);scrubber.value=currentTime});
+btnFwd.addEventListener('click',()=>{currentTime=Math.min(DUR,currentTime+STEP);scrubber.value=currentTime});
+scrubber.addEventListener('input',()=>{scrubbing=true;currentTime=Number(scrubber.value)});
+scrubber.addEventListener('change',()=>{scrubbing=false});
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();btnPlay.click()}if(e.code==='ArrowLeft')btnRew.click();if(e.code==='ArrowRight')btnFwd.click()});
+window.addEventListener('message',e=>{
+  if(e.data==='toggle')btnPlay.click();if(e.data==='rew')btnRew.click();
+  if(e.data==='fwd')btnFwd.click();if(e.data==='stop'){playing=false;playIcon.textContent='▶';playLabel.textContent='Přehrát'}
+});
+
+const phases=[
+  {t:0,     label:'① Auto se blíží ke zdi'},
+  {t:4000,  label:'② Zobrazujeme hybnost auta'},
+  {t:7000,  label:'③ Náraz BEZ airbagu – krátký čas, obrovská síla!'},
+  {t:11000, label:'④ Graf síly bez airbagu – špička'},
+  {t:14000, label:'⑤ Náraz S airbagem – delší čas, menší síla'},
+  {t:18000, label:'⑥ Graf síly s airbagem – nižší a širší'},
+  {t:22000, label:'⑦ Srovnání: F·Δt = Δp v obou případech'},
+];
+function getPhase(t){let p=phases[0].label;for(const ph of phases)if(t>=ph.t)p=ph.label;return p}
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function lerp(a,b,t){return a+(b-a)*clamp(t,0,1)}
+
+/* ──── Scene: TOP = without airbag, BOTTOM = with airbag ──── */
+const MID=H/2;
+const WALL_X=620;
+
+function drawBackground(){
+  // Divider
+  X.strokeStyle='#334155';X.lineWidth=2;X.setLineDash([8,6]);
+  X.beginPath();X.moveTo(0,MID);X.lineTo(W,MID);X.stroke();
+  X.setLineDash([]);
+  
+  // Labels
+  X.fillStyle='#ef4444';X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='left';
+  X.fillText('❌ BEZ airbagu',15,25);
+  X.fillStyle='#10b981';
+  X.fillText('✅ S airbagem',15,MID+25);
+  
+  // Walls
+  X.fillStyle='#475569';
+  X.fillRect(WALL_X,30,20,MID-60);
+  X.fillRect(WALL_X,MID+30,20,MID-60);
+  
+  // Wall labels
+  X.fillStyle='#94a3b8';X.font='11px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillText('ZEĎ',WALL_X+10,25);
+  X.fillText('ZEĎ',WALL_X+10,MID+25);
+}
+
+function drawCar(x,y,crashed,hasAirbag,t){
+  const cw=80,ch=35;
+  const cx=x-cw/2,cy=y-ch/2;
+  
+  // Car body
+  if(crashed){
+    X.fillStyle=hasAirbag?'#065f46':'#7f1d1d';
+    // Crumpled
+    X.beginPath();
+    X.moveTo(cx,cy);X.lineTo(cx+cw*0.7,cy);X.lineTo(cx+cw*0.6,cy+ch);X.lineTo(cx,cy+ch);
+    X.closePath();X.fill();
+    if(hasAirbag){
+      // Airbag circle
+      X.fillStyle='rgba(255,255,255,0.7)';
+      X.beginPath();X.arc(cx+cw*0.55,y,16,0,Math.PI*2);X.fill();
+      X.fillStyle='#064e3b';X.font='10px "Segoe UI",sans-serif';X.textAlign='center';
+      X.fillText('💨',cx+cw*0.55,y+4);
+    }
+  }else{
+    X.fillStyle=hasAirbag?'#059669':'#dc2626';
+    X.beginPath();
+    const r=6;
+    X.moveTo(cx+r,cy);X.lineTo(cx+cw-r,cy);X.quadraticCurveTo(cx+cw,cy,cx+cw,cy+r);
+    X.lineTo(cx+cw,cy+ch-r);X.quadraticCurveTo(cx+cw,cy+ch,cx+cw-r,cy+ch);
+    X.lineTo(cx+r,cy+ch);X.quadraticCurveTo(cx,cy+ch,cx,cy+ch-r);
+    X.lineTo(cx,cy+r);X.quadraticCurveTo(cx,cy,cx+r,cy);
+    X.closePath();X.fill();
+  }
+  
+  // Wheels
+  X.fillStyle='#1e293b';
+  X.beginPath();X.arc(cx+15,cy+ch+5,7,0,Math.PI*2);X.fill();
+  X.beginPath();X.arc(cx+cw-20,cy+ch+5,7,0,Math.PI*2);X.fill();
+  
+  // Person stick figure
+  X.strokeStyle='#fbbf24';X.lineWidth=2;
+  const px=cx+20,py=cy+8;
+  X.beginPath();X.arc(px,py,5,0,Math.PI*2);X.stroke();
+  X.beginPath();X.moveTo(px,py+5);X.lineTo(px,py+18);X.stroke();
+  X.beginPath();X.moveTo(px-6,py+10);X.lineTo(px+6,py+10);X.stroke();
+}
+
+function drawForceGraph(x,y,w,h,t,isAirbag){
+  X.fillStyle='rgba(15,23,42,0.85)';
+  X.fillRect(x,y,w,h);
+  X.strokeStyle='#334155';X.lineWidth=1;
+  X.strokeRect(x,y,w,h);
+  
+  // Title
+  X.fillStyle='#e2e8f0';X.font='bold 12px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillText(isAirbag?'Graf F(t) – s airbagem':'Graf F(t) – bez airbagu',x+w/2,y+16);
+  
+  // Axes
+  const ax=x+30,ay=y+h-20,aw=w-50,ah=h-45;
+  X.strokeStyle='#64748b';X.lineWidth=1;
+  X.beginPath();X.moveTo(ax,ay);X.lineTo(ax+aw,ay);X.stroke();
+  X.beginPath();X.moveTo(ax,ay);X.lineTo(ax,ay-ah);X.stroke();
+  X.fillStyle='#94a3b8';X.font='10px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillText('t',ax+aw+8,ay+2);
+  X.textAlign='right';X.fillText('F',ax-5,ay-ah+5);
+  
+  // Animated curve
+  const progress=clamp(t,0,1);
+  X.lineWidth=2.5;X.beginPath();
+  
+  if(!isAirbag){
+    // Sharp spike
+    X.strokeStyle='#ef4444';
+    const peakH=ah*0.9;
+    const spikeW=aw*0.15;
+    const cx2=ax+aw*0.4;
+    const pts=60;
+    for(let i=0;i<=pts*progress;i++){
+      const frac=i/pts;
+      const px2=ax+frac*aw;
+      let fy;
+      const dist=Math.abs(px2-cx2)/spikeW;
+      if(dist<1) fy=ay-peakH*Math.exp(-dist*dist*4);
+      else fy=ay;
+      if(i===0)X.moveTo(px2,fy);else X.lineTo(px2,fy);
+    }
+    X.stroke();
+    
+    // Fill area
+    if(progress>0.5){
+      X.fillStyle='rgba(239,68,68,0.15)';X.beginPath();
+      X.moveTo(ax,ay);
+      for(let i=0;i<=pts;i++){
+        const frac=i/pts;const px2=ax+frac*aw;
+        const dist=Math.abs(px2-cx2)/spikeW;
+        const fy=dist<1?ay-peakH*Math.exp(-dist*dist*4):ay;
+        X.lineTo(px2,fy);
+      }
+      X.lineTo(ax+aw,ay);X.closePath();X.fill();
+    }
+    
+    if(progress>0.6){
+      X.fillStyle='#fbbf24';X.font='bold 11px "Segoe UI",sans-serif';X.textAlign='center';
+      X.fillText('F velmi velká!',cx2,ay-peakH-8);
+      X.fillText('Δt malé',cx2,ay+14);
+    }
+  }else{
+    // Wide low pulse
+    X.strokeStyle='#10b981';
+    const peakH2=ah*0.35;
+    const pulseW=aw*0.5;
+    const cx3=ax+aw*0.45;
+    const pts2=60;
+    for(let i=0;i<=pts2*progress;i++){
+      const frac=i/pts2;
+      const px3=ax+frac*aw;
+      const dist=Math.abs(px3-cx3)/pulseW;
+      const fy=dist<1?ay-peakH2*Math.exp(-dist*dist*2):ay;
+      if(i===0)X.moveTo(px3,fy);else X.lineTo(px3,fy);
+    }
+    X.stroke();
+    
+    if(progress>0.5){
+      X.fillStyle='rgba(16,185,129,0.15)';X.beginPath();
+      X.moveTo(ax,ay);
+      for(let i=0;i<=pts2;i++){
+        const frac=i/pts2;const px3=ax+frac*aw;
+        const dist=Math.abs(px3-cx3)/pulseW;
+        const fy=dist<1?ay-peakH2*Math.exp(-dist*dist*2):ay;
+        X.lineTo(px3,fy);
+      }
+      X.lineTo(ax+aw,ay);X.closePath();X.fill();
+    }
+    
+    if(progress>0.6){
+      X.fillStyle='#fbbf24';X.font='bold 11px "Segoe UI",sans-serif';X.textAlign='center';
+      X.fillText('F malá ✓',cx3,ay-peakH2-8);
+      X.fillText('Δt velké',cx3,ay+14);
+    }
+  }
+}
+
+function drawConclusion(t){
+  if(t<22000)return;
+  const fade=clamp((t-22000)/1500,0,1);
+  X.globalAlpha=fade;
+  
+  X.fillStyle='rgba(30,41,59,0.95)';
+  const bx=120,by=H/2-45,bw=520,bh=90;
+  X.beginPath();
+  const r=14;
+  X.moveTo(bx+r,by);X.lineTo(bx+bw-r,by);X.quadraticCurveTo(bx+bw,by,bx+bw,by+r);
+  X.lineTo(bx+bw,by+bh-r);X.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh);
+  X.lineTo(bx+r,by+bh);X.quadraticCurveTo(bx,by+bh,bx,by+bh-r);
+  X.lineTo(bx,by+r);X.quadraticCurveTo(bx,by,bx+r,by);
+  X.closePath();X.fill();
+  X.strokeStyle='#fbbf24';X.lineWidth=2;X.stroke();
+  
+  X.fillStyle='#fbbf24';X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillText('F · Δt = Δp = m · Δv',bx+bw/2,by+30);
+  X.fillStyle='#e2e8f0';X.font='14px "Segoe UI",sans-serif';
+  X.fillText('Změna hybnosti je STEJNÁ v obou případech!',bx+bw/2,by+55);
+  X.fillStyle='#10b981';X.font='bold 14px "Segoe UI",sans-serif';
+  X.fillText('Airbag prodlouží Δt → sníží sílu F na tělo',bx+bw/2,by+78);
+  
+  X.globalAlpha=1;
+}
+
+function drawProgress(t){
+  const p=t/DUR,barY=H-14,barH=5,pad=50;
+  X.fillStyle='#334155';X.fillRect(pad,barY,W-2*pad,barH);
+  X.fillStyle='#3b82f6';X.fillRect(pad,barY,(W-2*pad)*p,barH);
+  X.beginPath();X.fillStyle='#60a5fa';X.arc(pad+(W-2*pad)*p,barY+barH/2,5,0,Math.PI*2);X.fill();
+}
+
+function frame(ts){
+  if(lastTs===null)lastTs=ts;
+  const dt=ts-lastTs;lastTs=ts;
+  if(playing&&!scrubbing){
+    currentTime=Math.min(DUR,currentTime+dt);
+    if(currentTime>=DUR){playing=false;playIcon.textContent='▶';playLabel.textContent='Přehrát'}
+  }
+  const t=currentTime;
+  if(!scrubbing)scrubber.value=t;
+
+  X.fillStyle='#0a0e1a';X.fillRect(0,0,W,H);
+  drawBackground();
+  
+  // Top scene (no airbag)
+  const crashT1=7000;
+  const topY=MID/2+10;
+  let carX1;
+  if(t<crashT1){carX1=lerp(100,WALL_X-45,t/crashT1)}
+  else{carX1=WALL_X-45}
+  drawCar(carX1,topY,t>=crashT1,false,t);
+  if(t>=crashT1&&t<crashT1+800){
+    const flash=1-(t-crashT1)/800;
+    X.fillStyle=`rgba(239,68,68,${flash*0.4})`;X.fillRect(0,0,W,MID);
+  }
+  
+  // Bottom scene (with airbag)
+  const crashT2=14000;
+  const botY=MID+MID/2+10;
+  let carX2;
+  if(t<crashT2){carX2=lerp(100,WALL_X-45,clamp(t/crashT2,0,1))}
+  else{carX2=WALL_X-45}
+  drawCar(carX2,botY,t>=crashT2,true,t);
+  if(t>=crashT2&&t<crashT2+800){
+    const flash=1-(t-crashT2)/800;
+    X.fillStyle=`rgba(16,185,129,${flash*0.3})`;X.fillRect(0,MID,W,MID);
+  }
+  
+  // Force graphs
+  if(t>=11000) drawForceGraph(20,MID-170,280,140,clamp((t-11000)/2500,0,1),false);
+  if(t>=18000) drawForceGraph(20,MID+30,280,140,clamp((t-18000)/2500,0,1),true);
+  
+  drawConclusion(t);
+  drawProgress(t);
+
+  document.getElementById('phase').textContent=getPhase(t);
+  document.getElementById('timer').textContent=(t/1000).toFixed(1)+'s / '+(DUR/1000).toFixed(0)+'.0s';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" rx="16" fill="url(#bg)"/>
+  
+  <text x="400" y="38" text-anchor="middle" font-family="Segoe UI,system-ui,sans-serif" font-size="22" font-weight="700" fill="#92400e">Hybnost v praxi – kde se s ní setkáváme?</text>
+  
+  <!-- 1. Auto a kamion -->
+  <g transform="translate(15,60)">
+    <rect width="180" height="140" rx="12" fill="white" opacity="0.8" stroke="#d97706" stroke-width="1.5"/>
+    <text x="90" y="30" text-anchor="middle" font-size="32">🚗💨</text>
+    <text x="90" y="55" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" font-weight="700" fill="#92400e">Brzdná dráha</text>
+    <text x="90" y="75" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">Těžší kamion potřebuje</text>
+    <text x="90" y="90" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">delší dráhu k zastavení</text>
+    <text x="90" y="110" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">→ větší hybnost</text>
+    <text x="90" y="130" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#b45309">p = m·v je větší</text>
+  </g>
+  
+  <!-- 2. Kulečník -->
+  <g transform="translate(210,60)">
+    <rect width="180" height="140" rx="12" fill="white" opacity="0.8" stroke="#d97706" stroke-width="1.5"/>
+    <text x="90" y="30" text-anchor="middle" font-size="32">🎱</text>
+    <text x="90" y="55" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" font-weight="700" fill="#92400e">Kulečník</text>
+    <text x="90" y="75" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">Při nárazu koule předá</text>
+    <text x="90" y="90" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">hybnost druhé kouli</text>
+    <text x="90" y="110" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">→ zákon zachování hybnosti</text>
+    <text x="90" y="130" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#b45309">p₁ + p₂ = p₁' + p₂'</text>
+  </g>
+  
+  <!-- 3. Raketa -->
+  <g transform="translate(405,60)">
+    <rect width="180" height="140" rx="12" fill="white" opacity="0.8" stroke="#d97706" stroke-width="1.5"/>
+    <text x="90" y="30" text-anchor="middle" font-size="32">🚀</text>
+    <text x="90" y="55" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" font-weight="700" fill="#92400e">Raketový pohon</text>
+    <text x="90" y="75" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">Plyny letí dozadu →</text>
+    <text x="90" y="90" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">raketa letí dopředu</text>
+    <text x="90" y="110" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">→ zákon akce a reakce</text>
+    <text x="90" y="130" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#b45309">Δp_raketa = −Δp_plyny</text>
+  </g>
+  
+  <!-- 4. Sport -->
+  <g transform="translate(600,60)">
+    <rect width="180" height="140" rx="12" fill="white" opacity="0.8" stroke="#d97706" stroke-width="1.5"/>
+    <text x="90" y="30" text-anchor="middle" font-size="32">⚽</text>
+    <text x="90" y="55" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" font-weight="700" fill="#92400e">Kopnutí do míče</text>
+    <text x="90" y="75" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">Síla nohy působí</text>
+    <text x="90" y="90" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">krátkodobě = impuls síly</text>
+    <text x="90" y="110" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">→ míč změní hybnost</text>
+    <text x="90" y="130" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#b45309">F·Δt = Δp</text>
+  </g>
+  
+  <!-- 5. Airbag -->
+  <g transform="translate(110,215)">
+    <rect width="180" height="140" rx="12" fill="white" opacity="0.8" stroke="#d97706" stroke-width="1.5"/>
+    <text x="90" y="30" text-anchor="middle" font-size="32">🛡️</text>
+    <text x="90" y="55" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" font-weight="700" fill="#92400e">Airbag v autě</text>
+    <text x="90" y="75" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">Prodlužuje čas nárazu</text>
+    <text x="90" y="90" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">→ snižuje sílu na tělo</text>
+    <text x="90" y="110" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">→ stejná změna hybnosti</text>
+    <text x="90" y="130" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#b45309">F = Δp / Δt (menší F)</text>
+  </g>
+  
+  <!-- 6. Newton kolébka -->
+  <g transform="translate(505,215)">
+    <rect width="180" height="140" rx="12" fill="white" opacity="0.8" stroke="#d97706" stroke-width="1.5"/>
+    <text x="90" y="30" text-anchor="middle" font-size="32">⚖️</text>
+    <text x="90" y="55" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" font-weight="700" fill="#92400e">Newtonova kolébka</text>
+    <text x="90" y="75" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">Hybnost se přenáší</text>
+    <text x="90" y="90" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">z kuličky na kuličku</text>
+    <text x="90" y="110" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="11" fill="#78350f">→ dokonalý pružný ráz</text>
+    <text x="90" y="130" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="10" fill="#b45309">zachování p i Eₖ</text>
+  </g>
+  
+  <text x="400" y="388" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" fill="#92400e" font-weight="600">Hybnost je klíčový pojem – spojuje sílu, pohyb a energii!</text>
+</svg>

@@ -11,7 +11,7 @@ import { rehypeBaseUrl } from './src/plugins/rehype-base-url.mjs';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://tmutina79-png.github.io',
-  base: process.env.CI ? '/matematika-nastenka' : '/',
+  base: process.env.CI ? '/fyzika_kerlinova' : '/',
   output: 'static',
 
   integrations: [
@@ -27,7 +27,7 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     define: {
-      __BASE_URL__: JSON.stringify(process.env.CI ? '/matematika-nastenka' : ''),
+      __BASE_URL__: JSON.stringify(process.env.CI ? '/fyzika_kerlinova' : ''),
     },
   },
 });

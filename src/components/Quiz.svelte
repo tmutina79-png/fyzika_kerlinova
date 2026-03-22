@@ -1,343 +1,160 @@
 <script>
-  /**
-   * Quiz – multi-question ABCD quiz with sequential unlock & results modal.
-   *
-   * Props:
-   *   questions – array of { question, options, correct, explanation? }
-   *   questionBank – array of arrays, each inner array contains variant questions for one slot
-   *                  e.g. [[q1a, q1b, q1c], [q2a, q2b], ...] - picks one from each group
-   *   shuffleOptions – if true, shuffles the order of options (and adjusts correct index)
-   */
-
-  const labels = ['A', 'B', 'C', 'D'];
-
-  let { questions = [], questionBank = [], shuffleOptions = true } = $props();
-
-  // Fisher-Yates shuffle
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
-
-  // Shuffle options and return new question with adjusted correct index
-  function shuffleQuestionOptions(q) {
-    if (!shuffleOptions || !q.options) return q;
-    
-    const indexed = q.options.map((opt, idx) => ({ opt, wasCorrect: idx === q.correct }));
-    const shuffled = shuffle(indexed);
-    const newCorrect = shuffled.findIndex(item => item.wasCorrect);
-    
-    return {
-      ...q,
-      options: shuffled.map(item => item.opt),
-      correct: newCorrect
-    };
-  }
-
-  // Generate quiz questions from bank or use provided questions
-  function generateQuestions() {
-    if (questionBank.length > 0) {
-      // Pick one random question from each group in the bank
-      return questionBank.map(group => {
-        const picked = group[Math.floor(Math.random() * group.length)];
-        return shuffleQuestionOptions(picked);
-      });
-    }
-    // Fallback to regular questions (also shuffle options)
-    return questions.map(q => shuffleQuestionOptions(q));
-  }
-
-  let activeQuestions = $state(generateQuestions());
-
+  let { questions = [], title = 'Kvíz', passingScore = 80 } = $props();
   let current = $state(0);
-  let selected = $state(-1);
-  let showWrong = $state(false);
-  let showCorrect = $state(false);
-  let showResults = $state(false);
-  let attempts = $state({});
+  let answers = $state({});
+  let submitted = $state(false);
+  let score = $state(0);
 
-  function select(idx) {
-    if (showCorrect) return;
-    selected = idx;
-    showWrong = false;
+  function select(qi, ai) {
+    if (submitted) return;
+    answers = { ...answers, [qi]: ai };
   }
 
-  function confirm() {
-    if (selected < 0 || showCorrect) return;
-    attempts[current] = (attempts[current] || 0) + 1;
-
-    if (selected === questions[current].correct) {
-      showCorrect = true;
-    } else {
-      showWrong = true;
-      selected = -1;
-    }
+  function submit() {
+    let correct = 0;
+    questions.forEach((q, i) => {
+      if (answers[i] === q.correct) correct++;
+    });
+    score = Math.round((correct / questions.length) * 100);
+    submitted = true;
   }
 
-  function next() {
-    if (current < questions.length - 1) {
-      current++;
-      selected = -1;
-      showWrong = false;
-      showCorrect = false;
-    } else {
-      showResults = true;
-    }
-  }
-
-  function resetQuiz() {
+  function reset() {
+    answers = {};
+    submitted = false;
+    score = 0;
     current = 0;
-    selected = -1;
-    showWrong = false;
-    showCorrect = false;
-    showResults = false;
-    attempts = {};
   }
 
-  function closeResults() {
-    showResults = false;
-  }
-
-  let totalAttempts = $derived(
-    Object.values(attempts).reduce((sum, a) => sum + a, 0)
-  );
-
-  let firstTryCount = $derived(
-    Object.values(attempts).filter(a => a === 1).length
-  );
-
-  let pct = $derived(
-    questions.length > 0
-      ? Math.round((firstTryCount / questions.length) * 100)
-      : 0
-  );
+  function next() { if (current < questions.length - 1) current++; }
+  function prev() { if (current > 0) current--; }
 </script>
 
-<!-- Quiz card -->
-<div class="my-8 rounded-2xl border border-primary-200 bg-white shadow-lg overflow-hidden">
-  <!-- Header bar -->
-  <div
-    class="bg-primary-600 text-white px-6 py-3 flex items-center justify-between text-sm font-semibold tracking-wide"
-  >
-    <span>📝 Kvíz</span>
-    <span>Otázka {current + 1} / {questions.length}</span>
+<div class="quiz">
+  <div class="quiz-header">
+    <h3 class="quiz-title">{title}</h3>
+    <span class="quiz-count">{Object.keys(answers).length}/{questions.length}</span>
   </div>
 
-  <!-- Body -->
-  <div class="px-6 py-5">
-    <!-- Progress dots -->
-    <div class="flex gap-2 mb-5">
+  {#if !submitted}
+    <div class="quiz-progress">
       {#each questions as _, i}
-        <div
-          class="h-2 flex-1 rounded-full transition-all duration-300
-            {i < current || (i === current && showCorrect)
-              ? 'bg-green-400'
-              : i === current
-                ? 'bg-primary-400'
-                : 'bg-gray-200'}"
-        ></div>
+        <button
+          class="quiz-dot"
+          class:active={i === current}
+          class:answered={answers[i] !== undefined}
+          onclick={() => current = i}
+        >{i + 1}</button>
       {/each}
     </div>
 
-    <!-- Question text -->
-    <p class="text-lg font-medium text-gray-800 mb-5">{questions[current]?.question}</p>
-
-    <!-- Options A B C D -->
-    <div class="grid gap-3">
-      {#each questions[current]?.options ?? [] as option, i}
-        <button
-          type="button"
-          onclick={() => select(i)}
-          disabled={showCorrect}
-          class="w-full text-left px-4 py-3 rounded-xl border-2 transition-all duration-200
-            flex items-center gap-3 text-[15px]
-            {showCorrect && i === questions[current].correct
-              ? 'border-green-500 bg-green-50 text-green-800 font-semibold'
-              : selected === i
-                ? 'border-primary-500 bg-primary-50 text-primary-900'
-                : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50 text-gray-700'}"
-        >
-          <span
-            class="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold shrink-0
-              {showCorrect && i === questions[current].correct
-                ? 'bg-green-500 text-white'
-                : selected === i
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-gray-200 text-gray-600'}"
+    <div class="quiz-question">
+      <p class="quiz-q-text"><strong>Otázka {current + 1}:</strong> {questions[current].question}</p>
+      <div class="quiz-options">
+        {#each questions[current].options as opt, oi}
+          <button
+            class="quiz-option"
+            class:selected={answers[current] === oi}
+            onclick={() => select(current, oi)}
           >
-            {labels[i]}
-          </span>
-          <span>{option}</span>
-        </button>
-      {/each}
+            <span class="quiz-opt-letter">{String.fromCharCode(65 + oi)}</span>
+            {opt}
+          </button>
+        {/each}
+      </div>
     </div>
 
-    <!-- Feedback messages -->
-    {#if showWrong}
-      <div class="mt-4 px-4 py-2.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
-        ❌ Špatná odpověď – zkus to znovu!
-      </div>
-    {/if}
-
-    {#if showCorrect}
-      <div class="mt-4 px-4 py-2.5 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm">
-        <span class="flex items-center gap-2">
-          ✅ Správně!
-          {#if questions[current]?.explanation}
-            <span class="text-green-600">— {questions[current].explanation}</span>
-          {/if}
-        </span>
-      </div>
-    {/if}
-
-    <!-- Action buttons -->
-    <div class="mt-5 flex gap-3">
-      {#if !showCorrect}
-        <button
-          type="button"
-          onclick={confirm}
-          disabled={selected < 0}
-          class="px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200
-            {selected < 0
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg'}"
-        >
-          Potvrdit
-        </button>
-      {:else}
-        <button
-          type="button"
-          onclick={next}
-          class="px-6 py-2.5 rounded-xl font-semibold text-sm bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200"
-        >
-          {current < questions.length - 1 ? 'Další otázka →' : 'Zobrazit výsledky 🏆'}
-        </button>
+    <div class="quiz-nav">
+      <button class="quiz-btn" onclick={prev} disabled={current === 0}>← Předchozí</button>
+      {#if Object.keys(answers).length === questions.length}
+        <button class="quiz-btn quiz-btn-submit" onclick={submit}>✅ Vyhodnotit</button>
       {/if}
+      <button class="quiz-btn" onclick={next} disabled={current === questions.length - 1}>Další →</button>
     </div>
-  </div>
-</div>
+  {:else}
+    <div class="quiz-result" class:pass={score >= passingScore} class:fail={score < passingScore}>
+      <div class="quiz-score">{score} %</div>
+      <p class="quiz-verdict">
+        {#if score >= passingScore}
+          🎉 Výborně! Kvíz jsi splnil/a!
+        {:else}
+          😕 Bohužel, potřebuješ alespoň {passingScore} %. Zkus to znovu!
+        {/if}
+      </p>
 
-<!-- ===== Results Modal ===== -->
-{#if showResults}
-  <div
-    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-    role="dialog"
-    aria-modal="true"
-    aria-label="Výsledky kvízu"
-  >
-    <!-- Backdrop click to close -->
-    <button
-      type="button"
-      class="absolute inset-0 w-full h-full cursor-default"
-      onclick={closeResults}
-      tabindex="-1"
-      aria-label="Zavřít"
-    ></button>
-
-    <!-- Modal panel -->
-    <div class="relative bg-white rounded-3xl shadow-2xl w-[96vw] max-w-3xl max-h-[92vh] overflow-y-auto p-8">
-      <!-- Close X -->
-      <button
-        type="button"
-        onclick={closeResults}
-        class="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200
-               flex items-center justify-center text-gray-500 hover:text-gray-800 text-xl transition"
-      >
-        ✕
-      </button>
-
-      <!-- Trophy header -->
-      <div class="text-center mb-6">
-        <div class="text-6xl mb-2">🏆</div>
-        <h2 class="text-2xl font-bold text-gray-800">Výsledky kvízu</h2>
-      </div>
-
-      <!-- Percentage ring -->
-      <div class="flex justify-center mb-8">
-        <div class="relative w-36 h-36">
-          <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
-            <path
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none"
-              stroke="#e5e7eb"
-              stroke-width="3"
-            />
-            <path
-              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-              fill="none"
-              stroke={pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : '#ef4444'}
-              stroke-width="3"
-              stroke-dasharray="{pct}, 100"
-              stroke-linecap="round"
-            />
-          </svg>
-          <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span class="text-3xl font-bold text-gray-800">{pct} %</span>
-            <span class="text-xs text-gray-500">na 1. pokus</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Summary stats -->
-      <div class="grid grid-cols-3 gap-4 mb-6 text-center">
-        <div class="bg-green-50 rounded-xl p-3">
-          <div class="text-2xl font-bold text-green-600">{firstTryCount}</div>
-          <div class="text-xs text-green-700">na 1. pokus</div>
-        </div>
-        <div class="bg-blue-50 rounded-xl p-3">
-          <div class="text-2xl font-bold text-blue-600">{questions.length}</div>
-          <div class="text-xs text-blue-700">otázek celkem</div>
-        </div>
-        <div class="bg-amber-50 rounded-xl p-3">
-          <div class="text-2xl font-bold text-amber-600">{totalAttempts}</div>
-          <div class="text-xs text-amber-700">pokusů celkem</div>
-        </div>
-      </div>
-
-      <!-- Per-question breakdown -->
-      <div class="space-y-2 mb-6">
+      <div class="quiz-review">
         {#each questions as q, i}
-          <div class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-gray-50 text-sm">
-            <span
-              class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0
-                {(attempts[i] || 0) === 1 ? 'bg-green-500' : 'bg-amber-500'}"
-            >
-              {i + 1}
-            </span>
-            <span class="flex-1 text-gray-700 truncate">{q.question}</span>
-            <span
-              class="text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap
-                {(attempts[i] || 0) === 1
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-amber-100 text-amber-700'}"
-            >
-              {attempts[i] || 0}× pokus
-            </span>
+          <div class="review-item" class:correct={answers[i] === q.correct} class:wrong={answers[i] !== q.correct}>
+            <span class="review-icon">{answers[i] === q.correct ? '✅' : '❌'}</span>
+            <div>
+              <p class="review-q">{q.question}</p>
+              <p class="review-a">Tvá odpověď: <strong>{q.options[answers[i]] || '—'}</strong></p>
+              {#if answers[i] !== q.correct}
+                <p class="review-correct">Správně: <strong>{q.options[q.correct]}</strong></p>
+              {/if}
+            </div>
           </div>
         {/each}
       </div>
 
-      <!-- Modal actions -->
-      <div class="flex justify-center gap-4">
-        <button
-          type="button"
-          onclick={resetQuiz}
-          class="px-6 py-2.5 rounded-xl font-semibold text-sm bg-primary-600 text-white hover:bg-primary-700 shadow-md hover:shadow-lg transition"
-        >
-          Zkusit znovu
-        </button>
-        <button
-          type="button"
-          onclick={closeResults}
-          class="px-6 py-2.5 rounded-xl font-semibold text-sm bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
-        >
-          Zavřít
-        </button>
-      </div>
+      <button class="quiz-btn quiz-btn-retry" onclick={reset}>🔄 Zkusit znovu</button>
     </div>
-  </div>
-{/if}
+  {/if}
+</div>
+
+<style>
+  .quiz { background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 14px; padding: 1.5rem; margin: 1.5rem 0; }
+  .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .quiz-title { margin: 0; font-size: 1.1rem; color: #1e3a8a; }
+  .quiz-count { font-size: 0.85rem; color: #64748b; font-weight: 600; }
+  .quiz-progress { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .quiz-dot {
+    width: 32px; height: 32px; border-radius: 50%; border: 2px solid #cbd5e1;
+    background: white; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    font-family: inherit; color: #64748b;
+  }
+  .quiz-dot.active { border-color: #3b82f6; color: #3b82f6; }
+  .quiz-dot.answered { background: #dbeafe; border-color: #3b82f6; color: #1e3a8a; }
+  .quiz-question { margin-bottom: 1rem; }
+  .quiz-q-text { font-size: 0.95rem; color: #1e293b; margin-bottom: 0.75rem; }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+  .quiz-option {
+    display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+    border: 1.5px solid #e2e8f0; border-radius: 8px; background: white;
+    cursor: pointer; font-family: inherit; font-size: 0.9rem; text-align: left;
+    transition: all 0.15s; color: #334155;
+  }
+  .quiz-option:hover { border-color: #93c5fd; background: #f0f9ff; }
+  .quiz-option.selected { border-color: #3b82f6; background: #eff6ff; }
+  .quiz-opt-letter {
+    width: 28px; height: 28px; border-radius: 50%; background: #e2e8f0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.8rem; color: #475569; flex-shrink: 0;
+  }
+  .quiz-option.selected .quiz-opt-letter { background: #3b82f6; color: white; }
+  .quiz-nav { display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+  .quiz-btn {
+    padding: 0.55rem 1.1rem; border-radius: 8px; border: 1px solid #cbd5e1;
+    background: white; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+    font-family: inherit; transition: all 0.15s; color: #334155;
+  }
+  .quiz-btn:hover:not(:disabled) { background: #f1f5f9; border-color: #94a3b8; }
+  .quiz-btn:disabled { opacity: 0.4; cursor: default; }
+  .quiz-btn-submit { background: #3b82f6; color: white; border-color: #3b82f6; }
+  .quiz-btn-submit:hover { background: #2563eb; }
+  .quiz-btn-retry { background: #3b82f6; color: white; border-color: #3b82f6; margin-top: 1rem; }
+  .quiz-result { text-align: center; }
+  .quiz-score { font-size: 3rem; font-weight: 800; margin-bottom: 0.25rem; }
+  .quiz-result.pass .quiz-score { color: #059669; }
+  .quiz-result.fail .quiz-score { color: #dc2626; }
+  .quiz-verdict { font-size: 1rem; color: #334155; margin-bottom: 1.25rem; }
+  .quiz-review { text-align: left; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+  .review-item { display: flex; gap: 0.75rem; padding: 0.75rem; border-radius: 8px; }
+  .review-item.correct { background: #ecfdf5; }
+  .review-item.wrong { background: #fef2f2; }
+  .review-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+  .review-q { font-weight: 600; font-size: 0.85rem; color: #1e293b; margin: 0 0 0.25rem 0; }
+  .review-a { font-size: 0.8rem; color: #475569; margin: 0; }
+  .review-correct { font-size: 0.8rem; color: #059669; margin: 0.15rem 0 0 0; }
+</style>

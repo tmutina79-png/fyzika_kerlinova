@@ -1,0 +1,99 @@
+---
+title: "Hybnost – Příklady"
+description: "6 příkladů na hybnost, impuls síly a zákon zachování hybnosti s krokovým řešením a možností tisku PDF"
+order: 2
+---
+
+import StepByStepSolution from '../../components/StepByStepSolution.svelte';
+import PDFWorksheetHybnost from '../../components/PDFWorksheetHybnost.svelte';
+
+# ✏️ Hybnost – Příklady
+
+Zde najdeš **6 příkladů** s postupným řešením krok po kroku. Klikni na tlačítko u každého kroku – odkryje se vždy jen **jeden krok**, abys měl(a) čas přemýšlet.
+
+---
+
+## Příklad 1: Hybnost automobilu
+
+> Automobil o hmotnosti 1 200 kg jede rychlostí 90 km/h. Vypočítej jeho hybnost.
+
+<StepByStepSolution client:load title="Řešení – Hybnost automobilu" steps={[
+  { label: "Krok 1: Zapíšeme zadání", content: "<strong>m</strong> = 1 200 kg<br/><strong>v</strong> = 90 km/h" },
+  { label: "Krok 2: Převedeme jednotky", content: "v = 90 km/h = 90 / 3,6 = <strong>25 m/s</strong>" },
+  { label: "Krok 3: Dosadíme do vzorce", content: "p = m · v = 1 200 · 25" },
+  { label: "Krok 4: Výsledek", content: "<span class='result'>p = 30 000 kg·m/s</span><br/>Automobil má hybnost 30 000 kg·m/s." }
+]} />
+
+---
+
+## Příklad 2: Porovnání hybností
+
+> Kamion (8 000 kg) jede rychlostí 54 km/h. Osobní auto (1 000 kg) jede 108 km/h. Které vozidlo má větší hybnost?
+
+<StepByStepSolution client:load title="Řešení – Porovnání hybností" steps={[
+  { label: "Krok 1: Zapíšeme zadání", content: "Kamion: m₁ = 8 000 kg, v₁ = 54 km/h<br/>Auto: m₂ = 1 000 kg, v₂ = 108 km/h" },
+  { label: "Krok 2: Převedeme rychlosti", content: "v₁ = 54 / 3,6 = <strong>15 m/s</strong><br/>v₂ = 108 / 3,6 = <strong>30 m/s</strong>" },
+  { label: "Krok 3: Vypočítáme hybnosti", content: "p₁ = 8 000 · 15 = <strong>120 000 kg·m/s</strong><br/>p₂ = 1 000 · 30 = <strong>30 000 kg·m/s</strong>" },
+  { label: "Krok 4: Porovnáme", content: "<span class='result'>Kamion má 4× větší hybnost než auto!</span><br/>I přesto, že jede pomaleji – jeho hmotnost je rozhodující." }
+]} />
+
+---
+
+## Příklad 3: Zákon zachování hybnosti
+
+> Kulička A (m₁ = 0,5 kg, v₁ = 4 m/s) narazí do stojící kuličky B (m₂ = 0,5 kg). Po pružné srážce se A zastaví. Jaká je rychlost B po srážce?
+
+<StepByStepSolution client:load title="Řešení – Zákon zachování hybnosti" steps={[
+  { label: "Krok 1: Zapíšeme zadání", content: "m₁ = 0,5 kg, v₁ = 4 m/s<br/>m₂ = 0,5 kg, v₂ = 0 m/s<br/>v₁' = 0 m/s (A se zastaví), v₂' = ?" },
+  { label: "Krok 2: Zákon zachování hybnosti", content: "m₁·v₁ + m₂·v₂ = m₁·v₁' + m₂·v₂'" },
+  { label: "Krok 3: Dosadíme", content: "0,5 · 4 + 0,5 · 0 = 0,5 · 0 + 0,5 · v₂'<br/>2 = 0,5 · v₂'" },
+  { label: "Krok 4: Vyjádříme v₂'", content: "v₂' = 2 / 0,5<br/><span class='result'>v₂' = 4 m/s</span><br/>Kulička B se rozjede rychlostí 4 m/s – celá hybnost se přenesla!" }
+]} />
+
+---
+
+## Příklad 4: Impuls síly
+
+> Na těleso o hmotnosti 2 kg působí síla 50 N po dobu 0,1 s. O kolik se změní hybnost tělesa? Pokud bylo v klidu, jakou rychlostí se rozjede?
+
+<StepByStepSolution client:load title="Řešení – Impuls síly" steps={[
+  { label: "Krok 1: Zapíšeme zadání", content: "m = 2 kg, F = 50 N, Δt = 0,1 s<br/>v₀ = 0 m/s (v klidu)" },
+  { label: "Krok 2: Vypočítáme impuls = změnu hybnosti", content: "Δp = F · Δt = 50 · 0,1 = <strong>5 kg·m/s</strong>" },
+  { label: "Krok 3: Vypočítáme rychlost", content: "Δp = m · Δv → Δv = Δp / m = 5 / 2" },
+  { label: "Krok 4: Výsledek", content: "<span class='result'>Δp = 5 kg·m/s, v = 2,5 m/s</span><br/>Těleso se rozjede rychlostí 2,5 m/s." }
+]} />
+
+---
+
+## Příklad 5: Nepružná srážka
+
+> Vagón (20 t, 3 m/s) narazí do stojícího vagónu (30 t) a spojí se s ním. Jakou rychlostí se pohybují?
+
+<StepByStepSolution client:load title="Řešení – Nepružná srážka" steps={[
+  { label: "Krok 1: Zapíšeme zadání", content: "m₁ = 20 000 kg, v₁ = 3 m/s<br/>m₂ = 30 000 kg, v₂ = 0 m/s<br/>Po srážce se spojí → společná rychlost v'" },
+  { label: "Krok 2: Zákon zachování hybnosti", content: "m₁·v₁ + m₂·v₂ = (m₁ + m₂)·v'" },
+  { label: "Krok 3: Dosadíme", content: "20 000·3 + 30 000·0 = (20 000 + 30 000)·v'<br/>60 000 = 50 000·v'" },
+  { label: "Krok 4: Výsledek", content: "v' = 60 000 / 50 000<br/><span class='result'>v' = 1,2 m/s</span><br/>Spojené vagóny jedou rychlostí 1,2 m/s." }
+]} />
+
+---
+
+## Příklad 6: Airbag a síla nárazu
+
+> Řidič (75 kg) jede 50 km/h a narazí do zdi. Bez airbagu trvá zastavení 0,02 s, s airbagem 0,15 s. Porovnej síly na řidiče.
+
+<StepByStepSolution client:load title="Řešení – Airbag a síla" steps={[
+  { label: "Krok 1: Zapíšeme a převedeme", content: "m = 75 kg, v = 50 km/h = 50/3,6 ≈ 13,9 m/s<br/>Δt₁ = 0,02 s (bez airbagu)<br/>Δt₂ = 0,15 s (s airbagem)" },
+  { label: "Krok 2: Změna hybnosti (stejná v obou případech)", content: "Δp = m·v = 75 · 13,9 ≈ <strong>1 042 kg·m/s</strong>" },
+  { label: "Krok 3: Síla bez airbagu", content: "F₁ = Δp / Δt₁ = 1 042 / 0,02 = <strong>52 100 N</strong> ≈ 52 kN 😱" },
+  { label: "Krok 4: Síla s airbagem", content: "F₂ = Δp / Δt₂ = 1 042 / 0,15 ≈ <strong>6 947 N</strong> ≈ 7 kN ✅" },
+  { label: "Krok 5: Závěr", content: "<span class='result'>Airbag snižuje sílu přibližně 7,5×!</span><br/>Proto airbagy zachraňují životy – prodloužením doby nárazu dramaticky sníží sílu." }
+]} />
+
+---
+
+## 🖨️ Příklady k tisku (PDF)
+
+Vyber si příklady, které chceš vytisknout, a klikni na tlačítko pro vygenerování PDF.
+
+<PDFWorksheetHybnost client:load />

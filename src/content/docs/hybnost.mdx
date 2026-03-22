@@ -1,0 +1,249 @@
+---
+title: "Hybnost"
+description: "Hybnost, impuls síly, zákon zachování hybnosti – teorie, vizualizace, příklady a kvízy pro kvintu"
+order: 1
+---
+
+import ImageModal from '../../components/ImageModal.svelte';
+import VideoModal from '../../components/VideoModal.svelte';
+import Quiz from '../../components/Quiz.svelte';
+
+# ⚛️ Hybnost
+
+## 1. Co je to hybnost?
+
+**Hybnost** (značka **p⃗**) je fyzikální veličina, která popisuje „množství pohybu" tělesa. Závisí na dvou věcech:
+
+- **hmotnosti** tělesa ($m$)
+- **rychlosti** tělesa ($\vec{v}$)
+
+> **Definice:** Hybnost je součin hmotnosti a rychlosti tělesa.
+
+$$
+\vec{p} = m \cdot \vec{v}
+$$
+
+| Veličina | Značka | Jednotka |
+|----------|--------|----------|
+| Hybnost | $\vec{p}$ | kg·m/s |
+| Hmotnost | $m$ | kg |
+| Rychlost | $\vec{v}$ | m/s |
+
+**Hybnost je vektorová veličina** – má nejen velikost, ale i směr (stejný jako směr rychlosti).
+
+<ImageModal client:load src="/img/hybnost-princip.svg" alt="Hybnost – základní princip: dvě tělesa se stejnou hybností" />
+
+### Klíčové vlastnosti hybnosti
+
+- 📌 Těžší těleso potřebuje **menší rychlost** k dosažení stejné hybnosti
+- 📌 Rychlejší těleso má **větší hybnost** při stejné hmotnosti
+- 📌 Těleso v klidu má **nulovou hybnost** ($v = 0 \Rightarrow p = 0$)
+
+---
+
+## 2. Kde se s hybností setkáváme v praxi?
+
+Hybnost není jen abstraktní pojem – je všude kolem nás!
+
+<ImageModal client:load src="/img/hybnost-praxe.svg" alt="Hybnost v praxi – příklady z reálného života" />
+
+### Příklady z běžného života:
+
+- 🚗 **Brzdná dráha** – těžší kamion (větší hybnost) brzdí déle než osobní auto
+- 🎱 **Kulečník** – koule si při nárazu předávají hybnost
+- 🚀 **Raketa** – plyny odlétají dozadu, raketa letí dopředu (zákon zachování hybnosti)
+- ⚽ **Kopnutí do míče** – noha působí impulsem síly a mění hybnost míče
+- 🛡️ **Airbag** – prodlužuje čas nárazu, snižuje sílu na tělo
+- ⚖️ **Newtonova kolébka** – dokonalý přenos hybnosti
+
+---
+
+## 3. Zákon zachování hybnosti
+
+Jeden z nejdůležitějších zákonů fyziky!
+
+> **Zákon zachování hybnosti:** V izolované soustavě těles je celková hybnost soustavy konstantní.
+
+$$
+\vec{p}_{\text{před}} = \vec{p}_{\text{po}}
+$$
+
+$$
+m_1 \cdot \vec{v}_1 + m_2 \cdot \vec{v}_2 = m_1 \cdot \vec{v}_1' + m_2 \cdot \vec{v}_2'
+$$
+
+**Kdy platí?** Když na soustavu nepůsobí **vnější síly** (nebo se navzájem vyruší).
+
+<ImageModal client:load src="/img/hybnost-zachovani.svg" alt="Zákon zachování hybnosti – srážka dvou těles" />
+
+### 🎬 Vizualizace: Srážka dvou těles
+
+<VideoModal client:load src="/video-hybnost-srazka.html" title="Srážka dvou těles – zákon zachování hybnosti" thumbnailImg="/img/hybnost-video-thumb.svg" />
+
+### Typy srážek
+
+| Typ srážky | Co se zachovává | Příklad |
+|------------|----------------|---------|
+| **Pružná** | hybnost + kinetická energie | kulečníkové koule |
+| **Nepružná** | pouze hybnost | spojení vagónů |
+| **Dokonale nepružná** | hybnost (tělesa se spojí) | kulka v balistickém kyvadle |
+
+---
+
+## 4. Impuls síly
+
+Jak souvisí síla se změnou hybnosti?
+
+> **Impuls síly** je součin síly a doby jejího působení. Rovná se změně hybnosti.
+
+$$
+\vec{F} \cdot \Delta t = \Delta \vec{p} = m \cdot \Delta \vec{v}
+$$
+
+| Veličina | Značka | Jednotka |
+|----------|--------|----------|
+| Impuls síly | $\vec{F} \cdot \Delta t$ | N·s = kg·m/s |
+| Změna hybnosti | $\Delta \vec{p}$ | kg·m/s |
+
+<ImageModal client:load src="/img/hybnost-impuls.svg" alt="Impuls síly – srovnání krátkého a dlouhého nárazu" />
+
+### 🎬 Vizualizace: Proč airbag zachraňuje život
+
+<VideoModal client:load src="/video-hybnost-impuls.html" title="Impuls síly – airbag vs. tvrdý náraz" thumbnailImg="/img/hybnost-video-thumb.svg" />
+
+### Praktický důsledek
+
+**Stejná změna hybnosti** (zastavení auta) může být dosažena:
+- **Velkou silou** po **krátký čas** → bolestivý náraz ❌
+- **Malou silou** po **delší čas** → bezpečné brzdění ✅
+
+Proto existují: **airbagy**, **deformační zóny**, **přilby**, **sítě pod trampolínou**…
+
+---
+
+## 🧠 Rychlý test – porozumění teorii
+
+<Quiz client:load title="Kvíz: Hybnost – teorie" passingScore={80} questions={[
+  {
+    question: "Jaký je vzorec pro hybnost?",
+    options: ["p = m/v", "p = m·v", "p = F·t", "p = m·a"],
+    correct: 1
+  },
+  {
+    question: "Jaká je jednotka hybnosti?",
+    options: ["N", "J", "kg·m/s", "m/s²"],
+    correct: 2
+  },
+  {
+    question: "Hybnost je veličina:",
+    options: ["skalární", "vektorová", "bezrozměrná", "konstantní"],
+    correct: 1
+  },
+  {
+    question: "Co platí v izolované soustavě při srážce?",
+    options: ["Rychlost se zachovává", "Hybnost se zachovává", "Síla se zachovává", "Hmotnost se mění"],
+    correct: 1
+  },
+  {
+    question: "Airbag chrání tím, že:",
+    options: ["Zmenšuje hybnost", "Prodlužuje čas nárazu, a tím snižuje sílu", "Zvětšuje hmotnost řidiče", "Zabraňuje změně rychlosti"],
+    correct: 1
+  },
+  {
+    question: "Při pružné srážce se zachovává:",
+    options: ["Pouze hybnost", "Pouze kinetická energie", "Hybnost i kinetická energie", "Ani hybnost, ani energie"],
+    correct: 2
+  },
+  {
+    question: "Těleso v klidu má hybnost:",
+    options: ["Nekonečnou", "Rovnou hmotnosti", "Nulovou", "Zápornou"],
+    correct: 2
+  },
+  {
+    question: "Impuls síly F·Δt se rovná:",
+    options: ["Kinetické energii", "Výkonu", "Změně hybnosti", "Zrychlení"],
+    correct: 2
+  }
+]} />
+
+---
+
+## 5. Příklady
+
+<a href="/docs/hybnost-priklady" class="group block no-underline rounded-2xl border-2 border-primary-200 bg-gradient-to-br from-primary-50 via-white to-indigo-50 p-6 shadow-md hover:shadow-xl hover:border-primary-400 hover:-translate-y-1 transition-all duration-300" style="text-decoration:none;">
+  <div class="flex items-center gap-4">
+    <div class="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary-600 to-indigo-600 text-white text-2xl shadow-lg group-hover:scale-110 transition-transform duration-300">✏️</div>
+    <div class="flex-1">
+      <div class="text-lg font-bold text-primary-800 group-hover:text-primary-600 transition-colors">Přejít na příklady</div>
+      <div class="text-sm text-gray-500 mt-0.5">6 příkladů s krokovým řešením + tisk PDF</div>
+    </div>
+    <svg class="w-6 h-6 text-primary-400 group-hover:text-primary-600 group-hover:translate-x-1 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+  </div>
+  <div class="flex gap-2 mt-4">
+    <span class="inline-block text-[11px] px-2.5 py-1 rounded-full bg-primary-100 text-primary-700 font-medium">Krok za krokem</span>
+    <span class="inline-block text-[11px] px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">Řešení</span>
+    <span class="inline-block text-[11px] px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 font-medium">PDF k tisku</span>
+  </div>
+</a>
+
+---
+
+## ✅ Ověření znalostí – závěrečný kvíz
+
+<Quiz client:load title="Závěrečný kvíz: Hybnost – celkové ověření" passingScore={80} questions={[
+  {
+    question: "Auto (1500 kg) jede 72 km/h. Jaká je jeho hybnost?",
+    options: ["108 000 kg·m/s", "30 000 kg·m/s", "1 500 kg·m/s", "72 000 kg·m/s"],
+    correct: 1
+  },
+  {
+    question: "Kulička (0,2 kg, 5 m/s) narazí do stojící kuličky (0,2 kg) a zastaví se. Rychlost druhé kuličky po srážce je:",
+    options: ["2,5 m/s", "5 m/s", "10 m/s", "0 m/s"],
+    correct: 1
+  },
+  {
+    question: "Síla 100 N působí na těleso po dobu 0,5 s. Impuls síly je:",
+    options: ["200 N·s", "50 N·s", "0,005 N·s", "100 N·s"],
+    correct: 1
+  },
+  {
+    question: "Dva vagóny (každý 15 t) se srazí a spojí. První jel 4 m/s, druhý stál. Společná rychlost je:",
+    options: ["4 m/s", "2 m/s", "8 m/s", "1 m/s"],
+    correct: 1
+  },
+  {
+    question: "Při nepružné srážce se zachovává:",
+    options: ["Kinetická energie", "Hybnost", "Rychlost", "Zrychlení"],
+    correct: 1
+  },
+  {
+    question: "Raketa se pohybuje díky zákonu zachování hybnosti. Plyny letí dozadu, raketa:",
+    options: ["Se zastaví", "Letí dopředu", "Rotuje", "Ztrácí hybnost"],
+    correct: 1
+  },
+  {
+    question: "Jaký je rozdíl mezi pružnou a nepružnou srážkou?",
+    options: [
+      "Při pružné srážce se zachovává i kinetická energie",
+      "Při nepružné srážce se zachovává kinetická energie",
+      "Při pružné srážce se nezachovává hybnost",
+      "Žádný rozdíl není"
+    ],
+    correct: 0
+  },
+  {
+    question: "Řidič (80 kg, 60 km/h) narazí. S airbagem (Δt = 0,2 s) je síla přibližně:",
+    options: ["6 667 N", "133 N", "80 000 N", "1 333 N"],
+    correct: 0
+  },
+  {
+    question: "Hybnost tělesa v klidu je:",
+    options: ["Rovna hmotnosti", "Nekonečná", "Nulová", "Záporná"],
+    correct: 2
+  },
+  {
+    question: "Dvě tělesa se pohybují proti sobě stejnou rychlostí a mají stejnou hmotnost. Celková hybnost soustavy je:",
+    options: ["Dvojnásobná", "Nulová", "Rovna hybnosti jednoho tělesa", "Záporná"],
+    correct: 1
+  }
+]} />

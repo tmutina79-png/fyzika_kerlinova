@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Hybnost – Srážka dvou těles</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;overflow:hidden}
+canvas{border-radius:16px;box-shadow:0 0 60px rgba(59,130,246,.2)}
+#phase{color:#60a5fa;font-size:15px;margin-top:10px;font-weight:600;min-height:22px}
+#timer{color:#475569;font-size:12px;margin-top:4px}
+#title{color:#e2e8f0;font-size:22px;font-weight:700;margin-bottom:14px;letter-spacing:1px}
+#controls{display:flex;align-items:center;gap:10px;margin-top:12px}
+#controls button{background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:8px 16px;font-size:15px;cursor:pointer;transition:background .15s,border-color .15s;font-family:inherit;display:flex;align-items:center;gap:6px}
+#controls button:hover{background:#334155;border-color:#60a5fa}
+#controls button:active{background:#475569}
+#controls button .icon{font-size:18px}
+#scrubber{-webkit-appearance:none;appearance:none;width:300px;height:6px;border-radius:3px;background:#1e293b;outline:none;cursor:pointer}
+#scrubber::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#scrubber::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#60a5fa;cursor:pointer;border:2px solid #0f172a}
+#info{color:#94a3b8;font-size:13px;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="title">⚛️ Hybnost – Srážka dvou těles</div>
+<canvas id="c" width="760" height="480"></canvas>
+<div id="phase"></div>
+<div id="timer"></div>
+<div id="controls">
+  <button id="btnRew" title="Zpět 0,3s"><span class="icon">⏪</span> −0,3s</button>
+  <button id="btnPlay" title="Přehrát / Zastavit"><span class="icon" id="playIcon">⏸</span> <span id="playLabel">Pauza</span></button>
+  <button id="btnFwd" title="Vpřed 0,3s"><span class="icon">⏩</span> +0,3s</button>
+  <input type="range" id="scrubber" min="0" max="30000" value="0" step="100"/>
+</div>
+<div id="info">Vizualizace pružné srážky dvou těles • zákon zachování hybnosti</div>
+
+<script>
+const C=document.getElementById('c'),X=C.getContext('2d');
+const W=C.width,H=C.height;
+const DUR=30000;
+let currentTime=0,playing=true,lastTs=null;
+const STEP=300;
+
+/* Controls */
+const btnPlay=document.getElementById('btnPlay');
+const btnRew=document.getElementById('btnRew');
+const btnFwd=document.getElementById('btnFwd');
+const scrubber=document.getElementById('scrubber');
+const playIcon=document.getElementById('playIcon');
+const playLabel=document.getElementById('playLabel');
+let scrubbing=false;
+
+btnPlay.addEventListener('click',()=>{playing=!playing;playIcon.textContent=playing?'⏸':'▶';playLabel.textContent=playing?'Pauza':'Přehrát';if(playing)lastTs=null});
+btnRew.addEventListener('click',()=>{currentTime=Math.max(0,currentTime-STEP);scrubber.value=currentTime});
+btnFwd.addEventListener('click',()=>{currentTime=Math.min(DUR,currentTime+STEP);scrubber.value=currentTime});
+scrubber.addEventListener('input',()=>{scrubbing=true;currentTime=Number(scrubber.value)});
+scrubber.addEventListener('change',()=>{scrubbing=false});
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();btnPlay.click()}if(e.code==='ArrowLeft')btnRew.click();if(e.code==='ArrowRight')btnFwd.click()});
+
+// postMessage handler for VideoModal
+window.addEventListener('message',e=>{
+  if(e.data==='toggle')btnPlay.click();
+  if(e.data==='rew')btnRew.click();
+  if(e.data==='fwd')btnFwd.click();
+  if(e.data==='stop'){playing=false;playIcon.textContent='▶';playLabel.textContent='Přehrát'}
+});
+
+/* Phases */
+const phases=[
+  {t:0,     label:'① Dvě tělesa se blíží'},
+  {t:4000,  label:'② Zobrazujeme hybnost p⃗ = m·v⃗'},
+  {t:8000,  label:'③ Tělesa se blíží ke srážce'},
+  {t:12000, label:'④ SRÁŽKA! Předání hybnosti'},
+  {t:16000, label:'⑤ Po srážce – tělesa se vzdalují'},
+  {t:20000, label:'⑥ Ověřujeme zákon zachování hybnosti'},
+  {t:25000, label:'⑦ Celková hybnost se zachovává!'},
+];
+function getPhase(t){let p=phases[0].label;for(const ph of phases)if(t>=ph.t)p=ph.label;return p}
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function lerp(a,b,t){return a+(b-a)*clamp(t,0,1)}
+function ease(t){return 1-Math.pow(1-clamp(t,0,1),3)}
+
+/* Physics params */
+const m1=3, m2=1; // masses
+const v1i=4, v2i=0; // initial velocities
+// Elastic collision formulas
+const v1f=(m1-m2)/(m1+m2)*v1i + 2*m2/(m1+m2)*v2i; // = 2
+const v2f=2*m1/(m1+m2)*v1i + (m2-m1)/(m1+m2)*v2i;  // = 6
+
+const FLOOR_Y=280;
+const COLLISION_T=12000;
+
+/* Stars */
+const stars=[];
+for(let i=0;i<80;i++) stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+0.3,b:Math.random()});
+
+function drawStars(t){
+  for(const s of stars){
+    const a=0.2+0.5*Math.abs(Math.sin(t/1200+s.b*5));
+    X.fillStyle=`rgba(255,255,255,${a})`;
+    X.beginPath();X.arc(s.x,s.y,s.r,0,Math.PI*2);X.fill();
+  }
+}
+
+function drawFloor(){
+  X.fillStyle='#1e293b';
+  X.fillRect(0,FLOOR_Y+40,W,H-FLOOR_Y-40);
+  X.strokeStyle='#334155';
+  X.lineWidth=2;
+  X.beginPath();X.moveTo(0,FLOOR_Y+40);X.lineTo(W,FLOOR_Y+40);X.stroke();
+  // Grid lines
+  X.strokeStyle='rgba(100,116,139,0.2)';
+  X.lineWidth=1;
+  for(let x=0;x<W;x+=40){X.beginPath();X.moveTo(x,FLOOR_Y+40);X.lineTo(x,H);X.stroke()}
+}
+
+function getBallPositions(t){
+  let x1,x2;
+  const collisionX1=320, collisionX2=collisionX1+55;
+  
+  if(t<COLLISION_T){
+    // Moving toward collision
+    const progress=t/COLLISION_T;
+    x1=lerp(80,collisionX1,ease(progress));
+    x2=lerp(550,collisionX2,ease(progress*0.3)); // B barely moves (v2i=0)
+  } else {
+    // After collision
+    const dt=(t-COLLISION_T)/1000;
+    x1=collisionX1 + v1f*dt*18;  // slower
+    x2=collisionX2 + v2f*dt*18;  // faster
+  }
+  return {x1,x2};
+}
+
+function drawBall(x,y,r,color,label,mass,vel,t){
+  // Shadow
+  X.fillStyle='rgba(0,0,0,0.3)';
+  X.beginPath();X.ellipse(x,FLOOR_Y+45,r*0.8,6,0,0,Math.PI*2);X.fill();
+  
+  // Ball
+  const grad=X.createRadialGradient(x-r*0.3,y-r*0.3,0,x,y,r);
+  grad.addColorStop(0,color==='blue'?'#60a5fa':'#f87171');
+  grad.addColorStop(1,color==='blue'?'#1e3a8a':'#991b1b');
+  X.fillStyle=grad;
+  X.beginPath();X.arc(x,y,r,0,Math.PI*2);X.fill();
+  
+  // Label
+  X.fillStyle='white';X.font='bold 18px "Segoe UI",sans-serif';X.textAlign='center';X.textBaseline='middle';
+  X.fillText(label,x,y);
+  
+  // Info below
+  X.fillStyle='#94a3b8';X.font='12px "Segoe UI",sans-serif';
+  X.fillText(`m=${mass} kg`,x,y+r+18);
+  
+  if(t>4000){
+    X.fillStyle=color==='blue'?'#60a5fa':'#f87171';X.font='bold 13px "Segoe UI",sans-serif';
+    X.fillText(`v=${vel.toFixed(1)} m/s`,x,y+r+34);
+  }
+}
+
+function drawArrow(x,y,vx,color,alpha){
+  if(Math.abs(vx)<0.1||alpha<=0)return;
+  const len=vx*12;
+  X.strokeStyle=color;X.lineWidth=3;X.globalAlpha=alpha;
+  X.beginPath();X.moveTo(x,y);X.lineTo(x+len,y);X.stroke();
+  // arrowhead
+  const dir=vx>0?1:-1;
+  X.fillStyle=color;
+  X.beginPath();
+  X.moveTo(x+len,y);
+  X.lineTo(x+len-dir*10,y-6);
+  X.lineTo(x+len-dir*10,y+6);
+  X.closePath();X.fill();
+  
+  X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillText(`p⃗=${(vx>0?'':'')}${Math.abs(vx).toFixed(0)}`,x+len/2,y-14);
+  X.globalAlpha=1;
+}
+
+function drawMomentumBar(t){
+  if(t<20000)return;
+  const fade=clamp((t-20000)/1500,0,1);
+  
+  const bx=50,by=380,bw=660,bh=70;
+  X.globalAlpha=fade;
+  
+  // Background
+  X.fillStyle='rgba(30,41,59,0.9)';
+  X.beginPath();
+  const r=12;
+  X.moveTo(bx+r,by);X.lineTo(bx+bw-r,by);X.quadraticCurveTo(bx+bw,by,bx+bw,by+r);
+  X.lineTo(bx+bw,by+bh-r);X.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh);
+  X.lineTo(bx+r,by+bh);X.quadraticCurveTo(bx,by+bh,bx,by+bh-r);
+  X.lineTo(bx,by+r);X.quadraticCurveTo(bx,by,bx+r,by);
+  X.closePath();X.fill();
+  
+  X.strokeStyle='#3b82f6';X.lineWidth=1.5;X.stroke();
+  
+  // Before
+  const p1_before=m1*v1i, p2_before=m2*v2i;
+  const pTotal_before=p1_before+p2_before;
+  
+  // After
+  const p1_after=m1*v1f, p2_after=m2*v2f;
+  const pTotal_after=p1_after+p2_after;
+  
+  X.fillStyle='#e2e8f0';X.font='bold 14px "Segoe UI",sans-serif';X.textAlign='left';
+  X.fillText('PŘED:',bx+15,by+22);
+  X.fillStyle='#60a5fa';X.font='13px "Segoe UI",sans-serif';
+  X.fillText(`p₁ = ${m1}·${v1i} = ${p1_before}`,bx+75,by+22);
+  X.fillText(`p₂ = ${m2}·${v2i} = ${p2_before}`,bx+200,by+22);
+  X.fillStyle='#fbbf24';X.font='bold 14px "Segoe UI",sans-serif';
+  X.fillText(`Σp = ${pTotal_before} kg·m/s`,bx+340,by+22);
+  
+  X.fillStyle='#e2e8f0';X.font='bold 14px "Segoe UI",sans-serif';
+  X.fillText('PO:',bx+15,by+50);
+  X.fillStyle='#f87171';X.font='13px "Segoe UI",sans-serif';
+  X.fillText(`p₁' = ${m1}·${v1f.toFixed(0)} = ${p1_after.toFixed(0)}`,bx+75,by+50);
+  X.fillText(`p₂' = ${m2}·${v2f.toFixed(0)} = ${p2_after.toFixed(0)}`,bx+220,by+50);
+  X.fillStyle='#fbbf24';X.font='bold 14px "Segoe UI",sans-serif';
+  X.fillText(`Σp' = ${pTotal_after.toFixed(0)} kg·m/s`,bx+380,by+50);
+  
+  // Check mark
+  if(t>25000){
+    const checkFade=clamp((t-25000)/800,0,1);
+    X.fillStyle=`rgba(16,185,129,${checkFade})`;
+    X.font='bold 18px "Segoe UI",sans-serif';
+    X.fillText('✅ Σp = Σp\'',bx+540,by+38);
+  }
+  
+  X.globalAlpha=1;
+}
+
+function drawCollisionFlash(t){
+  if(t<COLLISION_T||t>COLLISION_T+1500)return;
+  const dt=t-COLLISION_T;
+  const alpha=1-dt/1500;
+  const r=dt/1500*120;
+  const {x1}=getBallPositions(COLLISION_T);
+  const cx=x1+27;
+  
+  const grad=X.createRadialGradient(cx,FLOOR_Y-20,0,cx,FLOOR_Y-20,r);
+  grad.addColorStop(0,`rgba(251,191,36,${alpha*0.8})`);
+  grad.addColorStop(0.5,`rgba(251,191,36,${alpha*0.3})`);
+  grad.addColorStop(1,`rgba(251,191,36,0)`);
+  X.fillStyle=grad;
+  X.beginPath();X.arc(cx,FLOOR_Y-20,r,0,Math.PI*2);X.fill();
+}
+
+function drawFormula(t){
+  if(t<4000)return;
+  const fade=clamp((t-4000)/1000,0,1);
+  X.globalAlpha=fade;
+  X.fillStyle='rgba(30,41,59,0.85)';
+  
+  const fx=20,fy=20,fw=200,fh=50;
+  X.beginPath();
+  X.moveTo(fx+10,fy);X.lineTo(fx+fw-10,fy);X.quadraticCurveTo(fx+fw,fy,fx+fw,fy+10);
+  X.lineTo(fx+fw,fy+fh-10);X.quadraticCurveTo(fx+fw,fy+fh,fx+fw-10,fy+fh);
+  X.lineTo(fx+10,fy+fh);X.quadraticCurveTo(fx,fy+fh,fx,fy+fh-10);
+  X.lineTo(fx,fy+10);X.quadraticCurveTo(fx,fy,fx+10,fy);
+  X.closePath();X.fill();
+  
+  X.fillStyle='#fbbf24';X.font='bold 20px "Segoe UI",sans-serif';X.textAlign='center';
+  X.fillText('p⃗ = m · v⃗',fx+fw/2,fy+33);
+  X.globalAlpha=1;
+}
+
+/* Progress bar */
+function drawProgress(t){
+  const p=t/DUR,barY=H-14,barH=5,pad=50;
+  X.fillStyle='#334155';X.fillRect(pad,barY,W-2*pad,barH);
+  X.fillStyle='#3b82f6';X.fillRect(pad,barY,(W-2*pad)*p,barH);
+  X.beginPath();X.fillStyle='#60a5fa';X.arc(pad+(W-2*pad)*p,barY+barH/2,5,0,Math.PI*2);X.fill();
+}
+
+/* Main loop */
+function frame(ts){
+  if(lastTs===null)lastTs=ts;
+  const dt=ts-lastTs;lastTs=ts;
+  if(playing&&!scrubbing){
+    currentTime=Math.min(DUR,currentTime+dt);
+    if(currentTime>=DUR){playing=false;playIcon.textContent='▶';playLabel.textContent='Přehrát'}
+  }
+  const t=currentTime;
+  if(!scrubbing)scrubber.value=t;
+
+  X.fillStyle='#0a0e1a';X.fillRect(0,0,W,H);
+  drawStars(t);
+  drawFloor();
+  
+  const {x1,x2}=getBallPositions(t);
+  const ballY=FLOOR_Y-20;
+  
+  // Current velocities
+  let cv1,cv2;
+  if(t<COLLISION_T){cv1=v1i;cv2=v2i}
+  else{cv1=v1f;cv2=v2f}
+  
+  // Draw momentum arrows
+  const arrowAlpha=t>4000?clamp((t-4000)/1500,0,1):0;
+  drawArrow(x1,ballY-55,cv1*m1,'#60a5fa',arrowAlpha);
+  if(cv2!==0) drawArrow(x2,ballY-45,cv2*m2,'#f87171',arrowAlpha);
+  
+  drawCollisionFlash(t);
+  drawBall(x1,ballY,35,'blue','A',m1,cv1,t);
+  drawBall(x2,ballY,22,'red','B',m2,cv2,t);
+  drawFormula(t);
+  drawMomentumBar(t);
+  drawProgress(t);
+
+  document.getElementById('phase').textContent=getPhase(t);
+  document.getElementById('timer').textContent=(t/1000).toFixed(1)+'s / '+(DUR/1000).toFixed(0)+'.0s';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
