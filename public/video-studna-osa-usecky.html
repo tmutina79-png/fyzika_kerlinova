@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Umístění studny – osa úsečky</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; font-family: system-ui, -apple-system, sans-serif;
+    }
+    canvas { max-width: 100%; max-height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="1280" height="720"></canvas>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    const DURATION = 30000;
+    let startTime = null, isPlaying = true, currentProgress = 0;
+
+    const col = {
+      bg1: '#0f172a', bg2: '#1e293b',
+      house: '#fb923c', houseB: '#f472b6',
+      green: '#34d399', blue: '#60a5fa', purple: '#818cf8',
+      red: '#f87171', yellow: '#fbbf24', text: '#e2e8f0',
+      dim: '#94a3b8', well: '#38bdf8', ground: '#1c3a2a'
+    };
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+    function clamp01(t) { return Math.max(0, Math.min(1, t)); }
+    function phase(p, s, d) { return clamp01((p - s) / d); }
+
+    // Geometry
+    const Ax = 340, Ay = 400;  // House A
+    const Bx = 940, By = 400;  // House B
+    const Sx = (Ax + Bx) / 2, Sy = (Ay + By) / 2; // Midpoint
+
+    // Well on bisector (above midpoint)
+    const wellX = Sx, wellY = 240;
+
+    // Wrong position (closer to A)
+    const wrongX = 450, wrongY = 300;
+
+    function dist(x1, y1, x2, y2) { return Math.sqrt((x2-x1)**2 + (y2-y1)**2); }
+
+    function drawBg() {
+      const g = ctx.createLinearGradient(0, 0, W, H);
+      g.addColorStop(0, col.bg1); g.addColorStop(1, col.bg2);
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawText(text, x, y, size, color, align, alpha) {
+      if (alpha <= 0) return;
+      ctx.save(); ctx.globalAlpha = alpha;
+      ctx.font = (size > 18 ? 'bold ' : '') + size + 'px system-ui';
+      ctx.fillStyle = color; ctx.textAlign = align || 'center';
+      ctx.textBaseline = 'middle'; ctx.fillText(text, x, y);
+      ctx.restore();
+    }
+
+    function drawDot(x, y, r, color, alpha) {
+      if (alpha <= 0) return;
+      ctx.save(); ctx.globalAlpha = alpha;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+      ctx.fillStyle = color; ctx.fill(); ctx.restore();
+    }
+
+    function drawLine(x1, y1, x2, y2, color, lw, alpha, dash) {
+      if (alpha <= 0) return;
+      ctx.save(); ctx.globalAlpha = alpha;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+      ctx.strokeStyle = color; ctx.lineWidth = lw;
+      ctx.setLineDash(dash || []); ctx.stroke(); ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    function drawHouse(x, y, color, label, alpha) {
+      if (alpha <= 0) return;
+      ctx.save(); ctx.globalAlpha = alpha;
+      // House body
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(x - 28, y - 20, 56, 40, 4);
+      ctx.fill();
+      // Roof
+      ctx.beginPath();
+      ctx.moveTo(x - 34, y - 20);
+      ctx.lineTo(x, y - 48);
+      ctx.lineTo(x + 34, y - 20);
+      ctx.closePath();
+      ctx.fill();
+      // Door
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath();
+      ctx.roundRect(x - 8, y - 5, 16, 25, [0, 0, 2, 2]);
+      ctx.fill();
+      // Window
+      ctx.fillStyle = 'rgba(255,255,200,0.6)';
+      ctx.fillRect(x + 14, y - 14, 10, 10);
+      ctx.fillRect(x - 24, y - 14, 10, 10);
+      // Label
+      ctx.fillStyle = color;
+      ctx.font = 'bold 22px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x, y + 55);
+      ctx.restore();
+    }
+
+    function drawWell(x, y, alpha) {
+      if (alpha <= 0) return;
+      ctx.save(); ctx.globalAlpha = alpha;
+      // Glow
+      const g = ctx.createRadialGradient(x, y, 0, x, y, 50);
+      g.addColorStop(0, 'rgba(56,189,248,0.3)');
+      g.addColorStop(1, 'rgba(56,189,248,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, 50, 0, Math.PI*2); ctx.fill();
+      // Well circle
+      ctx.strokeStyle = col.well; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(x, y, 16, 0, Math.PI*2); ctx.stroke();
+      // Inner water
+      ctx.fillStyle = col.well;
+      ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI*2); ctx.fill();
+      // Roof supports
+      ctx.strokeStyle = '#78716c'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x - 12, y - 16); ctx.lineTo(x - 12, y - 34); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + 12, y - 16); ctx.lineTo(x + 12, y - 34); ctx.stroke();
+      // Roof
+      ctx.beginPath();
+      ctx.moveTo(x - 20, y - 34);
+      ctx.lineTo(x, y - 44);
+      ctx.lineTo(x + 20, y - 34);
+      ctx.closePath();
+      ctx.strokeStyle = '#a16207'; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.fillStyle = '#92400e'; ctx.fill();
+      ctx.restore();
+    }
+
+    function drawInfoBox(text, x, y, color, alpha) {
+      if (alpha <= 0) return;
+      ctx.save(); ctx.globalAlpha = alpha;
+      ctx.font = 'bold 20px system-ui';
+      const w = ctx.measureText(text).width + 40;
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      ctx.beginPath(); ctx.roundRect(x - w/2, y - 20, w, 40, 10); ctx.fill();
+      ctx.fillStyle = color || '#fff';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(text, x, y); ctx.restore();
+    }
+
+    function drawProgressBar(p) {
+      const barY = H - 20, barH = 5, pad = 100;
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(pad, barY, W - 2*pad, barH);
+      ctx.fillStyle = col.purple;
+      ctx.fillRect(pad, barY, (W - 2*pad) * p, barH);
+      ctx.beginPath();
+      ctx.arc(pad + (W - 2*pad) * p, barY + barH/2, 6, 0, Math.PI*2);
+      ctx.fillStyle = col.purple; ctx.fill();
+    }
+
+    function render(p) {
+      drawBg();
+
+      // Ground line
+      ctx.save(); ctx.globalAlpha = 0.3;
+      ctx.fillStyle = col.ground;
+      ctx.fillRect(0, 440, W, 280);
+      ctx.restore();
+
+      const pTitle    = easeOut(phase(p, 0.00, 0.07));
+      const pHouses   = easeOut(phase(p, 0.08, 0.06));
+      const pSegment  = easeOut(phase(p, 0.13, 0.05));
+      const pQuestion = easeOut(phase(p, 0.17, 0.04));
+      const pWrong    = easeOut(phase(p, 0.22, 0.05));
+      const pWrongD   = easeOut(phase(p, 0.27, 0.06));
+      const pWrongLbl = easeOut(phase(p, 0.33, 0.04));
+      const pBisector = easeOut(phase(p, 0.40, 0.08));
+      const pBisLbl   = easeOut(phase(p, 0.46, 0.04));
+      const pMid      = easeOut(phase(p, 0.50, 0.04));
+      const pRight    = easeOut(phase(p, 0.54, 0.04));
+      const pWell     = easeOut(phase(p, 0.60, 0.06));
+      const pCorrectD = easeOut(phase(p, 0.66, 0.06));
+      const pCorrectL = easeOut(phase(p, 0.72, 0.04));
+      const pExpl     = easeOut(phase(p, 0.78, 0.06));
+      const pSummary  = easeOut(phase(p, 0.88, 0.06));
+
+      // Title
+      if (p < 0.10) {
+        drawText('🏠 Umístění studny', W/2, H/2 - 30, 44, col.text, 'center', pTitle);
+        drawText('Kde vykopat studnu, aby byla od obou domů stejně daleko?', W/2, H/2 + 25, 20, col.dim, 'center', pTitle);
+        drawProgressBar(p);
+        return;
+      }
+
+      // Houses
+      drawHouse(Ax, Ay, col.house, 'Dům A', pHouses);
+      drawHouse(Bx, By, col.houseB, 'Dům B', pHouses);
+
+      // Segment AB
+      drawLine(Ax, Ay + 20, Bx, By + 20, col.dim, 2, pSegment, [8, 4]);
+      if (pSegment > 0) {
+        drawText('vzdálenost AB', (Ax + Bx)/2, Ay + 42, 14, col.dim, 'center', pSegment);
+      }
+
+      // Question
+      if (pQuestion > 0 && p < 0.40) {
+        drawInfoBox('Kde vykopat studnu, aby |XA| = |XB| ?', W/2, 80, col.yellow, pQuestion);
+      }
+
+      // Wrong position
+      if (pWrong > 0 && p < 0.55) {
+        drawDot(wrongX, wrongY, 10, col.red, pWrong);
+        drawText('?', wrongX, wrongY, 16, '#fff', 'center', pWrong);
+
+        if (pWrongD > 0) {
+          const dA = Math.round(dist(wrongX, wrongY, Ax, Ay));
+          const dB = Math.round(dist(wrongX, wrongY, Bx, By));
+          drawLine(wrongX, wrongY, Ax, Ay - 20, col.blue, 2, pWrongD, [6, 3]);
+          drawLine(wrongX, wrongY, Bx, By - 20, col.house, 2, pWrongD, [6, 3]);
+          drawText('d₁ = ' + dA, (wrongX + Ax)/2 - 15, (wrongY + Ay - 20)/2 - 12, 14, col.blue, 'center', pWrongD);
+          drawText('d₂ = ' + dB, (wrongX + Bx)/2 + 15, (wrongY + By - 20)/2 - 12, 14, col.house, 'center', pWrongD);
+        }
+
+        if (pWrongLbl > 0) {
+          drawInfoBox('❌  d₁ ≠ d₂ → nespravedlivé umístění', W/2, 80, col.red, pWrongLbl);
+        }
+      }
+
+      // Bisector (perpendicular bisector of AB)
+      if (pBisector > 0) {
+        const bisLen = 350 * pBisector;
+        drawLine(Sx, Sy + 20 - bisLen, Sx, Sy + 20 + 80, col.green, 4, pBisector);
+        // Mark midpoint
+        if (pMid > 0) {
+          drawDot(Sx, Sy + 20, 7, col.yellow, pMid);
+          drawText('S', Sx + 18, Sy + 35, 18, col.yellow, 'left', pMid);
+        }
+        // Right angle mark
+        if (pRight > 0) {
+          ctx.save(); ctx.globalAlpha = pRight;
+          ctx.strokeStyle = col.dim; ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.rect(Sx, Sy + 5, 15, 15);
+          ctx.stroke(); ctx.restore();
+        }
+      }
+
+      // Bisector label
+      if (pBisLbl > 0) {
+        drawText('osa úsečky AB', Sx, Sy - 330, 18, col.green, 'center', pBisLbl);
+        drawText('o', Sx - 20, Sy - 300, 22, col.green, 'center', pBisLbl);
+      }
+
+      // Well on bisector
+      if (pWell > 0) {
+        drawWell(wellX, wellY, pWell);
+        drawText('studna', wellX, wellY + 35, 16, col.well, 'center', pWell);
+      }
+
+      // Correct distances
+      if (pCorrectD > 0) {
+        drawLine(wellX, wellY + 10, Ax, Ay - 20, col.green, 2.5, pCorrectD, [6, 3]);
+        drawLine(wellX, wellY + 10, Bx, By - 20, col.green, 2.5, pCorrectD, [6, 3]);
+      }
+
+      if (pCorrectL > 0) {
+        const d = Math.round(dist(wellX, wellY, Ax, Ay));
+        drawText('d₁ = ' + d, (wellX + Ax)/2 - 25, (wellY + Ay)/2 - 15, 16, col.green, 'center', pCorrectL);
+        drawText('d₂ = ' + d, (wellX + Bx)/2 + 25, (wellY + By)/2 - 15, 16, col.green, 'center', pCorrectL);
+      }
+
+      // Explanation box
+      if (pExpl > 0) {
+        drawInfoBox('✅  d₁ = d₂ → spravedlivé umístění!', W/2, 80, col.green, pExpl);
+      }
+
+      // Summary overlay
+      if (pSummary > 0) {
+        ctx.save(); ctx.globalAlpha = pSummary * 0.88;
+        ctx.fillStyle = 'rgba(0,0,0,0.85)'; ctx.fillRect(0, 0, W, H);
+        ctx.restore();
+
+        drawText('🏠 Studna na ose úsečky AB', W/2, H/2 - 60, 36, col.green, 'center', pSummary);
+        drawText('Každý bod na ose úsečky je stejně daleko', W/2, H/2 - 10, 24, col.text, 'center', pSummary);
+        drawText('od obou koncových bodů (domů).', W/2, H/2 + 25, 24, col.text, 'center', pSummary);
+        drawText('|XA| = |XB|', W/2, H/2 + 70, 30, col.purple, 'center', pSummary);
+      }
+
+      drawProgressBar(p);
+    }
+
+    function animate(timestamp) {
+      if (!startTime) startTime = timestamp;
+      if (isPlaying) currentProgress = Math.min((timestamp - startTime) / DURATION, 1);
+      render(currentProgress);
+      if (currentProgress < 1 || !isPlaying) requestAnimationFrame(animate);
+      else render(1);
+    }
+
+    window.addEventListener('message', (e) => {
+      switch (e.data) {
+        case 'toggle':
+          if (currentProgress >= 1) { startTime = null; currentProgress = 0; isPlaying = true; requestAnimationFrame(animate); }
+          else { isPlaying = !isPlaying; if (isPlaying) { startTime = performance.now() - currentProgress * DURATION; requestAnimationFrame(animate); } }
+          break;
+        case 'stop': isPlaying = false; currentProgress = 0; startTime = null; render(0); break;
+        case 'rew': currentProgress = Math.max(0, currentProgress - 0.01); startTime = performance.now() - currentProgress * DURATION; render(currentProgress); break;
+        case 'fwd': currentProgress = Math.min(1, currentProgress + 0.01); startTime = performance.now() - currentProgress * DURATION; render(currentProgress); break;
+      }
+    });
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
