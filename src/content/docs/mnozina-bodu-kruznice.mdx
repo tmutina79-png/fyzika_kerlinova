@@ -1,0 +1,216 @@
+---
+title: "Množina bodů – Kružnice"
+description: "Úvod do množin bodů daných vlastností a kružnice jako množina bodů."
+order: 8
+---
+
+import SelfCheck from '../../components/SelfCheck.svelte';
+import Quiz from '../../components/Quiz.svelte';
+import VideoModal from '../../components/VideoModal.svelte';
+import ImageModal from '../../components/ImageModal.svelte';
+
+# Množina bodů – Kružnice 📐
+
+> **Klíčová otázka:** Jaké všechny body v rovině mají od bodu S vzdálenost přesně 5 cm?
+
+---
+
+<h2 id="1-o-co-jde">1. O co jde?</h2>
+
+V geometrii často hledáme **všechny body**, které splňují určitou podmínku. Těmto bodům říkáme **množina bodů dané vlastnosti**.
+
+Základní princip je jednoduchý:
+
+> 💡 **Množina bodů** = všechny body, které mají společnou vlastnost (např. stejnou vzdálenost od bodu, od přímky, od dvou bodů...)
+
+<div class="flex flex-col md:flex-row gap-4 items-start my-6">
+  <figure class="flex-1 min-w-0">
+    <ImageModal client:load src="/img/mnozina-bodu-princip.svg" alt="Princip množiny bodů" />
+    <figcaption class="text-center text-sm text-primary-400 mt-2">Různé množiny bodů – kružnice, osa úsečky, rovnoběžky.</figcaption>
+  </figure>
+  <div class="flex-1 min-w-0">
+    <VideoModal client:load src="/video-mnozina-bodu-princip.html" title="📐 Množiny bodů – animovaná vizualizace" thumbnailImg="/img/mnozina-bodu-video-thumb.svg" />
+  </div>
+</div>
+
+### Kde se s tím setkáš v praxi?
+
+<figure class="my-6">
+  <ImageModal client:load src="/img/mnozina-bodu-praxe.svg" alt="Množiny bodů v praxi" />
+  <figcaption class="text-center text-sm text-primary-400 mt-2">Příklady z praxe: dosah WiFi, umístění studny, železniční koleje a další.</figcaption>
+</figure>
+
+<SelfCheck client:load id="mb2-princip" label="Chápu, co je množina bodů dané vlastnosti." />
+
+---
+
+<h2 id="2-kruznice">2. Kružnice</h2>
+
+<figure class="my-6">
+  <ImageModal client:load src="/img/mnozina-bodu-kruznice.svg" alt="Kružnice jako množina bodů" class="max-w-sm mx-auto" />
+  <figcaption class="text-center text-sm text-primary-400 mt-2">Kružnice – všechny body ve vzdálenosti r od středu S.</figcaption>
+</figure>
+
+### Definice
+
+> **Kružnice** je množina všech bodů v rovině, které mají od daného bodu S (středu) **stejnou vzdálenost r** (poloměr).
+
+$$
+k(S, r) = \{X \in \text{rovina} : |SX| = r\}
+$$
+
+### Klíčové pojmy
+
+| Pojem | Vysvětlení |
+|:------|:-----------|
+| **Střed S** | Bod, od kterého měříme vzdálenost |
+| **Poloměr r** | Vzdálenost bodů kružnice od středu |
+| **Průměr d** | $d = 2r$ |
+| **Tětiva** | Úsečka spojující dva body kružnice |
+| **Sečna** | Přímka, která protíná kružnici ve dvou bodech |
+| **Tečna** | Přímka, která se kružnice dotýká v jednom bodě |
+
+> ⚠️ **Pozor:** Kružnice je jen "obrys" – body uvnitř nepatří ke kružnici! Body uvnitř včetně kružnice tvoří **kruh**.
+
+### Kružnice vs. kruh – v čem je rozdíl?
+
+| | Kružnice | Kruh |
+|:--|:---------|:-----|
+| **Co to je** | Jen „čára" (obvod) | Celá plocha včetně obvodu |
+| **Body** | Jen body ve vzdálenosti r od S | Všechny body ve vzdálenosti ≤ r od S |
+| **Zápis** | $k(S, r)$ | $K(S, r)$ |
+| **Analogie** | Obruč | Talíř |
+
+<SelfCheck client:load id="mb2-kruznice" label="Vím, že kružnice je množina bodů stejně vzdálených od středu." />
+
+---
+
+<h2 id="rychly-test">🧠 Ověř si znalosti: Rozumíš principům a pojmům?</h2>
+
+<Quiz
+  client:load
+  questions={[
+    {
+      question: "Co je kružnice?",
+      options: ["Množina bodů uvnitř kruhu", "Množina všech bodů ve stejné vzdálenosti od středu", "Množina bodů na přímce", "Množina bodů mezi dvěma přímkami"],
+      correct: 1,
+      explanation: "Kružnice je množina všech bodů v rovině, které mají od středu S stejnou vzdálenost r (poloměr)."
+    },
+    {
+      question: "Jaký je vztah mezi poloměrem a průměrem kružnice?",
+      options: ["d = r", "d = 2r", "d = r/2", "d = r²"],
+      correct: 1,
+      explanation: "Průměr kružnice je dvojnásobek poloměru: d = 2r."
+    },
+    {
+      question: "Čím se liší kružnice od kruhu?",
+      options: ["Ničím, je to totéž", "Kružnice je jen obrys, kruh zahrnuje i vnitřek", "Kruh je jen obrys, kružnice zahrnuje i vnitřek", "Kružnice má vždy větší poloměr"],
+      correct: 1,
+      explanation: "Kružnice je pouze obvod (body ve vzdálenosti přesně r). Kruh zahrnuje i všechny body uvnitř (vzdálenost ≤ r)."
+    },
+    {
+      question: "Co je tětiva kružnice?",
+      options: ["Přímka procházející středem", "Úsečka spojující dva body kružnice", "Poloměr kružnice", "Tečna kružnice"],
+      correct: 1,
+      explanation: "Tětiva je úsečka, jejíž oba koncové body leží na kružnici."
+    },
+    {
+      question: "Kolik bodů kružnice protne tečna?",
+      options: ["Žádný", "Právě jeden", "Právě dva", "Nekonečně mnoho"],
+      correct: 1,
+      explanation: "Tečna se kružnice dotýká v právě jednom bodě (bod dotyku)."
+    }
+  ]}
+/>
+
+<SelfCheck client:load id="mb2-kviz" label="Odpověděl(a) jsem správně na většinu otázek." />
+
+---
+
+<h2 id="priklady">3. Příklady</h2>
+
+### Příklad 1: Dosah WiFi routeru
+
+> 📝 **Zadání:** WiFi router je umístěn v bodě R a má dosah 10 m. Jaká je množina bodů, kde je signál ještě dostupný? A jaká je hranice dosahu?
+
+**Rozbor:**
+- Router v bodě R, dosah r = 10 m
+- Signál dostupný = body ve vzdálenosti ≤ 10 m od R
+
+**Řešení:**
+1. Hranice dosahu = kružnice **k(R, 10 m)** – všechny body ve vzdálenosti přesně 10 m
+2. Oblast s dostupným signálem = kruh **K(R, 10 m)** – všechny body ve vzdálenosti ≤ 10 m
+
+**Odpověď:** Hranice dosahu tvoří **kružnici** se středem v routeru a poloměrem 10 m. Celá oblast pokrytí je **kruh** se stejným středem a poloměrem.
+
+<VideoModal client:load src="/video-mnozina-bodu-princip.html" title="🎬 Video: Kružnice – vizualizace" thumbnailImg="/img/mnozina-bodu-video-thumb.svg" />
+
+---
+
+### Příklad 2: Dva vysílače
+
+> 📝 **Zadání:** Dva vysílače A a B jsou od sebe vzdáleny 12 km. Vysílač A má dosah 8 km a vysílač B má dosah 6 km. Najdi bod (body), kde se signály obou vysílačů právě setkávají.
+
+**Rozbor:**
+- Hranice dosahu vysílače A = kružnice $k_1(A, 8)$
+- Hranice dosahu vysílače B = kružnice $k_2(B, 6)$
+- Hledáme průsečíky obou kružnic
+
+**Řešení:**
+1. Narýsuj úsečku AB = 12 km (v měřítku)
+2. Narýsuj kružnici $k_1(A, 8)$
+3. Narýsuj kružnici $k_2(B, 6)$
+4. Kružnice se protínají → průsečíky X₁ a X₂ jsou hledané body
+
+**Odpověď:** Signály se setkávají ve **dvou bodech** – průsečících kružnic $k_1$ a $k_2$. Tyto body leží na hranicích dosahu obou vysílačů.
+
+> 💡 **Tip:** Průsečíky dvou kružnic je důležitý koncept – využívá se například při GPS lokalizaci!
+
+<SelfCheck client:load id="mb2-priklady" label="Umím řešit příklady s kružnicí jako množinou bodů." />
+
+---
+
+<h2 id="pozor">4. Na co si dát pozor</h2>
+
+| Chyba | Proč je špatně | Správně |
+|:------|:---------------|:--------|
+| Záměna kružnice a kruhu | Kružnice je jen obrys, kruh zahrnuje i vnitřek | Kružnice = body ve vzdálenosti **přesně r**, kruh = body ve vzdálenosti **≤ r** |
+| „Kružnice má nekonečný poloměr" | Poloměr je vždy konkrétní kladné číslo | Poloměr r > 0, je to pevně dané číslo |
+| Zapomenutí na střed | Kružnice je dána dvěma údaji | Vždy uvádíme **k(S, r)** – střed i poloměr |
+| Tětiva prochází středem = průměr | Ne každá tětiva je průměr | Průměr je **nejdelší** tětiva (prochází středem) |
+
+---
+
+<h2 id="over-si-znalosti">✅ Ověř si znalosti</h2>
+
+<Quiz
+  client:load
+  questions={[
+    {
+      question: "Jaká je množina bodů, které mají od bodu M vzdálenost 5 cm?",
+      options: ["Přímka", "Kružnice k(M, 5 cm)", "Kruh K(M, 5 cm)", "Dvě rovnoběžky"],
+      correct: 1,
+      explanation: "Body ve vzdálenosti přesně 5 cm od bodu M tvoří kružnici se středem M a poloměrem 5 cm."
+    },
+    {
+      question: "Bod P leží ve vzdálenosti 3 cm od středu S kružnice k(S, 5 cm). Kde leží bod P?",
+      options: ["Na kružnici", "Uvnitř kruhu", "Vně kružnice", "Na tečně"],
+      correct: 1,
+      explanation: "Vzdálenost 3 cm < 5 cm (poloměr), takže bod P leží uvnitř kruhu (ale ne na kružnici)."
+    },
+    {
+      question: "Kolik os souměrnosti má kružnice?",
+      options: ["Jednu", "Dvě", "Čtyři", "Nekonečně mnoho"],
+      correct: 3,
+      explanation: "Kružnice má nekonečně mnoho os souměrnosti – každý průměr je osou souměrnosti."
+    },
+    {
+      question: "Kružnice k₁(A, 4) a kružnice k₂(B, 3) se mohou protnout v kolika bodech, pokud |AB| = 5?",
+      options: ["V žádném", "V jednom", "Ve dvou", "Ve třech"],
+      correct: 2,
+      explanation: "|AB| = 5 < 4 + 3 = 7 a zároveň 5 > |4 − 3| = 1, takže kružnice se protínají ve dvou bodech."
+    }
+  ]}
+/>
+
+<SelfCheck client:load id="mb2-final" label="Zvládám příklady s kružnicí jako množinou bodů." />
