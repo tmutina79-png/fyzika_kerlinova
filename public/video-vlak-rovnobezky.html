@@ -327,6 +327,19 @@
         drawText('dvě rovnoběžky p₁ a p₂ s přímkou p.', W/2, H/2 + 35, 24, colors.text, 'center', sa);
         drawText('d(X, p) = d', W/2, H/2 + 80, 28, colors.line, 'center', sa);
       }
+
+      // Progress bar (always visible)
+      (function(){
+        const barY = H - 20, barH = 5, pad = 100;
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(pad, barY, W - 2*pad, barH);
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillRect(pad, barY, (W - 2*pad) * progress, barH);
+        ctx.beginPath();
+        ctx.fillStyle = '#60a5fa';
+        ctx.arc(pad + (W - 2*pad) * progress, barY + barH/2, 6, 0, Math.PI*2);
+        ctx.fill();
+      })();
     }
 
     function animate(timestamp) {

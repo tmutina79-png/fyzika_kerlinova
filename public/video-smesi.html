@@ -458,6 +458,19 @@ function frame(ts){
     drawVerification(W/2,H/2,p);
   }
 
+  // Progress bar
+  (function(){
+    const pr=t/DUR,barY=H-12,barH=5,pad=60;
+    X.fillStyle='#334155';
+    X.fillRect(pad,barY,W-2*pad,barH);
+    X.fillStyle='#3b82f6';
+    X.fillRect(pad,barY,(W-2*pad)*pr,barH);
+    X.beginPath();
+    X.fillStyle='#60a5fa';
+    X.arc(pad+(W-2*pad)*pr,barY+barH/2,5,0,Math.PI*2);
+    X.fill();
+  })();
+
   document.getElementById('phase').textContent=getPhase(t);
   document.getElementById('timer').textContent=`${(t/1000).toFixed(1)}s / 36.0s`;
   requestAnimationFrame(frame);
