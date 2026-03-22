@@ -80,7 +80,7 @@ const base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
       });
     })();
 
-    // Po kliknutí na kartu VM: otevři odpovídající sekci v sidebaru
+    // Po kliknutí na kartu VM: otevři odpovídající sekci + všechny nadřazené v sidebaru
     document.querySelectorAll('.vm-card').forEach(card => {
       card.addEventListener('click', () => {
         const sidebarId = card.getAttribute('data-sidebar');
@@ -89,7 +89,15 @@ const base = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
         document.querySelectorAll('#sidebar details[id]').forEach(d => {
           state[d.id] = false;
         });
-        state[sidebarId] = true;
+        // Otevři cílovou sekci i všechny nadřazené <details>
+        const target = document.getElementById(sidebarId);
+        if (target) {
+          let el = target;
+          while (el) {
+            if (el.tagName === 'DETAILS' && el.id) state[el.id] = true;
+            el = el.parentElement?.closest('details');
+          }
+        }
         sessionStorage.setItem('sidebar-details-state', JSON.stringify(state));
       });
     });
